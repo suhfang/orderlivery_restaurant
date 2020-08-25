@@ -1,0 +1,119 @@
+{
+  "project_info": {
+    "project_number": "293801835530",
+    "firebase_url": "https://orderlivery-app.firebaseio.com",
+    "project_id": "orderlivery-app",
+    "storage_bucket": "orderlivery-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:293801835530:android:79de76629e123f37a833f3",
+        "android_client_info": {
+          "package_name": "com.orderlivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "293801835530-csm2mnhid7eb45o0b4o7e1im0138nhvi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9oVgXFtSGU41fyny-6Ju0mjDlMEeGWk8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "293801835530-csm2mnhid7eb45o0b4o7e1im0138nhvi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "293801835530-m6ulf9koc1qollhsrrv1f6b2v92mcr2b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.orderlivery.Restaurant"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:293801835530:android:2146fdd0f09b97c6a833f3",
+        "android_client_info": {
+          "package_name": "com.orderlivery.envoy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "293801835530-csm2mnhid7eb45o0b4o7e1im0138nhvi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9oVgXFtSGU41fyny-6Ju0mjDlMEeGWk8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "293801835530-csm2mnhid7eb45o0b4o7e1im0138nhvi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "293801835530-m6ulf9koc1qollhsrrv1f6b2v92mcr2b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.orderlivery.Restaurant"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:293801835530:android:75215ed704ab41f5a833f3",
+        "android_client_info": {
+          "package_name": "com.orderlivery.restaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "293801835530-csm2mnhid7eb45o0b4o7e1im0138nhvi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9oVgXFtSGU41fyny-6Ju0mjDlMEeGWk8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "293801835530-csm2mnhid7eb45o0b4o7e1im0138nhvi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "293801835530-m6ulf9koc1qollhsrrv1f6b2v92mcr2b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.orderlivery.Restaurant"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
