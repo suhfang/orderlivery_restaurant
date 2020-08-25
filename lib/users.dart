@@ -31,6 +31,23 @@ class _UsersPageState extends State<UsersPage> {
         ),
         backgroundColor: Colors.white,
       ),
+      body: Container(
+        child: ListView(
+          children: [
+            ListTile(
+              leading: Icon(LineIcons.user),
+              title: Text('Chuck Greene'),
+              subtitle: Text('Editor'),
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(LineIcons.user),
+              title: Text('Andy Dufrenses'),
+              subtitle: Text('Admin'),
+            )
+          ],
+        )
+      ),
     );
   }
 }
