@@ -1,4 +1,6 @@
 import 'package:Restaurant/auth.dart';
+import 'package:Restaurant/home.dart';
+import 'package:Restaurant/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: AuthPage(loginTab: false,)
+      home: HomePage()
     );
   }
 }

@@ -1,6 +1,8 @@
 
 
+import 'package:Restaurant/categories.dart';
 import 'package:Restaurant/drawer.dart';
+import 'package:Restaurant/upload.dart';
 import 'package:Restaurant/users.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,29 @@ class _MenuPageState extends State<MenuPage> {
           ],
         ),
         backgroundColor: Colors.white,
+      ),
+      body: SafeArea(
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('UPLOAD'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UploadPage()));
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text('CATEGORY LIST'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CategoriesPage()));
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text('MENU ITEMS'),
+            ),
+          ],
+        ),
       ),
     );
   }

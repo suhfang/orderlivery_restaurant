@@ -1,6 +1,9 @@
 
 
 import 'package:Restaurant/drawer.dart';
+import 'package:Restaurant/menu.dart';
+import 'package:Restaurant/profile.dart';
+import 'package:Restaurant/ratings.dart';
 import 'package:Restaurant/users.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
