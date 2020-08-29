@@ -1,5 +1,6 @@
 import 'package:Restaurant/auth.dart';
 import 'package:Restaurant/home.dart';
+import 'package:Restaurant/init.dart';
 import 'package:Restaurant/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ void main() {
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
 
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage()
+      home: InitPage()
     );
   }
 }

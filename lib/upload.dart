@@ -30,6 +30,8 @@ class _UploadPageState extends State<UploadPage> {
                 children: [
                   Text('Please upload your menu here as a .csv file the use that to recreate your menu in our app. Once it\'s uploaded, you can edit it in the future, either by reuploading a new .csv or by editing the item.'),
                   InkWell(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
                     onTap: () async {
                       File file  = await FilePicker.getFile(allowedExtensions: ['csv']);
                       print(file);

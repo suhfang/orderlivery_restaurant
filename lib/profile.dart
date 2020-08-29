@@ -1,5 +1,7 @@
 
 
+import 'dart:convert';
+
 import 'package:Restaurant/drawer.dart';
 import 'package:Restaurant/users.dart';
 import 'package:badges/badges.dart';
@@ -8,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:http/http.dart' as http;
+import 'package:Restaurant/constants.dart' as Constants;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
@@ -43,6 +48,9 @@ TextEditingController sundayToController = TextEditingController();
   TextEditingController satToController = TextEditingController();
 
   String dropdownValue = 'Choose restaurant type';
+  String _cover_image_url = 'http://via.placeholder.com/1000x800';
+  String _logo_image_url = 'http://via.placeholder.com/640x360';
+
   final _signUpFormKey = GlobalKey<FormState>();
   final signUpFirstNameController = TextEditingController();
   FocusNode _focus = new FocusNode();
@@ -607,7 +615,7 @@ TextEditingController sundayToController = TextEditingController();
               SizedBox(height: 20,),
               Text('LOGO', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),),
               SizedBox(height: 10,),
-              Image.network('http://via.placeholder.com/640x360'),
+              Image.network(_logo_image_url),
               SizedBox(height: 10,),
               Container(
                 decoration: BoxDecoration(
@@ -621,7 +629,7 @@ TextEditingController sundayToController = TextEditingController();
               SizedBox(height: 40,),
               Text('COVER IMAGE', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),),
               SizedBox(height: 10,),
-              Image.network('http://via.placeholder.com/1000x800'),
+              Image.network(_cover_image_url),
               SizedBox(height: 10,),
               Container(
                 decoration: BoxDecoration(
@@ -648,6 +656,104 @@ TextEditingController sundayToController = TextEditingController();
           ),
         )
       ),
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getProfile();
+  }
+
+  void getProfile() async  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token');
+    print(token);
+    final response = await http.get('${Constants.apiBaseUrl}/restaurants/get-profile',
+    headers: {
+      'token': token,
+      'Content-Type': 'application/json'
+    });
+    var profile = Profile.fromJson(json.decode(response.body));
+
+    setState(() {
+      nameController.text = profile.name;
+      descriptionController.text = profile.description;
+      addressController.text = profile.address;
+      phoneController.text = profile.phone_number;
+      dropdownValue = profile.type;
+
+      sundayFromController.text = profile.hours.sun.open;
+      sundayToController.text = profile.hours.sun.close;
+
+      monFromController.text = profile.hours.mon.open;
+      monToController.text = profile.hours.tue.close;
+
+      tuesFromController.text = profile.hours.tue.open;
+      tuesToController.text = profile.hours.tue.close;
+
+      wedFromController.text = profile.hours.wed.open;
+      wedToController.text = profile.hours.wed.close;
+
+      thuFromController.text = profile.hours.thu.open;
+      thuToController.text = profile.hours.thu.close;
+
+      friFromController.text = profile.hours.fri.open;
+      friToController.text = profile.hours.fri.close;
+
+      satFromController.text = profile.hours.sat.open;
+      satToController.text = profile.hours.sat.close;
+    });
+  }
+}
+
+class Period {
+  String open;
+  String close;
+  Period({this.open, this.close});
+}
+
+class Hours {
+  Period mon;
+  Period tue;
+  Period wed;
+  Period thu;
+  Period fri;
+  Period sat;
+  Period sun;
+  Hours({this.mon, this.tue, this.wed, this.thu, this.fri, this.sat, this.sun});
+}
+
+class Profile {
+  String name;
+  String description;
+  String address;
+  String phone_number;
+  String type;
+  Hours hours;
+  Profile({this.name, this.description, this.address, this.phone_number, this.type, this.hours});
+
+  factory Profile.fromJson(Map<String, dynamic> json) {
+    var hours = json['hours'];
+    print(hours);
+    var mon_period = Period(open: hours['mon']['open'] as String, close: hours['mon']['close'] as String);
+    var tue_period = Period(open: hours['tue']['open'] as String, close: hours['tue']['close'] as String);
+    var wed_period = Period(open: hours['wed']['open'] as String, close: hours['wed']['close'] as String);
+    var thu_period = Period(open: hours['thu']['open'] as String, close: hours['thu']['close'] as String);
+    var fri_period = Period(open: hours['fri']['open'] as String, close: hours['fri']['close'] as String);
+    var sat_period = Period(open: hours['sat']['open'] as String, close: hours['sat']['close'] as String);
+    var sun_period = Period(open: hours['sun']['open'] as String, close: hours['sun']['close'] as String);
+
+    return Profile(
+        name: json['name'] as String,
+        address: json['address'] as String,
+        description: json['description'] as String,
+        phone_number: json['phone_number'] as String,
+        type: json['type'] as String,
+        hours: Hours(
+           mon: mon_period, tue: tue_period, wed: wed_period, thu: thu_period, fri: fri_period, sat: sat_period, sun: sun_period
+        )
     );
   }
 }
