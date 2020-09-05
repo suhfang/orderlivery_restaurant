@@ -1,12 +1,19 @@
 
+import 'dart:convert';
+
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/add_list_without_prices.dart';
+import 'package:Restaurant/categories.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:Restaurant/constants.dart' as Constants;
 import 'dart:math' as math;
 
 import 'package:line_icons/line_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SingleItemPage extends StatefulWidget {
   _SingleItemPageState createState() => _SingleItemPageState();
@@ -19,6 +26,13 @@ class SingleItemPage extends StatefulWidget {
 //final _formKey = GlobalKey<FormState>();
 class _SingleItemPageState extends State<SingleItemPage> {
 
+  List<String> health_labels = [
+    'Vegan', 'Vegetarian', 'Gluten Free', 'Halal', 'Kosher', 'Sugar-Free'
+  ];
+  List<String> items = [
+    'Choose Category type',
+    'Two'
+  ];
   PricingType _character = PricingType.none;
 
   FocusNode descriptionNode = FocusNode();
@@ -38,6 +52,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
   TextEditingController cookingTimeController = TextEditingController();
   TextEditingController minutesController = TextEditingController();
 
+  List<ItemList> lists = [];
 
   StepperType stepperType = StepperType.horizontal;
   int currentStep = 0;
@@ -46,17 +61,45 @@ class _SingleItemPageState extends State<SingleItemPage> {
   StepState stepOneState = StepState.editing;
   bool stepOneActive = true;
 
-  StepState stepTwoState = StepState.indexed;
+  StepState stepTwoState = StepState.disabled;
   bool stepTwoActive = true;
 
-  StepState stepThreeState = StepState.indexed;
+  StepState stepThreeState = StepState.disabled;
   bool stepThreeActive = true;
 
-  StepState stepFourState = StepState.indexed;
+  StepState stepFourState = StepState.disabled;
   bool stepFourActive = true;
 
-  StepState stepFiveState = StepState.indexed;
+  StepState stepFiveState = StepState.disabled;
   bool stepFiveActive = true;
+
+  StepState stepSixState = StepState.disabled;
+  bool stepSixActive = true;
+
+  ImagePicker imagePicker = ImagePicker();
+
+  bool isVegan = false;
+  bool isVegetarian = false;
+  bool isGlutenFree = false;
+  bool isHalal = false;
+  bool isKosher = false;
+  bool isSugarFree = false;
+
+  bool isEgg = false;
+  bool isFish = false;
+  bool isShellFish = false;
+  bool isMilk = false;
+  bool isPeanut = false;
+  bool isSoy = false;
+  bool isTreanut = false;
+  bool isWheatOrGluten = false;
+
+
+  String image_url = 'assets/images/menu.png';
+
+  createMenuItem() {
+
+  }
 
   next() {
     if (currentStep == 0) {
@@ -116,11 +159,49 @@ class _SingleItemPageState extends State<SingleItemPage> {
 
 
     }
+    if (currentStep == 2) {
+      setState(() {
+        stepThreeActive = true;
+        stepThreeState = StepState.complete;
 
-    currentStep + 1 != 5
-        ? goTo(currentStep + 1)
-        : setState(() => complete = true);
+        stepFourActive = true;
+        stepFourState = StepState.editing;
+      });
+    }
+    if (currentStep == 3) {
+      if (image_url == 'assets/images/menu.png') {
+        return;
+      }
+      setState(() {
+        stepFourActive = true;
+        stepFourState = StepState.complete;
 
+        stepFiveActive = true;
+        stepFiveState = StepState.editing;
+      });
+    }
+    if (currentStep == 4) {
+      setState(() {
+        stepFiveActive = true;
+        stepFiveState = StepState.complete;
+
+        stepSixActive = true;
+        stepSixState = StepState.editing;
+      });
+    }
+
+    if (currentStep == 5) {
+      setState(() {
+        stepSixActive = true;
+        stepSixState = StepState.complete;
+      });
+      createMenuItem();
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.pop(context);
+      });
+      return;
+    }
+    currentStep + 1 !=  6 ? goTo(currentStep + 1) : setState(() => complete = true);
   }
 
   cancel() {
@@ -133,13 +214,16 @@ class _SingleItemPageState extends State<SingleItemPage> {
     setState(() => currentStep = step);
   }
 
+  @override
+  initState() {
+    super.initState();
+    getCategories();
+  }
+
   String dropdownValue = 'Choose Category type';
   @override
   Widget build(BuildContext context) {
-    List<String> items = [
-      'Choose Category type',
-      'Two'
-    ];
+
     List<Step> steps = [
       Step(
           state: stepOneState,
@@ -337,6 +421,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         isActive: stepThreeActive,
         title: const Text('Add Lists'),
         content: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Text('You can create of options. Ex: Flavors of Wings, Sauce, Dressings, etc.'),
             SizedBox(height: 15,),
@@ -347,16 +432,26 @@ class _SingleItemPageState extends State<SingleItemPage> {
                     actions: <Widget>[
                       CupertinoActionSheetAction(
                         child: Text('List with Prices', style: TextStyle(color: Colors.blue),),
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(context);
-                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
+                           ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
+                           setState(() {
+                             if (list != null) {
+                               lists.add(list);
+                             }
+                           });
                         },
                       ),
                       CupertinoActionSheetAction(
                         child: Text('List without Prices', style: TextStyle(color: Colors.blue),),
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(context);
-                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
+                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
+                          setState(() {
+                            if (list != null) {
+                              lists.add(list);
+                            }
+                          });
                         },
                       )
                     ],
@@ -381,6 +476,28 @@ class _SingleItemPageState extends State<SingleItemPage> {
                   child: Text('ADD LIST', style: TextStyle(color: Colors.white),),
                 ),
               ),
+            ),
+            SizedBox(height: 10,),
+            Text('Added ${lists.length} lists'),
+            Container(
+              height: 100,
+              child: ListView.builder(
+                itemCount: lists.length,
+                itemBuilder: (context, index) {
+                  ItemList item = lists[index];
+                  return ListTile(
+                    title: Text(item.name),
+                    trailing: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          lists.removeAt(index);
+                        });
+                      },
+                      child: Icon(LineIcons.trash),
+                    ),
+                  );
+                },
+              ),
             )
           ],
         ),
@@ -388,32 +505,213 @@ class _SingleItemPageState extends State<SingleItemPage> {
       Step(
         state: stepFourState,
         isActive: stepFourActive,
-        title: const Text('Add Image'),
+        title: const Text('Upload a bright image of the menu item'),
         content: Column(
           children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Home Address'),
+            Container(
+              height: 200,
+              child:  Image.asset(image_url, fit: BoxFit.cover,),
             ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Postcode'),
+            SizedBox(height: 10,),
+            GestureDetector(
+              onTap: () async {
+                final image = await imagePicker.getImage(source: ImageSource.gallery);
+                if (image != null) {
+//                  showDialog(
+//                      context: context,
+//                      barrierDismissible: false,
+//                      builder: (BuildContext context) {
+//                        return Dialog(
+//                            backgroundColor: Colors.transparent,
+//                            child: Column(
+//                              mainAxisAlignment: MainAxisAlignment.center,
+//                              crossAxisAlignment: CrossAxisAlignment.center,
+//                              children: [CircularProgressIndicator()],
+//                            ));
+//                      });
+                  setState(() {
+                    image_url = image.path;
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.orange),
+                ),
+                height: 50,
+                child: Center(
+                  child: Text('UPDATE PHOTO', style: TextStyle(color: Colors.orange),),
+                ),
+              ),
             ),
           ],
         ),
       ),
       Step(
-        state: stepFourState,
-        isActive: stepFourActive,
-        title: const Text('Health Information'),
-        content: Column(
-          children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Home Address'),
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Postcode'),
-            ),
-          ],
-        ),
+        state: stepFiveState,
+        isActive: stepFiveActive,
+        title: const Text('Health & Safety Labels'),
+        content: Container(
+          height: 350,
+          child: ListView(
+            children: [
+              CheckboxListTile(
+                title: Text('Vegan'),
+                value: isVegan,
+                onChanged: (newValue) {
+                  setState(() {
+                    isVegan = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Vegetarian'),
+                value: isVegetarian,
+                onChanged: (newValue) {
+                  setState(() {
+                    isVegetarian = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Gluten Free'),
+                value: isGlutenFree,
+                onChanged: (newValue) {
+                  setState(() {
+                    isGlutenFree = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Halal'),
+                value: isHalal,
+                onChanged: (newValue) {
+                  setState(() {
+                    isHalal = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Kosher'),
+                value: isKosher,
+                onChanged: (newValue) {
+                  setState(() {
+                    isKosher = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Sugar Free'),
+                value: isSugarFree,
+                onChanged: (newValue) {
+                  setState(() {
+                    isSugarFree = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              )
+            ],
+          ),
+        )
+      ),
+      Step(
+        state: stepSixState,
+        isActive: stepSixActive,
+        title: const Text('Allergens'),
+        content: Container(
+          height: 450,
+          child: ListView(
+            children: [
+              CheckboxListTile(
+                title: Text('Egg'),
+                value: isEgg,
+                onChanged: (newValue) {
+                  setState(() {
+                    isEgg = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Fish'),
+                value: isFish,
+                onChanged: (newValue) {
+                  setState(() {
+                    isFish = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('ShellFish'),
+                value: isShellFish,
+                onChanged: (newValue) {
+                  setState(() {
+                    isShellFish = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Milk'),
+                value: isMilk,
+                onChanged: (newValue) {
+                  setState(() {
+                    isMilk = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Peanut'),
+                value: isPeanut,
+                onChanged: (newValue) {
+                  setState(() {
+                    isPeanut = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Soy'),
+                value: isSoy,
+                onChanged: (newValue) {
+                  setState(() {
+                    isSoy = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Treenuts'),
+                value: isTreanut,
+                onChanged: (newValue) {
+                  setState(() {
+                    isTreanut = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              ),
+              CheckboxListTile(
+                title: Text('Wheat / Gluten'),
+                value: isWheatOrGluten,
+                onChanged: (newValue) {
+                  setState(() {
+                    isWheatOrGluten = newValue;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+              )
+            ],
+          ),
+        )
       ),
     ];
 
@@ -519,11 +817,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                     hintText: '3 Pieces/\$5.00, 7 Pieces for \$10.00, 10 Pieces for \$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
                     textInputAction: TextInputAction.done,
-                    inputFormatters: [
-                      DecimalTextInputFormatter(decimalRange: 2),
-                    ],
                   ),
                 )
               ],
@@ -534,6 +828,19 @@ class _SingleItemPageState extends State<SingleItemPage> {
     } else {
       return SizedBox();
     }
+  }
+
+  void getCategories() async  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-categories',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        });
+    Iterable categories = json.decode(response.body)['categories'];
+    setState(() {
+      items = ['Choose Category type'] + categories.map((e) =>  Category.fromJson(e)).toList().map((e) => e.name).toList();
+    });
   }
 }
 
@@ -649,4 +956,14 @@ class DecimalTextInputFormatter extends TextInputFormatter {
     }
     return newValue;
   }
+}
+
+
+enum Healh_and_Safety_Labels {
+  vegan, vegetarian, gluten_free, halal, kosher, sugar_free,
+}
+
+
+enum Allergens {
+  egg, fish, shellfish, milk, peanut, soy, treenuts, wheat_or_gluten
 }

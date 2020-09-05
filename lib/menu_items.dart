@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+//import 'package:Restaurant/categories.dart';
 import 'package:Restaurant/categories.dart';
 import 'package:Restaurant/combo_item.dart';
 import 'package:Restaurant/single_item.dart';
@@ -85,8 +86,8 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   @override
   void initState() {
     _controller = TabController(vsync: this, length: _titles.length);
-    super.initState();
     getCategories();
+    super.initState();
 
 
   }
@@ -104,7 +105,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
         appBar: AppBar(
           title: Text('MENU ITEMS'),
           backgroundColor: Colors.white,
-          centerTitle: true,
           shadowColor: Colors.transparent,
         ),
         backgroundColor: Colors.white,
@@ -380,6 +380,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                       Expanded(
                           child: GestureDetector(
                             onTap: () async  {
+                            Navigator.pop(context);
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ComboItemPage()));
                             },
                             child: Container(
@@ -397,6 +398,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
 
                           child: GestureDetector(
                             onTap: () {
+                              Navigator.pop(context);
                               Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SingleItemPage()));
                             },
                             child: Container(

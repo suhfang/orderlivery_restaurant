@@ -30,6 +30,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
   List<Category> _categories = [
   ];
 
+  void submitMenuItem() {
+
+  }
   Widget stackBehindDismiss() {
     return Container(
       alignment: Alignment.centerRight,

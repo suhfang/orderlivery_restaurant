@@ -4,13 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
+import 'package:line_icons/line_icons.dart';
+
 class AddListWithPricePage extends StatefulWidget {
 
   _AddListWithPricePageState createState() => _AddListWithPricePageState();
 }
 
+class ItemList {
+  String name;
+  String description;
+  List<ListItem> items;
+  ItemList({this.name, this.description, this.items});
+}
+
+class ListItem {
+  String name;
+  String price;
+  ListItem({this.name, this.price});
+}
+
 class _AddListWithPricePageState extends State<AddListWithPricePage> {
 
+  String _title;
+  String _description;
+
+  List<ListItem> list_items = [];
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -22,13 +41,14 @@ class _AddListWithPricePageState extends State<AddListWithPricePage> {
         shadowColor: Colors.transparent,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Container(
             child: Padding(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.only(top: 20, right: 20, left: 20, bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('You can create a list of items. Ex: Flavors of Wings, Sauce, Dressing, etc.'),
+                  Text('Lists with prices are a great to add Extras, Add-Ons, and more that the user can add for an additional price. For example, if you want to charge the user \$0.50 for an extra sauce on top of the one that comes with the item.'),
+
                   SizedBox(height: 20,),
                   Text('List name', style: TextStyle(fontSize: 19),),
                   SizedBox(height: 10,),
@@ -36,10 +56,12 @@ class _AddListWithPricePageState extends State<AddListWithPricePage> {
                     alignment:
                     Alignment.topCenter,
                     child: _TextFormField(
+
 //                    focusNode: nameFocusNode,
                       inputFormatters: [],
                       hintText: 'Ex: Choose your Flavor, Pick a Topping, Choose Drink, etc.',
                       onChanged: (String value) {
+                          _title = value.trim();
 //                          _formKey.currentState.validate();
                       },
 //                    controller: nameController,
@@ -59,6 +81,7 @@ class _AddListWithPricePageState extends State<AddListWithPricePage> {
                   SizedBox(height: 10,),
                   TextFormField(
                     onChanged: (String value) {
+                      _description = value.trim();
                     },
 //                  focusNode: descriptionNode,
 //                  controller: descriptionController,
@@ -76,53 +99,209 @@ class _AddListWithPricePageState extends State<AddListWithPricePage> {
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                   ),
-                  SizedBox(height: 30,),
-                  GestureDetector(
-                    onTap: () {
-                      final act = CupertinoActionSheet(
-                          title: Text('Add Item'),
-                          actions: <Widget>[
-                            CupertinoActionSheetAction(
-                              child: Text('Add Item with Price', style: TextStyle(color: Colors.blue),),
-                              onPressed: () {
-                                Navigator.pop(context);
-//                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
-                              },
-                            ),
-                            CupertinoActionSheetAction(
-                              child: Text('Add Item without Price', style: TextStyle(color: Colors.blue),),
-                              onPressed: () {
-                                Navigator.pop(context);
-//                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
-                              },
-                            )
-                          ],
-                          cancelButton: CupertinoActionSheetAction(
-                            child: Text('Cancel'),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ));
-                      showCupertinoModalPopup(
-                          context: context,
-                          builder: (BuildContext context) => act);
+                  SizedBox(height: 10,),
+                  Text('You can create a list of items. Ex: Flavors of Wings, Sauce, Dressing, etc.'),
+                  SizedBox(height: 10,),
+                  Expanded(
+                      child: Stack(
+                        children: [
 
-                    },
-                    child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(10)
-                      ),
-                      child: Center(
-                        child: Text('ADD ITEM', style: TextStyle(color: Colors.white),),
-                      ),
-                    ),
+                          GestureDetector(
+                            onTap: () {
+                              _showNameAndPriceDialog();
+                            },
+                            child: Container(
+                              height: 50,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.orange)
+                              ),
+                              child: Center(
+                                child: Text('ADD ITEM', style: TextStyle(color: Colors.orange),),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 60),
+                            child: Container(
+                              height: 200,
+                              child: ListView.builder(
+                                itemCount: list_items.length,
+                                itemBuilder: (context, index) {
+                                  ListItem item = list_items[index];
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+
+                                      Container(
+                                        height: 50,
+                                        child: ListTile(
+                                          title: Text(item.name),
+                                          subtitle: Text(item.price != null ? ('\$' + item.price) : ''),
+                                          trailing: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                list_items.removeAt(index);
+                                              });
+                                            },
+                                            child: Icon(LineIcons.trash),
+                                          ),
+                                        ),
+                                      ),
+                                      Divider(),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child:  GestureDetector(
+                              onTap: () {
+                                ItemList data = ItemList(
+                                  name: _title,
+                                  description: _description,
+                                  items: list_items
+                                );
+                                if (list_items.isNotEmpty) {
+                                  Navigator.pop(context, data);
+                                } else {
+                                  FocusScope.of(context).unfocus();
+                                }
+                              },
+                              child: Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                    color: Colors.orange,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.orange)
+                                ),
+                                child: Center(
+                                  child: Text('CREATE LIST', style: TextStyle(color: Colors.white),),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      )
                   )
                 ],
               ),
             )
         ),
+      ),
+    );
+  }
+
+  ListItem _currentItem = ListItem();
+  _showNameAndPriceDialog() async {
+    await showDialog<String>(
+      context: context,
+      child: new AlertDialog(
+        contentPadding: const EdgeInsets.all(16.0),
+        content: Container(
+          height: 125,
+          child: Column(
+            children: [
+              new Row(
+                children: <Widget>[
+                  new Expanded(
+                    child: new TextField(
+                      onChanged: (String value) {
+                        _currentItem.name = value;
+                      },
+                      autofocus: true,
+                      decoration: new InputDecoration(
+                          labelText: 'List item name', hintText: 'Ex: Mild, Medium, Hot, Mega Hot'),
+                    ),
+                  ),
+                ],
+              ),
+              new Row(
+                children: <Widget>[
+                  new Expanded(
+                    child: new TextField(
+                      onChanged: (String value) {
+                        _currentItem.price = value;
+                      },
+                      autofocus: true,
+                      decoration: new InputDecoration(
+                          labelText: 'List item price', hintText: 'Ex: \$5.00'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          new FlatButton(
+              child: const Text('ADD'),
+              onPressed: () {
+                if (_currentItem.name.trim().isNotEmpty && _currentItem.price.trim().isNotEmpty) {
+                  List<String> names = list_items.map((e) => e.name).toList();
+                  if (!names.contains(_currentItem.name.trim())) {
+                    setState(() {
+                      list_items.add(_currentItem);
+                    });
+                  }
+                  _currentItem = ListItem();
+                }
+                Navigator.pop(context);
+              })
+        ],
+      ),
+    );
+  }
+  _showNameDialog() async {
+    await showDialog<String>(
+      context: context,
+      child: new AlertDialog(
+        contentPadding: const EdgeInsets.all(16.0),
+        content: new Row(
+          children: <Widget>[
+            new Expanded(
+              child: new TextField(
+                onChanged: (String value) {
+                  _currentItem.name = value;
+                },
+                autofocus: true,
+                decoration: new InputDecoration(
+                    labelText: 'List item name', hintText: 'eg. Mild, Medium, Hot, Mega Hot'),
+              ),
+            )
+          ],
+        ),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          new FlatButton(
+              child: const Text('ADD'),
+              onPressed: () {
+                if (_currentItem.name.trim().isNotEmpty) {
+                  List<String> names = list_items.map((e) => e.name).toList();
+                  if (!names.contains(_currentItem.name.trim())) {
+                    setState(() {
+                      list_items.add(_currentItem);
+                    });
+                  }
+                  _currentItem = ListItem();
+                }
+
+                Navigator.pop(context);
+              })
+        ],
       ),
     );
   }
