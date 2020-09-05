@@ -1,8 +1,12 @@
 
+import 'package:Restaurant/add_list.dart';
+import 'package:Restaurant/add_list_without_prices.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
+
+import 'package:line_icons/line_icons.dart';
 
 class SingleItemPage extends StatefulWidget {
   _SingleItemPageState createState() => _SingleItemPageState();
@@ -10,33 +14,113 @@ class SingleItemPage extends StatefulWidget {
 
 
 
-FocusNode descriptionNode = FocusNode();
-FocusNode flatPriceFocusNode = FocusNode();
-FocusNode nameFocusNode = FocusNode();
-FocusNode cookingTimeFocusNode = FocusNode();
 
 
-TextEditingController descriptionController = TextEditingController();
-TextEditingController nameController = TextEditingController();
-TextEditingController flatPriceController = TextEditingController();
-TextEditingController cookingTimeController = TextEditingController();
-
-final _formKey = GlobalKey<FormState>();
+//final _formKey = GlobalKey<FormState>();
 class _SingleItemPageState extends State<SingleItemPage> {
 
   PricingType _character = PricingType.none;
 
+  FocusNode descriptionNode = FocusNode();
+  FocusNode flatPriceFocusNode = FocusNode();
+  FocusNode nameFocusNode = FocusNode();
+  FocusNode cookingTimeFocusNode = FocusNode();
+  FocusNode priceAndQuantityFocusNode = FocusNode();
+  FocusNode startingFromFocusNode = FocusNode();
+  FocusNode minutesFocusNode = FocusNode();
 
+
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController flatPriceController = TextEditingController();
+  TextEditingController priceAndQuantityController = TextEditingController();
+  TextEditingController startingFromController = TextEditingController();
+  TextEditingController cookingTimeController = TextEditingController();
+  TextEditingController minutesController = TextEditingController();
 
 
   StepperType stepperType = StepperType.horizontal;
   int currentStep = 0;
   bool complete = false;
 
+  StepState stepOneState = StepState.editing;
+  bool stepOneActive = true;
+
+  StepState stepTwoState = StepState.indexed;
+  bool stepTwoActive = true;
+
+  StepState stepThreeState = StepState.indexed;
+  bool stepThreeActive = true;
+
+  StepState stepFourState = StepState.indexed;
+  bool stepFourActive = true;
+
+  StepState stepFiveState = StepState.indexed;
+  bool stepFiveActive = true;
+
   next() {
-    currentStep + 1 != createSteps().length
+    if (currentStep == 0) {
+      if (nameController.text.trim().isEmpty) {
+        FocusScope.of(context).requestFocus(nameFocusNode);
+        return;
+      }
+      if (descriptionController.text.trim().isEmpty) {
+        FocusScope.of(context).requestFocus(descriptionNode);
+        return;
+      }
+      if (_character == PricingType.none) {
+        return;
+      }
+      if (_character == PricingType.flat_price) {
+        if (flatPriceController.text.trim().isEmpty) {
+          FocusScope.of(context).requestFocus(flatPriceFocusNode);
+          return;
+        }
+      }
+      if (_character == PricingType.price_and_quantity) {
+        if (priceAndQuantityController.text.trim().isEmpty) {
+          FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
+          return;
+        }
+      }
+      if (_character == PricingType.starting_from) {
+        if (startingFromController.text.trim().isEmpty) {
+          FocusScope.of(context).requestFocus(startingFromFocusNode);
+          return;
+        }
+      }
+      setState(() {
+        stepOneActive = true;
+        stepOneState = StepState.complete;
+
+        stepTwoActive = true;
+        stepTwoState = StepState.editing;
+      });
+    }
+    if (currentStep == 1) {
+      if (dropdownValue.toLowerCase().contains('type')) {
+        return;
+      }
+       if (minutesController.text.trim().isEmpty) {
+         FocusScope.of(context).requestFocus(minutesFocusNode);
+         return;
+       }
+        setState(() {
+          stepTwoActive = true;
+          stepTwoState = StepState.complete;
+
+          stepThreeActive = true;
+          stepThreeState = StepState.editing;
+          FocusScope.of(context).unfocus();
+        });
+
+
+    }
+
+    currentStep + 1 != 5
         ? goTo(currentStep + 1)
         : setState(() => complete = true);
+
   }
 
   cancel() {
@@ -49,10 +133,17 @@ class _SingleItemPageState extends State<SingleItemPage> {
     setState(() => currentStep = step);
   }
 
-  List<Step> createSteps() {
+  String dropdownValue = 'Choose Category type';
+  @override
+  Widget build(BuildContext context) {
+    List<String> items = [
+      'Choose Category type',
+      'Two'
+    ];
     List<Step> steps = [
       Step(
-          isActive: true,
+          state: stepOneState,
+          isActive: stepOneActive,
           title: Text('Item name, description and pricing type'),
           content:  Container(
               child: Column(
@@ -66,9 +157,9 @@ class _SingleItemPageState extends State<SingleItemPage> {
                       child: _TextFormField(
                         focusNode: nameFocusNode,
                         inputFormatters: [],
-                        hintText: 'A La Cart name',
+                        hintText: 'Item name',
                         onChanged: (String value) {
-                          _formKey.currentState.validate();
+//                          _formKey.currentState.validate();
                         },
                         controller: nameController,
                         validator:
@@ -90,6 +181,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                       },
                       focusNode: descriptionNode,
                       controller: descriptionController,
+                      textInputAction: TextInputAction.done,
                       style: TextStyle(fontSize: 20),
                       decoration: InputDecoration(
                           hintText: 'How would your describe this item to your customers?',
@@ -103,7 +195,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(height: 10,),
                     Text('Select a pricing type'),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,8 +276,119 @@ class _SingleItemPageState extends State<SingleItemPage> {
           )
       ),
       Step(
-        isActive: false,
-        title: const Text('Address'),
+        state: stepTwoState,
+        isActive: stepTwoActive,
+        title: const Text('Category and Cooking Time'),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+
+                  value: dropdownValue,
+                  icon: Icon(LineIcons.angle_down),
+                  iconSize: 15,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  underline: Padding(
+                    padding: EdgeInsets.only(top: 20, right: 20),
+                    child: Container(
+                      height: 1,
+                      color: Colors.black.withOpacity(0.7),
+                    ),
+                  ),
+                  onChanged: (String newValue) {
+                    setState(() {
+                      dropdownValue = newValue;
+                    });
+                  },
+                  items: items
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: TextStyle(fontSize: 19),),
+                    );
+                  }).toList(),
+                ),
+              ),
+              width: MediaQuery.of(context).size.width,
+            ),
+            SizedBox(height: 20,),
+            Text('What\'s the average cooking time of this item?'),
+            Row(
+              children: [
+                Text('Minutes: '),
+               Expanded(
+                 child:  _TextFormField(
+                   focusNode: minutesFocusNode,
+                   controller: minutesController,
+                   keyboardType: TextInputType.number,
+                   hintText: 'Average cooking time',
+                 ),
+               )
+              ],
+            )
+          ],
+        ),
+      ),
+      Step(
+        state: stepThreeState,
+        isActive: stepThreeActive,
+        title: const Text('Add Lists'),
+        content: Column(
+          children: <Widget>[
+            Text('You can create of options. Ex: Flavors of Wings, Sauce, Dressings, etc.'),
+            SizedBox(height: 15,),
+            GestureDetector(
+              onTap: () {
+                final act = CupertinoActionSheet(
+                    title: Text('What type of list do you want to create?'),
+                    actions: <Widget>[
+                      CupertinoActionSheetAction(
+                        child: Text('List with Prices', style: TextStyle(color: Colors.blue),),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
+                        },
+                      ),
+                      CupertinoActionSheetAction(
+                        child: Text('List without Prices', style: TextStyle(color: Colors.blue),),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
+                        },
+                      )
+                    ],
+                    cancelButton: CupertinoActionSheetAction(
+                      child: Text('Cancel'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ));
+                showCupertinoModalPopup(
+                    context: context,
+                    builder: (BuildContext context) => act);
+
+              },
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                child: Center(
+                  child: Text('ADD LIST', style: TextStyle(color: Colors.white),),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+      Step(
+        state: stepFourState,
+        isActive: stepFourActive,
+        title: const Text('Add Image'),
         content: Column(
           children: <Widget>[
             TextFormField(
@@ -196,18 +399,30 @@ class _SingleItemPageState extends State<SingleItemPage> {
             ),
           ],
         ),
-      )
+      ),
+      Step(
+        state: stepFourState,
+        isActive: stepFourActive,
+        title: const Text('Health Information'),
+        content: Column(
+          children: <Widget>[
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Home Address'),
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Postcode'),
+            ),
+          ],
+        ),
+      ),
     ];
-    return steps;
 
-  }
-  @override
-  Widget build(BuildContext context) {
 
 
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          centerTitle: true,
           backgroundColor: Colors.white,
           title: Text('New A La Carte Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
@@ -218,7 +433,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                 child: Stepper(
                   currentStep: currentStep,
                   onStepContinue: next,
-                  steps: createSteps(),
+                  steps: steps,
                   onStepTapped: (step) => goTo(step),
                   onStepCancel: cancel,
                 )
@@ -242,9 +457,10 @@ class _SingleItemPageState extends State<SingleItemPage> {
           SizedBox(height: 10,),
           Row(
             children: [
-              Text('USD \$ '),
+              Text('\$ '),
               Expanded(
                 child: _TextFormField(
+                  hintText: 'Enter the price in USD',
                   controller: flatPriceController,
                   focusNode: flatPriceFocusNode,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -260,13 +476,60 @@ class _SingleItemPageState extends State<SingleItemPage> {
       );
     }
     if (type == PricingType.starting_from) {
-      return Container(
-        child: Text('Starting from'),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 30,),
+          Text('Starting from Price'),
+          SizedBox(height: 10,),
+          Row(
+            children: [
+              Text('\$ '),
+              Expanded(
+                child: _TextFormField(
+                  hintText: 'Enter the starting price',
+                  controller: startingFromController,
+                  focusNode: startingFromFocusNode,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  textInputAction: TextInputAction.done,
+                  inputFormatters: [
+                    DecimalTextInputFormatter(decimalRange: 2),
+                  ],
+                ),
+              )
+            ],
+          )
+        ],
       );
     }
     if (type == PricingType.price_and_quantity) {
-      return Container(
-        child: Text('Price and Quantity'),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 30,),
+          Text('Enter quantities and prices separated by commas'),
+          SizedBox(height: 10,),
+          Container(
+            height: 60,
+            width: 250,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _TextFormField(
+                    hintText: '3 Pieces/\$5.00, 7 Pieces for \$10.00, 10 Pieces for \$15',
+                    controller: priceAndQuantityController,
+                    focusNode: priceAndQuantityFocusNode,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    textInputAction: TextInputAction.done,
+                    inputFormatters: [
+                      DecimalTextInputFormatter(decimalRange: 2),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
       );
     } else {
       return SizedBox();
@@ -320,28 +583,28 @@ class _TextFormField extends StatelessWidget {
             border: Border.all(color: Colors.white),
           ),
           child: TextFormField(
-            enabled: enabled,
-            textInputAction: textInputAction,
-            focusNode: focusNode,
-            textCapitalization: TextCapitalization.none,
-            inputFormatters: inputFormatters,
-            onChanged: onChanged,
-            autofillHints: autofillHints,
-            style: TextStyle(fontSize: 20),
-            controller: controller,
-            validator: validator,
-            decoration: InputDecoration(
-                helperText: ' ',
-                hintText: hintText,
-                contentPadding: EdgeInsets.only(left: 10, right: 0, bottom: 5),
-                filled: true,
-                fillColor: Colors.white,
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                )
-            ),
-            obscureText: isPassword ? true : false,
-            keyboardType: keyboardType
+              enabled: enabled,
+              textInputAction: textInputAction,
+              focusNode: focusNode,
+              textCapitalization: TextCapitalization.none,
+              inputFormatters: inputFormatters,
+              onChanged: onChanged,
+              autofillHints: autofillHints,
+              style: TextStyle(fontSize: 20),
+              controller: controller,
+              validator: validator,
+              decoration: InputDecoration(
+                  helperText: ' ',
+                  hintText: hintText,
+                  contentPadding: EdgeInsets.only(left: 10, right: 0, bottom: 5),
+                  filled: true,
+                  fillColor: Colors.white,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(width: 0.3, color: Colors.grey)
+                  )
+              ),
+              obscureText: isPassword ? true : false,
+              keyboardType: keyboardType
           ),
         ));
   }

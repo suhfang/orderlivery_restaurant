@@ -104,6 +104,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
         appBar: AppBar(
           title: Text('MENU ITEMS'),
           backgroundColor: Colors.white,
+          centerTitle: true,
           shadowColor: Colors.transparent,
         ),
         backgroundColor: Colors.white,
