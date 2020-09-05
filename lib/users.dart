@@ -17,20 +17,7 @@ class _UsersPageState extends State<UsersPage> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return DrawerScaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(),
-            Text('USERS'),
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Icon(LineIcons.bell),
-            )
-          ],
-        ),
-        backgroundColor: Colors.white,
-      ),
+      title: 'USERS',
       body: Container(
         child: ListView(
           children: [

@@ -4,9 +4,13 @@ import 'dart:math';
 
 import 'package:Restaurant/SignUpVerificationPage.dart';
 import 'package:Restaurant/constants.dart' as Constants;
+import 'package:Restaurant/forgot_password.dart';
 import 'package:Restaurant/home.dart';
+import 'package:Restaurant/init.dart';
+import 'package:Restaurant/location_hub.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter_facebook_login/flutter_facebook_login.dart';
@@ -15,6 +19,7 @@ import 'package:http/http.dart' as http;
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignUpModel {
   String firstName;
@@ -45,13 +50,15 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   final _loginFormKey = GlobalKey<FormState>();
   LoginpModel loginModel = LoginpModel();
 
-  final restaurantNameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final signUpLastNameController = TextEditingController();
   final signUpEmailController = TextEditingController();
   final signUpPhoneController = TextEditingController();
   final signUpPasswordController = TextEditingController();
 
   final loginEmailController = TextEditingController();
+  final accessTokenController = TextEditingController();
   final loginPasswordController = TextEditingController();
 
   bool _pageLoaded = false;
@@ -131,7 +138,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   void init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if ((prefs.getString('token') ?? '').isNotEmpty) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => InitPage()));
     }
   }
   @override
@@ -229,12 +236,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       Alignment.topCenter,
                                                       width: deviceWidth,
                                                       child: _TextFormField(
-//                                                        inputFormatters: [
-//                                                          FilteringTextInputFormatter
-//                                                              .allow(RegExp(
-//                                                              "[a-zA-Z]"))
-//                                                        ],
-                                                        hintText: 'Restaurant name',
+                                                        hintText: 'FIRST NAME',
                                                         onChanged:
                                                             (String value) {
                                                           _signUpFormKey
@@ -242,11 +244,53 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                               .validate();
                                                         },
                                                         controller:
-                                                        restaurantNameController,
+                                                        firstNameController,
                                                         validator:
                                                             (String value) {
                                                           if (value.length < 2) {
-                                                            return 'Enter your restaurant\'s name';
+                                                            return 'Enter your first name';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                        },
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+
+                                              ],
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      alignment:
+                                                      Alignment.topCenter,
+                                                      width: deviceWidth,
+                                                      child: _TextFormField(
+                                                        hintText: 'LAST NAME',
+                                                        onChanged:
+                                                            (String value) {
+                                                          _signUpFormKey
+                                                              .currentState
+                                                              .validate();
+                                                        },
+                                                        controller:
+                                                        lastNameController,
+                                                        validator:
+                                                            (String value) {
+                                                          if (value.length < 2) {
+                                                            return 'Enter your last name';
                                                           }
                                                           return null;
                                                         },
@@ -273,7 +317,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'Email',
+                                                    hintText: 'EMAIL',
                                                     onChanged: (String value) {
                                                       _signUpFormKey.currentState
                                                           .validate();
@@ -309,7 +353,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'Password',
+                                                    hintText: 'PASSWORD',
                                                     onChanged: (String value) {
                                                       _signUpFormKey.currentState
                                                           .validate();
@@ -351,7 +395,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       FilteringTextInputFormatter
                                                           .allow(RegExp("[0-9]"))
                                                     ],
-                                                    hintText: 'Phone number',
+                                                    hintText: 'PHONE NUMBER',
                                                     onChanged: (String value) {
                                                       _signUpFormKey.currentState
                                                           .validate();
@@ -381,25 +425,53 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                           ],
                                         ),
                                       ),
+                                      Padding(
+                                        padding: EdgeInsets.all(20),
+                                        child: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/terms'),
+                                                style: TextStyle(color: Colors.purple, fontSize: 15),
+                                                text: ' Terms and Conditions '
+                                              ),
+                                              TextSpan(
+                                                  style: TextStyle(color: Colors.black, fontSize: 15),
+                                                  text: 'and'
+                                              ),
+                                              TextSpan(
+                                                  recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/privacy'),
+                                                  style: TextStyle(color: Colors.purple, fontSize: 15),
+                                                  text: ' Privacy Policy '
+                                              ),
+                                            ],
+                                            style: TextStyle(color: Colors.black, fontSize: 15),
+                                              text: 'By signing up, you agree to our'
+                                          ),
+                                        )
+                                      ),
                                       SizedBox(
-                                          height: 40,
-                                          width: deviceWidth,
+                                          height: 50,
+                                          width: MediaQuery.of(context).size.width-50,
                                           child: InkWell(
                                             onTap: () {
                                               signup(context);
 
                                             },
                                             child: Container(
-                                                width: 600,
-                                                height: 40,
+                                              
+                                                width: MediaQuery.of(context).size.width-50,
+                                                height: 50,
                                                 decoration: BoxDecoration(
-//                                      border: Border.all(color: Colors.grey),
+                                                  borderRadius: BorderRadius.circular(10),
                                                   color: Colors.orange,
                                                 ),
                                                 child: Center(
                                                   child: Text(
                                                     'SIGN UP',
                                                     style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
                                                       color: Colors.white,
                                                       fontSize: 19,
                                                     ),
@@ -436,6 +508,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                     Text(
                                                       'LOG IN',
                                                       style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
                                                           color: Colors.blue,
                                                           fontSize: 20),
                                                     ),
@@ -461,7 +534,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   'Log In',
                                                   style: TextStyle(
                                                       fontSize: 40,
-                                                      fontWeight: FontWeight.bold),
+                                                      fontWeight: FontWeight.bold,
+                                                    color: Colors.black
+                                                  ),
                                                 ),
 //                                                Padding(
 //                                                  padding: EdgeInsets.only(right: 10),
@@ -489,8 +564,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'Email',
+                                                    hintText: 'EMAIL',
                                                     onChanged: (String value) {
+                                                      accessTokenController.text = '';
                                                       _loginFormKey.currentState
                                                           .validate();
                                                     },
@@ -524,8 +600,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'Password',
+                                                    hintText: 'PASSWORD',
                                                     onChanged: (String value) {
+                                                      accessTokenController.text = '';
                                                       _loginFormKey.currentState
                                                           .validate();
                                                     },
@@ -548,31 +625,77 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                 )
                                               ],
                                             ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
+
                                           ],
                                         ),
                                       ),
+
+                                     GestureDetector(
+                                       onTap: () {
+                                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordPage()));
+                                       },
+                                       child:  Padding(
+                                         padding: EdgeInsets.all(20),
+                                         child: Text('Forgot password?', style: TextStyle(color: Colors.blue, fontSize: 19,  decoration: TextDecoration.underline,),),
+                                       ),
+                                     ),
+                                      SizedBox(height: 20,),
+                                      SizedBox(height: 50, child: Text('OR'),),
+                                      Column(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            alignment: Alignment.topCenter,
+                                            width: deviceWidth,
+                                            child: _TextFormField(
+                                              hintText: 'ACCESS TOKEN',
+                                              onChanged: (String value) {
+                                                loginEmailController.text = '';
+                                                loginPasswordController.text = '';
+                                                _loginFormKey.currentState
+                                                    .validate();
+                                              },
+                                              autofillHints: [
+                                                AutofillHints.email
+                                              ],
+                                              controller:
+                                              accessTokenController,
+                                              validator: (String value) {
+                                                if (!EmailValidator
+                                                    .validate(value)) {
+                                                  return 'Enter your access token';
+                                                }
+                                                return null;
+                                              },
+                                              onSaved: (String value) {
+//                                                  model.lastName = value;
+                                              },
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      
                                       SizedBox(
-                                          height: 40,
-                                          width: deviceWidth,
+                                          height: 50,
+                                          width: MediaQuery.of(context).size.width-50,
                                           child: InkWell(
                                             onTap: () {
                                               login(context);
                                             },
                                             child: Container(
-                                                width: 600,
-                                                height: 40,
+                                                width: MediaQuery.of(context).size.width-50,
+                                                height: 50,
                                                 decoration: BoxDecoration(
-//                                      border: Border.all(color: Colors.grey),
+                                                  borderRadius: BorderRadius.circular(10),
                                                   color: Colors.orange,
 
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    'Log In',
+                                                    'LOG IN',
                                                     style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
                                                       color: Colors.white,
                                                       fontSize: 19,
                                                     ),
@@ -610,8 +733,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                     Text(
                                                       'SIGN UP',
                                                       style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
                                                           color: Colors.blue,
-                                                          fontSize: 20),
+                                                          fontSize: 19),
                                                     ),
                                                   ],
                                                 ),
@@ -641,6 +765,67 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   }
 
   void login(BuildContext context) async {
+   if (loginEmailController.text.isEmpty && loginPasswordController.text.isEmpty && accessTokenController.text.isNotEmpty) {
+     loginWithAccessToken();
+   } else if (loginEmailController.text.isNotEmpty && loginPasswordController.text.isNotEmpty && accessTokenController.text.isEmpty) {
+     loginWithEmailAndPassword();
+   }
+  }
+
+
+  void signup(BuildContext context) async {
+    if (!_signUpFormKey.currentState.validate()) {
+      return;
+    }
+
+
+
+    final firstName = firstNameController.text.trim();
+    final lastName = lastNameController.text.trim();
+    final email = signUpEmailController.text.trim();
+    final password = signUpPasswordController.text.trim();
+    final phoneNumber = signUpPhoneController.text.trim();
+
+    if (SignupverificationPage.code == 0) {
+      SignupverificationPage.code = generateRandom();
+    }
+    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SignupverificationPage(phoneNumber: phoneNumber, firstName: firstName, lastName: lastName, email: email, password: password)));
+
+
+  }
+
+  TabController _controller;
+
+  ///<-- fixed here
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TabController(length: 1, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _launchInWebViewWithJavaScript(String url) async {
+
+    if (await canLaunch(url)) {
+      print(url);
+      await launch(
+        url,
+        forceSafariVC: true,
+        forceWebView: true,
+        enableJavaScript: true,
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  void loginWithEmailAndPassword() {
     if (!_loginFormKey.currentState.validate()) {
       return;
     }
@@ -679,8 +864,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
           Navigator.pop(context);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', data.token);
+          await prefs.setBool('is_location', false);
+          await prefs.setBool('is_restaurant', true);
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (BuildContext context) => HomePage(),
+              builder: (BuildContext context) => InitPage(),
               fullscreenDialog: true));
         }
       } else {
@@ -694,46 +881,75 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ));
+          if (response.body.toLowerCase().contains('could')) {
+            final error = json.decode(response.body);
+            Scaffold.of(context).showSnackBar(SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(
+                error['message'],
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ));
+          }
         }
       }
     });
   }
 
-  void signup(BuildContext context) async {
-    if (!_signUpFormKey.currentState.validate()) {
-      return;
-    }
+  void loginWithAccessToken() {
+//    if (!_loginFormKey.currentState.validate()) {
+//      return;
+//    }
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [CircularProgressIndicator()],
+              ));
+        });
+
+    Future.delayed(Duration(seconds: 1), () async {
+      var url = Constants.apiBaseUrl + '/restaurant_locations/login';
+
+      print(accessTokenController.text);
+      Map jsonMap = {
+        'secret_access_token': accessTokenController.text.trim(),
+      };
 
 
+      var body = json.encode(jsonMap);
+      var response = await http.post(url,
+          headers: {"Content-Type": "application/json"}, body: body);
+      print(response.body);
+      if (response.statusCode == 200) {
+        TokenResponse data = TokenResponse.fromJson(json.decode(response.body));
 
-    final restaurantName = restaurantNameController.text.trim();
-    final email = signUpEmailController.text.trim();
-    final password = signUpPasswordController.text.trim();
-    final phoneNumber = signUpPhoneController.text.trim();
+          Navigator.pop(context);
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', accessTokenController.text.trim());
+           await prefs.setBool('is_location', true);
+          await prefs.setBool('is_restaurant', false);
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) => LocationHubPage(),
+              fullscreenDialog: true));
 
-    if (SignupverificationPage.code == 0) {
-      SignupverificationPage.code = generateRandom();
-    }
-    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SignupverificationPage(phoneNumber: phoneNumber, restaurantName: restaurantName, email: email, password: password)));
-
-
+      } else {
+        Navigator.pop(context);
+          Scaffold.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Invalid access token',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ));
+      }
+    });
   }
 
-  TabController _controller;
-
-  ///<-- fixed here
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TabController(length: 1, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 }
 
 class _TextFormField extends StatelessWidget {
@@ -781,7 +997,9 @@ class _TextFormField extends StatelessWidget {
               helperText: ' ',
               hintText: hintText,
               contentPadding: EdgeInsets.only(left: 0, right: 0, bottom: 5),
-//              border: InputBorder.none,
+              enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(width: 0.3, color: Colors.grey)
+              ),
               filled: true,
               fillColor: Colors.white,
             ),

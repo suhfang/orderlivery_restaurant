@@ -17,32 +17,22 @@ class _RatingsPageState extends State<RatingsPage> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return DrawerScaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(),
-            Text('RATINGS'),
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Icon(LineIcons.bell),
-            )
-          ],
-        ),
-        backgroundColor: Colors.white,
-      ),
+      backgroundColor: Colors.white,
+      title: 'RATINGS',
       body: Container(
         child: Padding(
           padding: EdgeInsets.all(20),
           child:  Stack(
             children: [
              Container(
-               height: 150,
+               height: 250,
+               color: Colors.white,
                width: MediaQuery.of(context).size.width-50,
                child:  Column(
                  children: [
                    Card(
                      child: Container(
+                       color: Colors.white,
                        child: Column(
                          crossAxisAlignment: CrossAxisAlignment.center,
                          children: [
@@ -70,6 +60,7 @@ class _RatingsPageState extends State<RatingsPage> {
                    ),
                    Card(
                      child: Container(
+                       color: Colors.white,
                        child: Column(
                          crossAxisAlignment: CrossAxisAlignment.center,
                          children: [
@@ -95,13 +86,23 @@ class _RatingsPageState extends State<RatingsPage> {
                        ),
                      ),
                    ),
+                   SizedBox(height: 20,),
+                   Column(
+                     children: [
+                       Text('Recent ratings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
+                     ],
+                   ),
+                   SizedBox(height: 40,),
                  ],
                )
              ),
+
               Padding(
                 padding: EdgeInsets.only(top: 160),
                 child: ListView(
                   children: [
+                    SizedBox(height: 50,),
+                    SizedBox(height: 10,),
                     Container(
                       child: Column(
                         children: [

@@ -26,29 +26,7 @@ class _AddLocationPageState extends State<AddLocationPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Add a location'),
-          backgroundColor: Colors.white,
-        ),
-        body: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Container(
-                child: Stack(
-                  children: [
-                    SizedBox(height: 50,),
-                    Text('Add a location of your restaurant', style: TextStyle(fontSize: 19),),
-                    Padding(
-                      padding: EdgeInsets.only(top: 30),
-                      child: CustomSearchScaffold(),
-                    )
-                  ],
-                ),
-              ),
-            )
-        )
-    );
+    return CustomSearchScaffold();
   }
 }
 
@@ -78,7 +56,7 @@ class _SearchPageState extends State<SearchPage> {
 final customTheme = ThemeData(
   primarySwatch: Colors.blue,
   brightness: Brightness.dark,
-  accentColor: Colors.redAccent,
+  accentColor: Colors.orange,
   inputDecorationTheme: InputDecorationTheme(
     border: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(4.00)),
@@ -118,6 +96,7 @@ class _MyAppState extends State<MyApp> {
     return Scaffold(
       key: homeScaffoldKey,
       appBar: AppBar(
+        shadowColor: Colors.transparent,
         centerTitle: true,
         title: Text("My App"),
       ),
@@ -178,6 +157,7 @@ Future<Null> displayPrediction(Prediction p, ScaffoldState scaffold) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
+
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/add-location',
         headers: {
           'token': token,
@@ -188,8 +168,10 @@ Future<Null> displayPrediction(Prediction p, ScaffoldState scaffold) async {
           'lat': '${lat}',
           'lon': '${lng}'
         }));
-
     Navigator.pop(scaffold.context, 'added');
+    print(response.body);
+
+//    Navigator.pop(scaffold.context, 'added');
 
   }
 }
@@ -235,40 +217,48 @@ class _CustomSearchScaffoldState extends PlacesAutocompleteState {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Text('Add Address'),
+      title: Text('ADD LOCATION'),
       backgroundColor: Colors.white,
       shadowColor: Colors.transparent,
+      centerTitle: true,
     );
     final body = PlacesAutocompleteResult(
       onTap: (p) {
         displayPrediction(p, searchScaffoldKey.currentState);
       },
-      logo: Row(
-        children: [],
-        mainAxisAlignment: MainAxisAlignment.center,
-      ),
+      logo: Row(),
+
     );
 
     return Scaffold(
+
+        backgroundColor: Colors.white,
         key: searchScaffoldKey,
+        appBar: appBar,
         body: Container(
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
           child: Stack(children: [
             Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.only(left: 30, right: 30, top: 10),
               child: AppBarPlacesAutoCompleteTextField(
+
+                textStyle: TextStyle(fontSize: 25),
                   textDecoration: InputDecoration(
-                    hintStyle: TextStyle(fontSize: 19),
-                    hintText: 'Find an address',
+                    hintStyle: TextStyle(fontSize: 25),
+                    hintText: 'Search restaurant...',
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(width: 0.3, color: Colors.white)
+                    ),
                     errorBorder: InputBorder.none,
                     disabledBorder: InputBorder.none,
-                    contentPadding:
-                    EdgeInsets.only(left: 15, bottom: 20, top: 11, right: 15),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: EdgeInsets.only(left: 0, right: 0, bottom: 15),
                   )),
             ),
-            SizedBox(height: 104, child: Divider()),
             Padding(
               padding: EdgeInsets.only(top: 50),
               child: body,

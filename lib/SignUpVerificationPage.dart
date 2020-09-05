@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:Restaurant/auth.dart';
 import 'package:Restaurant/home.dart';
+import 'package:Restaurant/init.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -17,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupverificationPage extends StatefulWidget {
   final String phoneNumber;
-  final String restaurantName;
+  final String firstName;
   final String lastName;
   final String email;
   final String password;
@@ -25,7 +26,7 @@ class SignupverificationPage extends StatefulWidget {
 
   static int code = 0;
   static bool sentVerificationCode = false;
-  SignupverificationPage({this.phoneNumber, this.restaurantName, this.lastName, this.email, this.password});
+  SignupverificationPage({this.phoneNumber, this.firstName, this.lastName, this.email, this.password});
   _SignupverificationPageState createState() => _SignupverificationPageState();
 }
 
@@ -49,6 +50,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
     onTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
         textEditingController.text = '';
+
         sendVerificationCode();
       };
     errorController = StreamController<ErrorAnimationType>();
@@ -72,7 +74,9 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Phone verification'),
+        shadowColor: Colors.transparent,
+        centerTitle: true,
+        title: Text('PHONE VERIFICATION'),
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
       ),
@@ -202,13 +206,13 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                     text: "Didn't receive the code? ",
-                    style: TextStyle(color: Colors.black54, fontSize: 15),
+                    style: TextStyle(color: Colors.purple, fontSize: 15),
                     children: [
                       TextSpan(
                           text: " RESEND",
                           recognizer: onTapRecognizer,
                           style: TextStyle(
-                              color: Color(0xFF91D3B3),
+                              color: Colors.orange,
                               fontWeight: FontWeight.bold,
                               fontSize: 16))
                     ]),
@@ -237,18 +241,8 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
                   ),
                 ),
                 decoration: BoxDecoration(
-                    color: Colors.orange.shade300,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.green.shade200,
-                          offset: Offset(1, -2),
-                          blurRadius: 5),
-                      BoxShadow(
-                          color: Colors.green.shade200,
-                          offset: Offset(-1, 2),
-                          blurRadius: 5)
-                    ]),
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(15),),
               ),
             ],
           ),
@@ -258,7 +252,18 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
   }
 
   void sendVerificationCode() async {
-
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [CircularProgressIndicator()],
+              ));
+        });
     final response = await http.post('${Constants.apiBaseUrl}/customers/send-sms', headers: {
       'Content-Type': 'application/json'
     },
@@ -266,7 +271,8 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
           'phone_number': widget.phoneNumber,
           'code': '${SignupverificationPage.code}'
         }));
-
+    Navigator.pop(context);
+    print(response.body);
 
 
   }
@@ -286,7 +292,8 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
         });
     const url = '${Constants.apiBaseUrl}/restaurants/signup';
     Map jsonMap = {
-      'name': widget.restaurantName,
+      'first_name': widget.firstName,
+      'last_name': widget.lastName,
       'email': widget.email,
       'password': widget.password,
       'phone_number': widget.phoneNumber,
@@ -296,7 +303,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
     Future.delayed(Duration(seconds: 1), () async {
       var response = await http.post(url,
           headers: {"Content-Type": "application/json"}, body: body);
-
+      print(response.body);
       if (response.statusCode == 200) {
         TokenResponse data = TokenResponse.fromJson(json.decode(response.body));
         if (data.token.isNotEmpty) {
@@ -304,7 +311,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', data.token);
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (BuildContext context) => HomePage(),
+              builder: (BuildContext context) => InitPage(),
               fullscreenDialog: true));
         }
       } else {
@@ -318,7 +325,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ));
-          Future.delayed(Duration(seconds: 1), () {
+          Future.delayed(Duration(seconds: 3), () {
             Navigator.pop(context);
           });
         }

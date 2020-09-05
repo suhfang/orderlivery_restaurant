@@ -148,6 +148,7 @@ Future<Null> displayPrediction(Prediction p, ScaffoldState scaffold) async {
       'lon': '${lng}'
     }));
 
+    print(response.body);
     Navigator.push(scaffold.context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
 
   }
@@ -194,7 +195,8 @@ class _CustomSearchScaffoldState extends PlacesAutocompleteState {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Text('Add Address'),
+      centerTitle: true,
+      title: Text('ADD ADDRESS'),
       backgroundColor: Colors.white,
       shadowColor: Colors.transparent,
     );
@@ -217,14 +219,14 @@ class _CustomSearchScaffoldState extends PlacesAutocompleteState {
               child: AppBarPlacesAutoCompleteTextField(
                   textDecoration: InputDecoration(
                     hintStyle: TextStyle(fontSize: 19),
-                    hintText: 'Find an address',
+                    hintText: 'What\'s the main address of your restaurant?',
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     errorBorder: InputBorder.none,
                     disabledBorder: InputBorder.none,
                     contentPadding:
-                    EdgeInsets.only(left: 15, bottom: 20, top: 11, right: 15),
+                    EdgeInsets.only(left: 15, bottom: 20, top: 11, right: 0),
                   )),
             ),
             SizedBox(height: 104, child: Divider()),
