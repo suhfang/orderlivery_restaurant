@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
 
 
 class Address {
- String name;
+  String name;
   String lat;
   String lon;
 
@@ -50,8 +50,8 @@ class RestaurantLocation {
   factory RestaurantLocation.fromJson(Map<String, dynamic> json) {
 
     return RestaurantLocation(
-        address: Address.fromJson(json['address']),
-        id: json['_id'] as String,
+      address: Address.fromJson(json['address']),
+      id: json['_id'] as String,
 
     );
   }
@@ -106,90 +106,72 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (context, index) {
                       final item = _locations[index];
                       return Dismissible(
-                        background: stackBehindDismiss(),
-                        direction: DismissDirection.endToStart,
-                        key: Key(item.id),
-
-                        onDismissed: (DismissDirection direction) {
-
+                          background: stackBehindDismiss(),
+                          direction: DismissDirection.endToStart,
+                          key: Key(item.id),
+                          onDismissed: (DismissDirection direction) {
                             _locations.removeAt(index);
-                        },
-                        confirmDismiss: (DismissDirection direction) {
+                          },
+                          confirmDismiss: (DismissDirection direction) {
                             return deleteAddress(context, _locations[index], index);
                           },
-                        child: GestureDetector(
-                          onTap: () {
+                          child: GestureDetector(
+                            onTap: () {
                               Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationMenuPage(addressName: item.address.name, addressId: item.id,)));
-
-                          },
-                          child:  Column(
-                            children: [
-                              ListTile(
-                                title: Text(_restaurantName + ' at'),
-                                subtitle: Text(item.address.name),
-                              ),
-                              Divider()
-                            ],
-                          ),
-                        )
+                            },
+                            child:  Column(
+                              children: [
+                                ListTile(
+                                  title: Text(_restaurantName + ' at'),
+                                  subtitle: Text(item.address.name),
+                                ),
+                                Divider()
+                              ],
+                            ),
+                          )
                       );
                     }
                 ),
               ) : Align(
-        alignment: Alignment.center,
-        child: Padding(
-          padding: EdgeInsets.only(left: 20, right: 20),
-          child: Text('Add multiple locations of your restaurant and manage them right here', style: TextStyle(fontSize: 20), textAlign: TextAlign.center,),
-        ),
-      ),
-
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  child: Text('Add multiple locations of your restaurant and manage them right here', style: TextStyle(fontSize: 20), textAlign: TextAlign.center,),
+                ),
+              ),
               Align(
                   alignment: Alignment.bottomCenter,
                   child: Stack(
                     children: [
-
                       GestureDetector(
-                        onTap: () async {
-                          String added = await Navigator.push(context, MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  AddLocationPage()));
-                          print(added);
-                          if (added == 'added') {
-                            setState(() {
-                              getLocations();
-                            });
-                          }
-                        },
-
+                          onTap: () async {
+                            String added = await Navigator.push(context, MaterialPageRoute( builder: (BuildContext context) => AddLocationPage()));
+                            if (added == 'added') {
+                              setState(() {
+                                getLocations();
+                              });
+                            }
+                          },
                           child: Container(
                             height: 70,
                             child: Column(
                               children: [
-
                                 SizedBox(height: 10,),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.orange,
-                                    borderRadius: BorderRadius.circular(10)
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(10)
                                   ),
                                   height: 50,
-
-                                  width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width - 50,
+                                  width: MediaQuery.of(context).size.width - 50,
                                   child: Center(
-                                    child: Text('ADD LOCATION', style: TextStyle(
-
-//                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),),
+                                    child: Text('ADD LOCATION', style: TextStyle(color: Colors.white),),
                                   ),
                                 ),
                               ],
                             ),
                           )
                       ),
-
                     ],
                   )
               )
@@ -197,7 +179,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-
     );
   }
 
@@ -259,31 +240,31 @@ class _HomePageState extends State<HomePage> {
                           child: GestureDetector(
                             onTap: () async  {
 //                              if (_locations.length > 1) {
-                                var url = Constants.apiBaseUrl + '/restaurants/remove-location';
-                                print(url);
-                                SharedPreferences prefs = await SharedPreferences.getInstance();
-                                print(prefs.getString('token'));
-                                Future.delayed(Duration(seconds: 0), () async {
-                                  var response = await http.post(
-                                      url,
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                        'token': prefs.getString('token')
-                                      },
-                                      body: json.encode(
-                                          {
-                                            'id': location.id
-                                          }
-                                      )
-                                  );
-                                  Navigator.of(context).pop(true);
-                                  setState(() {
+                              var url = Constants.apiBaseUrl + '/restaurants/remove-location';
+                              print(url);
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              print(prefs.getString('token'));
+                              Future.delayed(Duration(seconds: 0), () async {
+                                var response = await http.post(
+                                    url,
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                      'token': prefs.getString('token')
+                                    },
+                                    body: json.encode(
+                                        {
+                                          'id': location.id
+                                        }
+                                    )
+                                );
+                                Navigator.of(context).pop(true);
+                                setState(() {
 
 
-                                    getLocations();
-                                  });
+                                  getLocations();
                                 });
-                                return true;
+                              });
+                              return true;
 //                              }
                             },
                             child:  Container(
@@ -330,7 +311,4 @@ class _HomePageState extends State<HomePage> {
       );
     });
   }
-  }
-
-
-
+}

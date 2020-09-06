@@ -1,5 +1,6 @@
 
 
+import 'package:Restaurant/location_food_menu.dart';
 import 'package:Restaurant/location_profile.dart';
 import 'package:Restaurant/menu.dart';
 import 'package:Restaurant/restaurant_location_profile.dart';
@@ -40,21 +41,21 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
               }
             ),
             ListTile(
-              title: Text('MENU'),
+              title: Text('LOCATION MENU'),
               trailing: Icon(LineIcons.angle_right),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => FoodMenuPage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationFoodMenuPage()));
                 }
             ),
             ListTile(
-              title: Text('ORDERS'),
+              title: Text('LOCATION ORDERS'),
               trailing: Icon(LineIcons.angle_right),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantLocationProfilePage()));
                 }
             ),
             ListTile(
-              title: Text('RATINGS'),
+              title: Text('LOCATION RATINGS'),
               trailing: Icon(LineIcons.angle_right),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantLocationProfilePage()));

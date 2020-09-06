@@ -433,7 +433,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                             children: [
                                               TextSpan(
                                                 recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/terms'),
-                                                style: TextStyle(color: Colors.purple, fontSize: 15),
+                                                style: TextStyle(color: Colors.blue, fontSize: 15, decoration: TextDecoration.underline),
                                                 text: ' Terms and Conditions '
                                               ),
                                               TextSpan(
@@ -442,7 +442,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                               ),
                                               TextSpan(
                                                   recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/privacy'),
-                                                  style: TextStyle(color: Colors.purple, fontSize: 15),
+                                                  style: TextStyle(color: Colors.blue, fontSize: 15,  decoration: TextDecoration.underline),
                                                   text: ' Privacy Policy '
                                               ),
                                             ],

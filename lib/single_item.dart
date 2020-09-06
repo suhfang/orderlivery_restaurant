@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/add_list_without_prices.dart';
@@ -97,8 +98,76 @@ class _SingleItemPageState extends State<SingleItemPage> {
 
   String image_url = 'assets/images/menu.png';
 
-  createMenuItem() {
+  File _imageFile;
 
+  createMenuItem() {
+    List<int> imageBytes = _imageFile.readAsBytesSync();
+    if (_character == PricingType.flat_price) {
+      String name = nameController.text.trim();
+      String description = descriptionController.text.trim();
+      String price = flatPriceController.text.trim();
+      String cookingTime = minutesController.text.trim();
+      String category = dropdownValue;
+      List _lists = lists.map((itemList) =>
+      {
+        'name': itemList.name,
+        'description': itemList.description,
+        'items': itemList.items.map((item) => {
+          'name': item.name,
+          'price': item.price
+        }).toList()
+      }).toList();
+      String base64  = base64Encode(imageBytes);
+      List<String> labels =  [];
+      if (isVegan) {
+        labels.add('Vegan');
+      }
+      if (isVegetarian) {
+        labels.add('isVegetarian');
+      }
+      if (isGlutenFree) {
+        labels.add('Gluten Free');
+      }
+      if (isHalal) {
+        labels.add('Halal');
+      }
+      if (isKosher) {
+        labels.add('Kosher');
+      }
+      if (isSugarFree) {
+        labels.add('Sugar Free');
+      }
+      List<String> allergens =  [];
+      if (isEgg) {
+        allergens.add('Egg');
+      }
+      if (isFish) {
+        allergens.add('Fish');
+      }
+      if (isShellFish) {
+        allergens.add('Shell Fish');
+      }
+      if (isMilk) {
+        allergens.add('Milk');
+      }
+      if (isPeanut) {
+        allergens.add('Peanut');
+      }
+      if (isSoy) {
+        allergens.add('Soy');
+      }
+      if (isTreanut) {
+        allergens.add('Treenuts');
+      }
+      if (isWheatOrGluten) {
+        allergens.add('Wheat / Gluten');
+      }
+
+
+
+
+
+    }
   }
 
   next() {
@@ -107,10 +176,10 @@ class _SingleItemPageState extends State<SingleItemPage> {
         FocusScope.of(context).requestFocus(nameFocusNode);
         return;
       }
-      if (descriptionController.text.trim().isEmpty) {
-        FocusScope.of(context).requestFocus(descriptionNode);
-        return;
-      }
+//      if (descriptionController.text.trim().isEmpty) {
+//        FocusScope.of(context).requestFocus(descriptionNode);
+//        return;
+//      }
       if (_character == PricingType.none) {
         return;
       }
@@ -228,7 +297,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       Step(
           state: stepOneState,
           isActive: stepOneActive,
-          title: Text('Item name, description and pricing type'),
+          title: Text('Item name, description and pricing'),
           content:  Container(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +327,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                       ),
                     ),
                     SizedBox(height: 5,),
-                    Text('How would you describe your item to customers?'),
+                    Text('How would you describe this item to customers?'),
                     SizedBox(height: 0,),
                     TextFormField(
                       onChanged: (String value) {
@@ -268,7 +337,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                       textInputAction: TextInputAction.done,
                       style: TextStyle(fontSize: 20),
                       decoration: InputDecoration(
-                          hintText: 'How would your describe this item to your customers?',
+                          hintText: 'How would you describe this item to your customers? (Optional)',
                           hintMaxLines: 200, border: InputBorder.none,
                           disabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(width: 0.3, color: Colors.orange)
@@ -517,6 +586,9 @@ class _SingleItemPageState extends State<SingleItemPage> {
               onTap: () async {
                 final image = await imagePicker.getImage(source: ImageSource.gallery);
                 if (image != null) {
+                  setState(() {
+                    _imageFile = File(image.path);
+                  });
 //                  showDialog(
 //                      context: context,
 //                      barrierDismissible: false,
