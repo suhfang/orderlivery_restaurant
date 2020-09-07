@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/add_list_without_prices.dart';
@@ -7,6 +8,7 @@ import 'package:Restaurant/categories.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:Restaurant/constants.dart' as Constants;
@@ -19,22 +21,14 @@ class ComboItemPage extends StatefulWidget {
   _ComboItemPageState createState() => _ComboItemPageState();
 }
 
+Category chooseCategory = Category(name: 'Choose Category type');
 
-
-
-
-//final _formKey = GlobalKey<FormState>();
 class _ComboItemPageState extends State<ComboItemPage> {
-
-  List<String> health_labels = [
-    'Vegan', 'Vegetarian', 'Gluten Free', 'Halal', 'Kosher', 'Sugar-Free'
-  ];
-  List<String> items = [
-    'Choose Category type',
-    'Two'
-  ];
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  Category dropdownValue = chooseCategory;
+  List<Category> items = [chooseCategory, Category(name: 'Two')];
+  List<Item> menuItems = [];
   PricingType _character = PricingType.none;
-
   FocusNode descriptionNode = FocusNode();
   FocusNode flatPriceFocusNode = FocusNode();
   FocusNode nameFocusNode = FocusNode();
@@ -42,8 +36,6 @@ class _ComboItemPageState extends State<ComboItemPage> {
   FocusNode priceAndQuantityFocusNode = FocusNode();
   FocusNode startingFromFocusNode = FocusNode();
   FocusNode minutesFocusNode = FocusNode();
-
-
   TextEditingController descriptionController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController flatPriceController = TextEditingController();
@@ -51,66 +43,367 @@ class _ComboItemPageState extends State<ComboItemPage> {
   TextEditingController startingFromController = TextEditingController();
   TextEditingController cookingTimeController = TextEditingController();
   TextEditingController minutesController = TextEditingController();
-
   List<ItemList> lists = [];
-
+  List<String> added_ids = [];
   StepperType stepperType = StepperType.horizontal;
   int currentStep = 0;
   bool complete = false;
-
   StepState stepOneState = StepState.editing;
   bool stepOneActive = true;
-
   StepState stepTwoState = StepState.disabled;
   bool stepTwoActive = true;
-
   StepState stepThreeState = StepState.disabled;
   bool stepThreeActive = true;
-
   StepState stepFourState = StepState.disabled;
   bool stepFourActive = true;
-
   StepState stepFiveState = StepState.disabled;
   bool stepFiveActive = true;
-
   StepState stepSixState = StepState.disabled;
   bool stepSixActive = true;
-
   ImagePicker imagePicker = ImagePicker();
-
   bool isVegan = false;
   bool isVegetarian = false;
   bool isGlutenFree = false;
   bool isHalal = false;
   bool isKosher = false;
   bool isSugarFree = false;
-
   bool isEgg = false;
   bool isFish = false;
   bool isShellFish = false;
   bool isMilk = false;
   bool isPeanut = false;
   bool isSoy = false;
-  bool isTreanut = false;
+  bool isTreenuts = false;
   bool isWheatOrGluten = false;
+  String imageUrl = 'assets/images/menu.png';
+  File imageFile;
 
-
-  String image_url = 'assets/images/menu.png';
-
-  createMenuItem() {
-
+  Future<void> createFlatPriceMenu() async {
+    String name = nameController.text.trim();
+    String description = descriptionController.text.trim();
+    String price = flatPriceController.text.trim();
+    String cookingTime = minutesController.text.trim();
+    String category_id = dropdownValue.id;
+    List _lists = lists.map((itemList) => {
+      'name': itemList.name,
+      'description': itemList.description,
+      'items': itemList.items.map((item) =>
+      {
+        'name': item.name,
+        'price': item.price != null ? double.parse(item.price) : item.price
+      }).toList()
+    }).toList();
+    List<String> labels = [];
+    if (isVegan) {
+      labels.add('Vegan');
+    }
+    if (isVegetarian) {
+      labels.add('isVegetarian');
+    }
+    if (isGlutenFree) {
+      labels.add('Gluten Free');
+    }
+    if (isHalal) {
+      labels.add('Halal');
+    }
+    if (isKosher) {
+      labels.add('Kosher');
+    }
+    if (isSugarFree) {
+      labels.add('Sugar Free');
+    }
+    List<String> allergens = [];
+    if (isEgg) {
+      allergens.add('Egg');
+    }
+    if (isFish) {
+      allergens.add('Fish');
+    }
+    if (isShellFish) {
+      allergens.add('Shell Fish');
+    }
+    if (isMilk) {
+      allergens.add('Milk');
+    }
+    if (isPeanut) {
+      allergens.add('Peanut');
+    }
+    if (isSoy) {
+      allergens.add('Soy');
+    }
+    if (isTreenuts) {
+      allergens.add('Treenuts');
+    }
+    if (isWheatOrGluten) {
+      allergens.add('Wheat');
+      allergens.add('Gluten');
+    }
+    var _json = {
+      'name': name,
+      'description': description,
+      'flat_price': double.parse(price),
+      'category_id': category_id,
+      'lists': _lists,
+      'health_labels': labels,
+      'allergens': allergens,
+      'individual_items': added_ids
+    };
+    if (imageFile != null) {
+      _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
+    }
+    if (cookingTime.isNotEmpty) {
+      _json['cooking_time'] = cookingTime;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
+    print(response.body);
   }
 
-  next() {
+  bool validatePricesAndQuantities() {
+    String price_and_quantity_text = priceAndQuantityController.text.trim();
+    List<String> pq = price_and_quantity_text.split(',');
+    if (pq.isEmpty) return false;
+
+    try {
+      pq.map((e) {
+        e = e.trim();
+        double quantity = double.parse(e.split('/')[0].split(' ')[0]);
+        String measurement_label = e.split('/')[0].split(' ')[1];
+        String k = e.split('/')[1];
+        String price = k.substring(1, k.length);
+        return {
+          'quantity': quantity,
+          'measurement_label': measurement_label,
+          'price': price
+        };
+      }).toList();
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  Future<void> createPriceAndQuantityMenu() async {
+    String name = nameController.text.trim();
+    String description = descriptionController.text.trim();
+    List pq = priceAndQuantityController.text.trim().split(', ');
+    if (!validatePricesAndQuantities()) {
+      setState(() {
+        currentStep = 0;
+        stepOneActive = true;
+        stepOneState = StepState.editing;
+        FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
+      });
+      return;
+    }
+    List prices_and_quantities = pq.map((e) {
+      double quantity = double.parse(e.split('/')[0].split(' ')[0]);
+      String measurement_label = e.split('/')[0].split(' ')[1];
+      String k = e.split('/')[1];
+      String price = k.substring(1, k.length);
+      return {
+        'quantity': quantity,
+        'measurement_label': measurement_label,
+        'price': price
+      };
+    }).toList();
+    String cookingTime = minutesController.text.trim();
+    String category_id = dropdownValue.id;
+    List _lists = lists.map((itemList) => {
+      'name': itemList.name,
+      'description': itemList.description,
+      'items': itemList.items.map((item) =>
+      {
+        'name': item.name,
+        'price': item.price != null ? double.parse(item.price) : item.price
+      }).toList()
+    }).toList();
+    List<String> labels = [];
+    if (isVegan) {
+      labels.add('Vegan');
+    }
+    if (isVegetarian) {
+      labels.add('isVegetarian');
+    }
+    if (isGlutenFree) {
+      labels.add('Gluten Free');
+    }
+    if (isHalal) {
+      labels.add('Halal');
+    }
+    if (isKosher) {
+      labels.add('Kosher');
+    }
+    if (isSugarFree) {
+      labels.add('Sugar Free');
+    }
+    List<String> allergens = [];
+    if (isEgg) {
+      allergens.add('Egg');
+    }
+    if (isFish) {
+      allergens.add('Fish');
+    }
+    if (isShellFish) {
+      allergens.add('Shell Fish');
+    }
+    if (isMilk) {
+      allergens.add('Milk');
+    }
+    if (isPeanut) {
+      allergens.add('Peanut');
+    }
+    if (isSoy) {
+      allergens.add('Soy');
+    }
+    if (isTreenuts) {
+      allergens.add('Treenuts');
+    }
+    if (isWheatOrGluten) {
+      allergens.add('Wheat');
+      allergens.add('Gluten');
+    }
+    var _json = {
+      'name': name,
+      'description': description,
+      'quantities_and_prices': prices_and_quantities,
+      'category_id': category_id,
+      'lists': _lists,
+      'health_labels': labels,
+      'allergens': allergens,
+      'individual_items': added_ids
+    };
+    if (imageFile != null) {
+      _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
+    }
+    if (cookingTime.isNotEmpty) {
+      _json['cooking_time'] = cookingTime;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
+    print(response.body);
+  }
+
+  Future<void> createStartingFromMenu() async {
+    String name = nameController.text.trim();
+    String description = descriptionController.text.trim();
+    String price = startingFromController.text.trim();
+    String cookingTime = minutesController.text.trim();
+    String category_id = dropdownValue.id;
+    List _lists = lists.map((itemList) => {
+      'name': itemList.name,
+      'description': itemList.description,
+      'items': itemList.items.map((item) =>
+      {
+        'name': item.name,
+        'price': item.price != null ? double.parse(item.price) : item.price
+      }).toList()
+    }).toList();
+    List<String> labels = [];
+    if (isVegan) {
+      labels.add('Vegan');
+    }
+    if (isVegetarian) {
+      labels.add('isVegetarian');
+    }
+    if (isGlutenFree) {
+      labels.add('Gluten Free');
+    }
+    if (isHalal) {
+      labels.add('Halal');
+    }
+    if (isKosher) {
+      labels.add('Kosher');
+    }
+    if (isSugarFree) {
+      labels.add('Sugar Free');
+    }
+    List<String> allergens = [];
+    if (isEgg) {
+      allergens.add('Egg');
+    }
+    if (isFish) {
+      allergens.add('Fish');
+    }
+    if (isShellFish) {
+      allergens.add('Shell Fish');
+    }
+    if (isMilk) {
+      allergens.add('Milk');
+    }
+    if (isPeanut) {
+      allergens.add('Peanut');
+    }
+    if (isSoy) {
+      allergens.add('Soy');
+    }
+    if (isTreenuts) {
+      allergens.add('Treenuts');
+    }
+    if (isWheatOrGluten) {
+      allergens.add('Wheat');
+      allergens.add('Gluten');
+    }
+    var _json = {
+      'name': name,
+      'description': description,
+      'starting_price': double.parse(price),
+      'category_id': category_id,
+      'lists': _lists,
+      'health_labels': labels,
+      'allergens': allergens,
+      'individual_items': added_ids
+    };
+
+    if (imageFile != null) {
+      _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
+    }
+    if (cookingTime.isNotEmpty) {
+      _json['cooking_time'] = cookingTime;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
+    print(response.body);
+  }
+
+  createMenuItem() async {
+    if (_character == PricingType.flat_price) {
+      print(added_ids);
+      await createFlatPriceMenu();
+    }
+    if (_character == PricingType.price_and_quantity) {
+      await createPriceAndQuantityMenu();
+    }
+    if (_character == PricingType.starting_from) {
+      await createStartingFromMenu();
+    }
+  }
+
+  next() async {
     if (currentStep == 0) {
       if (nameController.text.trim().isEmpty) {
         FocusScope.of(context).requestFocus(nameFocusNode);
         return;
       }
-      if (descriptionController.text.trim().isEmpty) {
-        FocusScope.of(context).requestFocus(descriptionNode);
-        return;
-      }
+//      if (descriptionController.text.trim().isEmpty) {
+//        FocusScope.of(context).requestFocus(descriptionNode);
+//        return;
+//      }
       if (_character == PricingType.none) {
         return;
       }
@@ -123,6 +416,15 @@ class _ComboItemPageState extends State<ComboItemPage> {
       if (_character == PricingType.price_and_quantity) {
         if (priceAndQuantityController.text.trim().isEmpty) {
           FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
+          return;
+        }
+        if (!validatePricesAndQuantities()) {
+          setState(() {
+            currentStep = 0;
+            stepOneActive = true;
+            stepOneState = StepState.editing;
+            FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
+          });
           return;
         }
       }
@@ -141,11 +443,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       });
     }
     if (currentStep == 1) {
-      if (dropdownValue.toLowerCase().contains('type')) {
-        return;
-      }
-      if (minutesController.text.trim().isEmpty) {
-        FocusScope.of(context).requestFocus(minutesFocusNode);
+      if (dropdownValue.name.toLowerCase().contains('type')) {
         return;
       }
       setState(() {
@@ -156,10 +454,11 @@ class _ComboItemPageState extends State<ComboItemPage> {
         stepThreeState = StepState.editing;
         FocusScope.of(context).unfocus();
       });
-
-
     }
     if (currentStep == 2) {
+      if (added_ids.length < 2) {
+        return;
+      }
       setState(() {
         stepThreeActive = true;
         stepThreeState = StepState.complete;
@@ -168,25 +467,12 @@ class _ComboItemPageState extends State<ComboItemPage> {
         stepFourState = StepState.editing;
       });
     }
-//    if (currentStep == 3) {
-//      if (image_url == 'assets/images/menu.png') {
-//        return;
-//      }
-//      setState(() {
-//        stepFourActive = true;
-//        stepFourState = StepState.complete;
-//
-//        stepFiveActive = true;
-//        stepFiveState = StepState.editing;
-//      });
-//    }
-
     if (currentStep == 3) {
       setState(() {
         stepSixActive = true;
         stepSixState = StepState.complete;
       });
-      createMenuItem();
+      await createMenuItem();
       Future.delayed(Duration(seconds: 1), () {
         Navigator.pop(context);
       });
@@ -209,9 +495,10 @@ class _ComboItemPageState extends State<ComboItemPage> {
   initState() {
     super.initState();
     getCategories();
+    getMenuItems();
   }
 
-  String dropdownValue = 'Choose Category type';
+
   @override
   Widget build(BuildContext context) {
 
@@ -219,7 +506,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       Step(
           state: stepOneState,
           isActive: stepOneActive,
-          title: Text('Item name, description and pricing type'),
+          title: Text('Item name, description and pricing'),
           content:  Container(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +536,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
                       ),
                     ),
                     SizedBox(height: 5,),
-                    Text('How would you describe your item to customers?'),
+                    Text('How would you describe this item to customers?'),
                     SizedBox(height: 0,),
                     TextFormField(
                       onChanged: (String value) {
@@ -259,7 +546,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
                       textInputAction: TextInputAction.done,
                       style: TextStyle(fontSize: 20),
                       decoration: InputDecoration(
-                          hintText: 'How would your describe this item to your customers?',
+                          hintText: 'How would you describe this item to your customers? (Optional)',
                           hintMaxLines: 200, border: InputBorder.none,
                           disabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(width: 0.3, color: Colors.orange)
@@ -359,8 +646,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
           children: <Widget>[
             Container(
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-
+                child: DropdownButton<Category>(
                   value: dropdownValue,
                   icon: Icon(LineIcons.angle_down),
                   iconSize: 15,
@@ -373,16 +659,16 @@ class _ComboItemPageState extends State<ComboItemPage> {
                       color: Colors.black.withOpacity(0.7),
                     ),
                   ),
-                  onChanged: (String newValue) {
+                  onChanged: (Category newValue) {
                     setState(() {
                       dropdownValue = newValue;
                     });
                   },
                   items: items
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
+                      .map<DropdownMenuItem<Category>>((Category value) {
+                    return DropdownMenuItem<Category>(
                       value: value,
-                      child: Text(value, style: TextStyle(fontSize: 19),),
+                      child: Text(value.name, style: TextStyle(fontSize: 19),),
                     );
                   }).toList(),
                 ),
@@ -410,66 +696,58 @@ class _ComboItemPageState extends State<ComboItemPage> {
       Step(
         state: stepThreeState,
         isActive: stepThreeActive,
-        title: const Text('Add Menu Items'),
+        title: const Text('Add Existing Items'),
         content: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Text('You can create of options. Ex: Flavors of Wings, Sauce, Dressings, etc.'),
+            Text('Here, you can add individual items to your combo mea.  Simply tap to search, find it, and add it to the combo.'),
             SizedBox(height: 15,),
-            GestureDetector(
-              onTap: () {
-                final act = CupertinoActionSheet(
-                    title: Text('What type of list do you want to create?'),
-                    actions: <Widget>[
-                      CupertinoActionSheetAction(
-                        child: Text('List with Prices', style: TextStyle(color: Colors.blue),),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
-                          setState(() {
-                            if (list != null) {
-                              lists.add(list);
-                            }
-                          });
-                        },
-                      ),
-                      CupertinoActionSheetAction(
-                        child: Text('List without Prices', style: TextStyle(color: Colors.blue),),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
-                          setState(() {
-                            if (list != null) {
-                              lists.add(list);
-                            }
-                          });
-                        },
-                      )
-                    ],
-                    cancelButton: CupertinoActionSheetAction(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ));
-                showCupertinoModalPopup(
-                    context: context,
-                    builder: (BuildContext context) => act);
-
-              },
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Center(
-                  child: Text('ADD LIST', style: TextStyle(color: Colors.white),),
-                ),
+            Form(
+              key: _formKey,
+                autovalidate: true,
+              child: MultiSelect(
+                buttonBarColor: Colors.white,
+                searchBoxHintText: 'Search',
+                  autovalidate: false,
+                  titleText: 'Add at least two items from the list',
+                  validator: (value) {
+                   _formKey.currentState.save();
+                    if (value == null) {
+                      return 'Please select two or more items';
+                    }
+                    return null;
+                  },
+                  errorText: 'Please select two or more items',
+                  dataSource: menuItems.map((e) {
+                    return {
+                      'display': e.name,
+                      'value': e.id,
+                    };
+                  }).toList(),
+                  textField: 'display',
+                  valueField: 'value',
+                  filterable: true,
+                  required: true,
+                  onSaved: (value) {
+                    if (value != null) {
+                      List<String> ids = value.cast<String>();
+                      Future.delayed(Duration(milliseconds: 100), () {
+                        setState(() {
+                          added_ids = ids;
+                        });
+                      });
+                    } else {
+                      Future.delayed(Duration(milliseconds: 100), () {
+                        setState(() {
+                          added_ids = [];
+                        });
+                      });
+                    }
+                  },
               ),
             ),
             SizedBox(height: 10,),
-            Text('Added ${lists.length} lists'),
+            Text('Added ${added_ids.length} items'),
             Container(
               height: 100,
               child: ListView.builder(
@@ -501,13 +779,16 @@ class _ComboItemPageState extends State<ComboItemPage> {
           children: <Widget>[
             Container(
               height: 200,
-              child:  Image.asset(image_url, fit: BoxFit.cover,),
+              child:  Image.asset(imageUrl, fit: BoxFit.cover,),
             ),
             SizedBox(height: 10,),
             GestureDetector(
               onTap: () async {
                 final image = await imagePicker.getImage(source: ImageSource.gallery);
                 if (image != null) {
+                  setState(() {
+                    imageFile = File(image.path);
+                  });
 //                  showDialog(
 //                      context: context,
 //                      barrierDismissible: false,
@@ -521,7 +802,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
 //                            ));
 //                      });
                   setState(() {
-                    image_url = image.path;
+                    imageUrl = image.path;
                   });
                 }
               },
@@ -540,6 +821,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
           ],
         ),
       ),
+
     ];
 
 
@@ -549,7 +831,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.white,
-          title: Text('New Combo Menu Item', textAlign: TextAlign.center,),
+          title: Text('New Combo Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
         ),
         body: SafeArea(
@@ -567,6 +849,8 @@ class _ComboItemPageState extends State<ComboItemPage> {
     );
 
   }
+
+
 
   switchStepType() {
     setState(() => stepperType == StepperType.horizontal  ? stepperType = StepperType.vertical  : stepperType = StepperType.horizontal);
@@ -641,7 +925,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
               children: [
                 Expanded(
                   child: _TextFormField(
-                    hintText: '3 Pieces/\$5.00, 7 Pieces for \$10.00, 10 Pieces for \$15',
+                    hintText: '3 Pieces/\$5.00, 7.5 Pieces/\$10.00, 10 Pieces/\$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
                     textInputAction: TextInputAction.done,
@@ -657,6 +941,21 @@ class _ComboItemPageState extends State<ComboItemPage> {
     }
   }
 
+  void getMenuItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-menus',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        });
+    Iterable menus = json.decode(response.body)['menus'];
+
+    setState(() {
+      menuItems = menus.map((e) =>  Item.fromJson(e)).toList().toList().where((element) => element.individual_items.length == 0).toList();
+      print(menuItems);
+    });
+  }
+
   void getCategories() async  {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-categories',
@@ -666,7 +965,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
         });
     Iterable categories = json.decode(response.body)['categories'];
     setState(() {
-      items = ['Choose Category type'] + categories.map((e) =>  Category.fromJson(e)).toList().map((e) => e.name).toList();
+      items = [chooseCategory] + categories.map((e) =>  Category.fromJson(e)).toList().toList();
     });
   }
 }
@@ -748,9 +1047,7 @@ enum PricingType { flat_price, price_and_quantity, starting_from, none }
 class DecimalTextInputFormatter extends TextInputFormatter {
   DecimalTextInputFormatter({this.decimalRange})
       : assert(decimalRange == null || decimalRange > 0);
-
   final int decimalRange;
-
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, // unused.
@@ -758,23 +1055,19 @@ class DecimalTextInputFormatter extends TextInputFormatter {
       ) {
     TextSelection newSelection = newValue.selection;
     String truncated = newValue.text;
-
     if (decimalRange != null) {
       String value = newValue.text;
-
       if (value.contains(".") &&
           value.substring(value.indexOf(".") + 1).length > decimalRange) {
         truncated = oldValue.text;
         newSelection = oldValue.selection;
       } else if (value == ".") {
         truncated = "0.";
-
         newSelection = newValue.selection.copyWith(
           baseOffset: math.min(truncated.length, truncated.length + 1),
           extentOffset: math.min(truncated.length, truncated.length + 1),
         );
       }
-
       return TextEditingValue(
         text: truncated,
         selection: newSelection,
@@ -793,4 +1086,18 @@ enum Healh_and_Safety_Labels {
 
 enum Allergens {
   egg, fish, shellfish, milk, peanut, soy, treenuts, wheat_or_gluten
+}
+
+class Item {
+  String id;
+  String name;
+  List<String> individual_items;
+  Item({this.id, this.name, this.individual_items});
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+        id: json['_id'] as String,
+        name: json['name'] as String,
+        individual_items: json['individual_items'].cast<String>()
+    );
+  }
 }

@@ -20,22 +20,12 @@ class SingleItemPage extends StatefulWidget {
   _SingleItemPageState createState() => _SingleItemPageState();
 }
 
+Category chooseCategory = Category(name: 'Choose Category type');
 
-
-
-
-//final _formKey = GlobalKey<FormState>();
 class _SingleItemPageState extends State<SingleItemPage> {
-
-  List<String> health_labels = [
-    'Vegan', 'Vegetarian', 'Gluten Free', 'Halal', 'Kosher', 'Sugar-Free'
-  ];
-  List<String> items = [
-    'Choose Category type',
-    'Two'
-  ];
+  Category dropdownValue = chooseCategory;
+  List<Category> items = [chooseCategory, Category(name: 'Two')];
   PricingType _character = PricingType.none;
-
   FocusNode descriptionNode = FocusNode();
   FocusNode flatPriceFocusNode = FocusNode();
   FocusNode nameFocusNode = FocusNode();
@@ -43,8 +33,6 @@ class _SingleItemPageState extends State<SingleItemPage> {
   FocusNode priceAndQuantityFocusNode = FocusNode();
   FocusNode startingFromFocusNode = FocusNode();
   FocusNode minutesFocusNode = FocusNode();
-
-
   TextEditingController descriptionController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController flatPriceController = TextEditingController();
@@ -52,125 +40,351 @@ class _SingleItemPageState extends State<SingleItemPage> {
   TextEditingController startingFromController = TextEditingController();
   TextEditingController cookingTimeController = TextEditingController();
   TextEditingController minutesController = TextEditingController();
-
   List<ItemList> lists = [];
-
   StepperType stepperType = StepperType.horizontal;
   int currentStep = 0;
   bool complete = false;
-
   StepState stepOneState = StepState.editing;
   bool stepOneActive = true;
-
   StepState stepTwoState = StepState.disabled;
   bool stepTwoActive = true;
-
   StepState stepThreeState = StepState.disabled;
   bool stepThreeActive = true;
-
   StepState stepFourState = StepState.disabled;
   bool stepFourActive = true;
-
   StepState stepFiveState = StepState.disabled;
   bool stepFiveActive = true;
-
   StepState stepSixState = StepState.disabled;
   bool stepSixActive = true;
-
   ImagePicker imagePicker = ImagePicker();
-
   bool isVegan = false;
   bool isVegetarian = false;
   bool isGlutenFree = false;
   bool isHalal = false;
   bool isKosher = false;
   bool isSugarFree = false;
-
   bool isEgg = false;
   bool isFish = false;
   bool isShellFish = false;
   bool isMilk = false;
   bool isPeanut = false;
   bool isSoy = false;
-  bool isTreanut = false;
+  bool isTreenuts = false;
   bool isWheatOrGluten = false;
+  String imageUrl = 'assets/images/menu.png';
+  File imageFile;
 
-
-  String image_url = 'assets/images/menu.png';
-
-  File _imageFile;
-
-  createMenuItem() {
-    List<int> imageBytes = _imageFile.readAsBytesSync();
-    if (_character == PricingType.flat_price) {
-      String name = nameController.text.trim();
-      String description = descriptionController.text.trim();
-      String price = flatPriceController.text.trim();
-      String cookingTime = minutesController.text.trim();
-      String category = dropdownValue;
-      List _lists = lists.map((itemList) =>
+  Future<void> createFlatPriceMenu() async {
+    String name = nameController.text.trim();
+    String description = descriptionController.text.trim();
+    String price = flatPriceController.text.trim();
+    String cookingTime = minutesController.text.trim();
+    String category_id = dropdownValue.id;
+    List _lists = lists.map((itemList) => {
+      'name': itemList.name,
+      'description': itemList.description,
+      'items': itemList.items.map((item) =>
       {
-        'name': itemList.name,
-        'description': itemList.description,
-        'items': itemList.items.map((item) => {
-          'name': item.name,
-          'price': item.price
-        }).toList()
+        'name': item.name,
+        'price': item.price != null ? double.parse(item.price) : item.price
+      }).toList()
+    }).toList();
+    List<String> labels = [];
+    if (isVegan) {
+      labels.add('Vegan');
+    }
+    if (isVegetarian) {
+      labels.add('isVegetarian');
+    }
+    if (isGlutenFree) {
+      labels.add('Gluten Free');
+    }
+    if (isHalal) {
+      labels.add('Halal');
+    }
+    if (isKosher) {
+      labels.add('Kosher');
+    }
+    if (isSugarFree) {
+      labels.add('Sugar Free');
+    }
+    List<String> allergens = [];
+    if (isEgg) {
+      allergens.add('Egg');
+    }
+    if (isFish) {
+      allergens.add('Fish');
+    }
+    if (isShellFish) {
+      allergens.add('Shell Fish');
+    }
+    if (isMilk) {
+      allergens.add('Milk');
+    }
+    if (isPeanut) {
+      allergens.add('Peanut');
+    }
+    if (isSoy) {
+      allergens.add('Soy');
+    }
+    if (isTreenuts) {
+      allergens.add('Treenuts');
+    }
+    if (isWheatOrGluten) {
+      allergens.add('Wheat');
+      allergens.add('Gluten');
+    }
+    var _json = {
+      'name': name,
+      'description': description,
+      'flat_price': double.parse(price),
+      'category_id': category_id,
+      'lists': _lists,
+      'health_labels': labels,
+      'allergens': allergens
+    };
+    if (imageFile != null) {
+      _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
+    }
+    if (cookingTime.isNotEmpty) {
+      _json['cooking_time'] = cookingTime;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    headers: {
+      'token': prefs.getString('token'),
+      'Content-Type': 'application/json'
+    },
+    body: json.encode(_json));
+    print(response.body);
+  }
+
+  bool validatePricesAndQuantities() {
+    String price_and_quantity_text = priceAndQuantityController.text.trim();
+    List<String> pq = price_and_quantity_text.split(',');
+    if (pq.isEmpty) return false;
+    try {
+      pq.map((e) {
+        e = e.trim();
+        double quantity = double.parse(e.split('/')[0].split(' ')[0]);
+        String measurement_label = e.split('/')[0].split(' ')[1];
+        String k = e.split('/')[1];
+        String price = k.substring(1, k.length);
+        return {
+          'quantity': quantity,
+          'measurement_label': measurement_label,
+          'price': price
+        };
       }).toList();
-      String base64  = base64Encode(imageBytes);
-      List<String> labels =  [];
-      if (isVegan) {
-        labels.add('Vegan');
-      }
-      if (isVegetarian) {
-        labels.add('isVegetarian');
-      }
-      if (isGlutenFree) {
-        labels.add('Gluten Free');
-      }
-      if (isHalal) {
-        labels.add('Halal');
-      }
-      if (isKosher) {
-        labels.add('Kosher');
-      }
-      if (isSugarFree) {
-        labels.add('Sugar Free');
-      }
-      List<String> allergens =  [];
-      if (isEgg) {
-        allergens.add('Egg');
-      }
-      if (isFish) {
-        allergens.add('Fish');
-      }
-      if (isShellFish) {
-        allergens.add('Shell Fish');
-      }
-      if (isMilk) {
-        allergens.add('Milk');
-      }
-      if (isPeanut) {
-        allergens.add('Peanut');
-      }
-      if (isSoy) {
-        allergens.add('Soy');
-      }
-      if (isTreanut) {
-        allergens.add('Treenuts');
-      }
-      if (isWheatOrGluten) {
-        allergens.add('Wheat / Gluten');
-      }
-
-
-
-
-
+      return true;
+    } catch(e) {
+      return false;
     }
   }
 
-  next() {
+  Future<void> createPriceAndQuantityMenu() async {
+    String name = nameController.text.trim();
+    String description = descriptionController.text.trim();
+    List pq = priceAndQuantityController.text.trim().split(', ');
+    if (!validatePricesAndQuantities()) {
+      setState(() {
+        currentStep = 0;
+        stepOneActive = true;
+        stepOneState = StepState.editing;
+        FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
+      });
+      return;
+    }
+    List prices_and_quantities = pq.map((e) {
+      double quantity = double.parse(e.split('/')[0].split(' ')[0]);
+      String measurement_label = e.split('/')[0].split(' ')[1];
+      String k = e.split('/')[1];
+      String price = k.substring(1, k.length);
+      return {
+        'quantity': quantity,
+        'measurement_label': measurement_label,
+        'price': price
+      };
+    }).toList();
+    String cookingTime = minutesController.text.trim();
+    String category_id = dropdownValue.id;
+    List _lists = lists.map((itemList) => {
+      'name': itemList.name,
+      'description': itemList.description,
+      'items': itemList.items.map((item) =>
+      {
+        'name': item.name,
+        'price': item.price != null ? double.parse(item.price) : item.price
+      }).toList()
+    }).toList();
+    List<String> labels = [];
+    if (isVegan) {
+      labels.add('Vegan');
+    }
+    if (isVegetarian) {
+      labels.add('isVegetarian');
+    }
+    if (isGlutenFree) {
+      labels.add('Gluten Free');
+    }
+    if (isHalal) {
+      labels.add('Halal');
+    }
+    if (isKosher) {
+      labels.add('Kosher');
+    }
+    if (isSugarFree) {
+      labels.add('Sugar Free');
+    }
+    List<String> allergens = [];
+    if (isEgg) {
+      allergens.add('Egg');
+    }
+    if (isFish) {
+      allergens.add('Fish');
+    }
+    if (isShellFish) {
+      allergens.add('Shell Fish');
+    }
+    if (isMilk) {
+      allergens.add('Milk');
+    }
+    if (isPeanut) {
+      allergens.add('Peanut');
+    }
+    if (isSoy) {
+      allergens.add('Soy');
+    }
+    if (isTreenuts) {
+      allergens.add('Treenuts');
+    }
+    if (isWheatOrGluten) {
+      allergens.add('Wheat');
+      allergens.add('Gluten');
+    }
+    var _json = {
+      'name': name,
+      'description': description,
+      'quantities_and_prices': prices_and_quantities,
+      'category_id': category_id,
+      'lists': _lists,
+      'health_labels': labels,
+      'allergens': allergens
+    };
+    if (imageFile != null) {
+      _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
+    }
+    if (cookingTime.isNotEmpty) {
+      _json['cooking_time'] = cookingTime;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
+    print(response.body);
+  }
+
+  Future<void> createStartingFromMenu() async {
+    String name = nameController.text.trim();
+    String description = descriptionController.text.trim();
+    String price = startingFromController.text.trim();
+    String cookingTime = minutesController.text.trim();
+    String category_id = dropdownValue.id;
+    List _lists = lists.map((itemList) => {
+      'name': itemList.name,
+      'description': itemList.description,
+      'items': itemList.items.map((item) =>
+      {
+        'name': item.name,
+        'price': item.price != null ? double.parse(item.price) : item.price
+      }).toList()
+    }).toList();
+    List<String> labels = [];
+    if (isVegan) {
+      labels.add('Vegan');
+    }
+    if (isVegetarian) {
+      labels.add('isVegetarian');
+    }
+    if (isGlutenFree) {
+      labels.add('Gluten Free');
+    }
+    if (isHalal) {
+      labels.add('Halal');
+    }
+    if (isKosher) {
+      labels.add('Kosher');
+    }
+    if (isSugarFree) {
+      labels.add('Sugar Free');
+    }
+    List<String> allergens = [];
+    if (isEgg) {
+      allergens.add('Egg');
+    }
+    if (isFish) {
+      allergens.add('Fish');
+    }
+    if (isShellFish) {
+      allergens.add('Shell Fish');
+    }
+    if (isMilk) {
+      allergens.add('Milk');
+    }
+    if (isPeanut) {
+      allergens.add('Peanut');
+    }
+    if (isSoy) {
+      allergens.add('Soy');
+    }
+    if (isTreenuts) {
+      allergens.add('Treenuts');
+    }
+    if (isWheatOrGluten) {
+      allergens.add('Wheat');
+      allergens.add('Gluten');
+    }
+    var _json = {
+      'name': name,
+      'description': description,
+      'starting_price': double.parse(price),
+      'category_id': category_id,
+      'lists': _lists,
+      'health_labels': labels,
+      'allergens': allergens
+    };
+    if (imageFile != null) {
+      _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
+    }
+    if (cookingTime.isNotEmpty) {
+      _json['cooking_time'] = cookingTime;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
+    print(response.body);
+  }
+
+  createMenuItem() async {
+    if (_character == PricingType.flat_price) {
+      await createFlatPriceMenu();
+    }
+    if (_character == PricingType.price_and_quantity) {
+      await createPriceAndQuantityMenu();
+    }
+    if (_character == PricingType.starting_from) {
+      await createStartingFromMenu();
+    }
+  }
+
+  next() async {
     if (currentStep == 0) {
       if (nameController.text.trim().isEmpty) {
         FocusScope.of(context).requestFocus(nameFocusNode);
@@ -194,6 +408,15 @@ class _SingleItemPageState extends State<SingleItemPage> {
           FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
           return;
         }
+        if (!validatePricesAndQuantities()) {
+          setState(() {
+            currentStep = 0;
+            stepOneActive = true;
+            stepOneState = StepState.editing;
+            FocusScope.of(context).requestFocus(priceAndQuantityFocusNode);
+          });
+          return;
+        }
       }
       if (_character == PricingType.starting_from) {
         if (startingFromController.text.trim().isEmpty) {
@@ -210,13 +433,9 @@ class _SingleItemPageState extends State<SingleItemPage> {
       });
     }
     if (currentStep == 1) {
-      if (dropdownValue.toLowerCase().contains('type')) {
+      if (dropdownValue.name.toLowerCase().contains('type')) {
         return;
       }
-       if (minutesController.text.trim().isEmpty) {
-         FocusScope.of(context).requestFocus(minutesFocusNode);
-         return;
-       }
         setState(() {
           stepTwoActive = true;
           stepTwoState = StepState.complete;
@@ -225,8 +444,6 @@ class _SingleItemPageState extends State<SingleItemPage> {
           stepThreeState = StepState.editing;
           FocusScope.of(context).unfocus();
         });
-
-
     }
     if (currentStep == 2) {
       setState(() {
@@ -238,9 +455,6 @@ class _SingleItemPageState extends State<SingleItemPage> {
       });
     }
     if (currentStep == 3) {
-      if (image_url == 'assets/images/menu.png') {
-        return;
-      }
       setState(() {
         stepFourActive = true;
         stepFourState = StepState.complete;
@@ -258,13 +472,12 @@ class _SingleItemPageState extends State<SingleItemPage> {
         stepSixState = StepState.editing;
       });
     }
-
     if (currentStep == 5) {
       setState(() {
         stepSixActive = true;
         stepSixState = StepState.complete;
       });
-      createMenuItem();
+      await createMenuItem();
       Future.delayed(Duration(seconds: 1), () {
         Navigator.pop(context);
       });
@@ -289,7 +502,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
     getCategories();
   }
 
-  String dropdownValue = 'Choose Category type';
+
   @override
   Widget build(BuildContext context) {
 
@@ -437,8 +650,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
           children: <Widget>[
             Container(
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-
+                child: DropdownButton<Category>(
                   value: dropdownValue,
                   icon: Icon(LineIcons.angle_down),
                   iconSize: 15,
@@ -451,18 +663,18 @@ class _SingleItemPageState extends State<SingleItemPage> {
                       color: Colors.black.withOpacity(0.7),
                     ),
                   ),
-                  onChanged: (String newValue) {
+                  onChanged: (Category newValue) {
                     setState(() {
                       dropdownValue = newValue;
                     });
                   },
                   items: items
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value, style: TextStyle(fontSize: 19),),
-                    );
-                  }).toList(),
+                      .map<DropdownMenuItem<Category>>((Category value) {
+                        return DropdownMenuItem<Category>(
+                          value: value,
+                          child: Text(value.name, style: TextStyle(fontSize: 19),),
+                        );
+                      }).toList(),
                 ),
               ),
               width: MediaQuery.of(context).size.width,
@@ -579,7 +791,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
           children: <Widget>[
             Container(
               height: 200,
-              child:  Image.asset(image_url, fit: BoxFit.cover,),
+              child:  Image.asset(imageUrl, fit: BoxFit.cover,),
             ),
             SizedBox(height: 10,),
             GestureDetector(
@@ -587,7 +799,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
                 final image = await imagePicker.getImage(source: ImageSource.gallery);
                 if (image != null) {
                   setState(() {
-                    _imageFile = File(image.path);
+                    imageFile = File(image.path);
                   });
 //                  showDialog(
 //                      context: context,
@@ -602,7 +814,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
 //                            ));
 //                      });
                   setState(() {
-                    image_url = image.path;
+                    imageUrl = image.path;
                   });
                 }
               },
@@ -763,10 +975,10 @@ class _SingleItemPageState extends State<SingleItemPage> {
               ),
               CheckboxListTile(
                 title: Text('Treenuts'),
-                value: isTreanut,
+                value: isTreenuts,
                 onChanged: (newValue) {
                   setState(() {
-                    isTreanut = newValue;
+                    isTreenuts = newValue;
                   });
                 },
                 controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
@@ -877,7 +1089,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 30,),
-          Text('Enter quantities and prices separated by commas'),
+          Text('Enter quantities and prices separated by commas and spaces'),
           SizedBox(height: 10,),
           Container(
             height: 60,
@@ -886,7 +1098,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
               children: [
                 Expanded(
                   child: _TextFormField(
-                    hintText: '3 Pieces/\$5.00, 7 Pieces for \$10.00, 10 Pieces for \$15',
+                    hintText: '3 Pieces/\$5.00, 7.5 Pieces/\$10.00, 10 Pieces/\$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
                     textInputAction: TextInputAction.done,
@@ -911,7 +1123,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         });
     Iterable categories = json.decode(response.body)['categories'];
     setState(() {
-      items = ['Choose Category type'] + categories.map((e) =>  Category.fromJson(e)).toList().map((e) => e.name).toList();
+      items = [chooseCategory] + categories.map((e) =>  Category.fromJson(e)).toList().toList();
     });
   }
 }
@@ -993,9 +1205,7 @@ enum PricingType { flat_price, price_and_quantity, starting_from, none }
 class DecimalTextInputFormatter extends TextInputFormatter {
   DecimalTextInputFormatter({this.decimalRange})
       : assert(decimalRange == null || decimalRange > 0);
-
   final int decimalRange;
-
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, // unused.
@@ -1003,23 +1213,19 @@ class DecimalTextInputFormatter extends TextInputFormatter {
       ) {
     TextSelection newSelection = newValue.selection;
     String truncated = newValue.text;
-
     if (decimalRange != null) {
       String value = newValue.text;
-
       if (value.contains(".") &&
           value.substring(value.indexOf(".") + 1).length > decimalRange) {
         truncated = oldValue.text;
         newSelection = oldValue.selection;
       } else if (value == ".") {
         truncated = "0.";
-
         newSelection = newValue.selection.copyWith(
           baseOffset: math.min(truncated.length, truncated.length + 1),
           extentOffset: math.min(truncated.length, truncated.length + 1),
         );
       }
-
       return TextEditingValue(
         text: truncated,
         selection: newSelection,
