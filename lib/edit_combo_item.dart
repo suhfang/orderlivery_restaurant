@@ -8,6 +8,7 @@ import 'package:Restaurant/categories.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:Restaurant/constants.dart' as Constants;
@@ -16,15 +17,19 @@ import 'dart:math' as math;
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SingleItemPage extends StatefulWidget {
-  _SingleItemPageState createState() => _SingleItemPageState();
+class ComboItemPage extends StatefulWidget {
+  final String id;
+  ComboItemPage({this.id});
+  _ComboItemPageState createState() => _ComboItemPageState();
 }
 
 Category chooseCategory = Category(name: 'Choose Category type');
 
-class _SingleItemPageState extends State<SingleItemPage> {
+class _ComboItemPageState extends State<ComboItemPage> {
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   Category dropdownValue = chooseCategory;
   List<Category> items = [chooseCategory, Category(name: 'Two')];
+  List<Item> menuItems = [];
   PricingType _character = PricingType.none;
   FocusNode descriptionNode = FocusNode();
   FocusNode flatPriceFocusNode = FocusNode();
@@ -41,6 +46,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
   TextEditingController cookingTimeController = TextEditingController();
   TextEditingController minutesController = TextEditingController();
   List<ItemList> lists = [];
+  List<String> added_ids = [];
   StepperType stepperType = StepperType.horizontal;
   int currentStep = 0;
   bool complete = false;
@@ -141,7 +147,8 @@ class _SingleItemPageState extends State<SingleItemPage> {
       'category_id': category_id,
       'lists': _lists,
       'health_labels': labels,
-      'allergens': allergens
+      'allergens': allergens,
+      'individual_items': added_ids
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -151,11 +158,11 @@ class _SingleItemPageState extends State<SingleItemPage> {
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
-    headers: {
-      'token': prefs.getString('token'),
-      'Content-Type': 'application/json'
-    },
-    body: json.encode(_json));
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
     print(response.body);
   }
 
@@ -163,6 +170,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
     String price_and_quantity_text = priceAndQuantityController.text.trim();
     List<String> pq = price_and_quantity_text.split(',');
     if (pq.isEmpty) return false;
+
     try {
       pq.map((e) {
         e = e.trim();
@@ -269,7 +277,8 @@ class _SingleItemPageState extends State<SingleItemPage> {
       'category_id': category_id,
       'lists': _lists,
       'health_labels': labels,
-      'allergens': allergens
+      'allergens': allergens,
+      'individual_items': added_ids
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -354,8 +363,10 @@ class _SingleItemPageState extends State<SingleItemPage> {
       'category_id': category_id,
       'lists': _lists,
       'health_labels': labels,
-      'allergens': allergens
+      'allergens': allergens,
+      'individual_items': added_ids
     };
+
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
     }
@@ -374,6 +385,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
 
   createMenuItem() async {
     if (_character == PricingType.flat_price) {
+      print(added_ids);
       await createFlatPriceMenu();
     }
     if (_character == PricingType.price_and_quantity) {
@@ -436,16 +448,19 @@ class _SingleItemPageState extends State<SingleItemPage> {
       if (dropdownValue.name.toLowerCase().contains('type')) {
         return;
       }
-        setState(() {
-          stepTwoActive = true;
-          stepTwoState = StepState.complete;
+      setState(() {
+        stepTwoActive = true;
+        stepTwoState = StepState.complete;
 
-          stepThreeActive = true;
-          stepThreeState = StepState.editing;
-          FocusScope.of(context).unfocus();
-        });
+        stepThreeActive = true;
+        stepThreeState = StepState.editing;
+        FocusScope.of(context).unfocus();
+      });
     }
     if (currentStep == 2) {
+      if (added_ids.length < 2) {
+        return;
+      }
       setState(() {
         stepThreeActive = true;
         stepThreeState = StepState.complete;
@@ -455,24 +470,6 @@ class _SingleItemPageState extends State<SingleItemPage> {
       });
     }
     if (currentStep == 3) {
-      setState(() {
-        stepFourActive = true;
-        stepFourState = StepState.complete;
-
-        stepFiveActive = true;
-        stepFiveState = StepState.editing;
-      });
-    }
-    if (currentStep == 4) {
-      setState(() {
-        stepFiveActive = true;
-        stepFiveState = StepState.complete;
-
-        stepSixActive = true;
-        stepSixState = StepState.editing;
-      });
-    }
-    if (currentStep == 5) {
       setState(() {
         stepSixActive = true;
         stepSixState = StepState.complete;
@@ -500,6 +497,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
   initState() {
     super.initState();
     getCategories();
+    getMenuItems();
   }
 
 
@@ -670,11 +668,11 @@ class _SingleItemPageState extends State<SingleItemPage> {
                   },
                   items: items
                       .map<DropdownMenuItem<Category>>((Category value) {
-                        return DropdownMenuItem<Category>(
-                          value: value,
-                          child: Text(value.name, style: TextStyle(fontSize: 19),),
-                        );
-                      }).toList(),
+                    return DropdownMenuItem<Category>(
+                      value: value,
+                      child: Text(value.name, style: TextStyle(fontSize: 19),),
+                    );
+                  }).toList(),
                 ),
               ),
               width: MediaQuery.of(context).size.width,
@@ -684,14 +682,14 @@ class _SingleItemPageState extends State<SingleItemPage> {
             Row(
               children: [
                 Text('Minutes: '),
-               Expanded(
-                 child:  _TextFormField(
-                   focusNode: minutesFocusNode,
-                   controller: minutesController,
-                   keyboardType: TextInputType.number,
-                   hintText: 'Average cooking time',
-                 ),
-               )
+                Expanded(
+                  child:  _TextFormField(
+                    focusNode: minutesFocusNode,
+                    controller: minutesController,
+                    keyboardType: TextInputType.number,
+                    hintText: 'Average cooking time',
+                  ),
+                )
               ],
             )
           ],
@@ -700,66 +698,58 @@ class _SingleItemPageState extends State<SingleItemPage> {
       Step(
         state: stepThreeState,
         isActive: stepThreeActive,
-        title: const Text('Add Lists'),
+        title: const Text('Add Existing Items'),
         content: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Text('You can create of options. Ex: Flavors of Wings, Sauce, Dressings, etc.'),
+            Text('Here, you can add individual items to your combo mea.  Simply tap to search, find it, and add it to the combo.'),
             SizedBox(height: 15,),
-            GestureDetector(
-              onTap: () {
-                final act = CupertinoActionSheet(
-                    title: Text('What type of list do you want to create?'),
-                    actions: <Widget>[
-                      CupertinoActionSheetAction(
-                        child: Text('List with Prices', style: TextStyle(color: Colors.blue),),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                           ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
-                           setState(() {
-                             if (list != null) {
-                               lists.add(list);
-                             }
-                           });
-                        },
-                      ),
-                      CupertinoActionSheetAction(
-                        child: Text('List without Prices', style: TextStyle(color: Colors.blue),),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
-                          setState(() {
-                            if (list != null) {
-                              lists.add(list);
-                            }
-                          });
-                        },
-                      )
-                    ],
-                    cancelButton: CupertinoActionSheetAction(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ));
-                showCupertinoModalPopup(
-                    context: context,
-                    builder: (BuildContext context) => act);
-
-              },
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Center(
-                  child: Text('ADD LIST', style: TextStyle(color: Colors.white),),
-                ),
+            Form(
+              key: _formKey,
+              autovalidate: true,
+              child: MultiSelect(
+                buttonBarColor: Colors.white,
+                searchBoxHintText: 'Search',
+                autovalidate: false,
+                titleText: 'Add at least two items from the list',
+                validator: (value) {
+                  _formKey.currentState.save();
+                  if (value == null) {
+                    return 'Please select two or more items';
+                  }
+                  return null;
+                },
+                errorText: 'Please select two or more items',
+                dataSource: menuItems.map((e) {
+                  return {
+                    'display': e.name,
+                    'value': e.id,
+                  };
+                }).toList(),
+                textField: 'display',
+                valueField: 'value',
+                filterable: true,
+                required: true,
+                onSaved: (value) {
+                  if (value != null) {
+                    List<String> ids = value.cast<String>();
+                    Future.delayed(Duration(milliseconds: 100), () {
+                      setState(() {
+                        added_ids = ids;
+                      });
+                    });
+                  } else {
+                    Future.delayed(Duration(milliseconds: 100), () {
+                      setState(() {
+                        added_ids = [];
+                      });
+                    });
+                  }
+                },
               ),
             ),
             SizedBox(height: 10,),
-            Text('Added ${lists.length} lists'),
+            Text('Added ${added_ids.length} items'),
             Container(
               height: 100,
               child: ListView.builder(
@@ -833,170 +823,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
           ],
         ),
       ),
-      Step(
-        state: stepFiveState,
-        isActive: stepFiveActive,
-        title: const Text('Health & Safety Labels'),
-        content: Container(
-          height: 350,
-          child: ListView(
-            children: [
-              CheckboxListTile(
-                title: Text('Vegan'),
-                value: isVegan,
-                onChanged: (newValue) {
-                  setState(() {
-                    isVegan = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Vegetarian'),
-                value: isVegetarian,
-                onChanged: (newValue) {
-                  setState(() {
-                    isVegetarian = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Gluten Free'),
-                value: isGlutenFree,
-                onChanged: (newValue) {
-                  setState(() {
-                    isGlutenFree = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Halal'),
-                value: isHalal,
-                onChanged: (newValue) {
-                  setState(() {
-                    isHalal = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Kosher'),
-                value: isKosher,
-                onChanged: (newValue) {
-                  setState(() {
-                    isKosher = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Sugar Free'),
-                value: isSugarFree,
-                onChanged: (newValue) {
-                  setState(() {
-                    isSugarFree = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              )
-            ],
-          ),
-        )
-      ),
-      Step(
-        state: stepSixState,
-        isActive: stepSixActive,
-        title: const Text('Allergens'),
-        content: Container(
-          height: 450,
-          child: ListView(
-            children: [
-              CheckboxListTile(
-                title: Text('Egg'),
-                value: isEgg,
-                onChanged: (newValue) {
-                  setState(() {
-                    isEgg = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Fish'),
-                value: isFish,
-                onChanged: (newValue) {
-                  setState(() {
-                    isFish = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('ShellFish'),
-                value: isShellFish,
-                onChanged: (newValue) {
-                  setState(() {
-                    isShellFish = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Milk'),
-                value: isMilk,
-                onChanged: (newValue) {
-                  setState(() {
-                    isMilk = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Peanut'),
-                value: isPeanut,
-                onChanged: (newValue) {
-                  setState(() {
-                    isPeanut = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Soy'),
-                value: isSoy,
-                onChanged: (newValue) {
-                  setState(() {
-                    isSoy = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Treenuts'),
-                value: isTreenuts,
-                onChanged: (newValue) {
-                  setState(() {
-                    isTreenuts = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Wheat / Gluten'),
-                value: isWheatOrGluten,
-                onChanged: (newValue) {
-                  setState(() {
-                    isWheatOrGluten = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              )
-            ],
-          ),
-        )
-      ),
+
     ];
 
 
@@ -1006,7 +833,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.white,
-          title: Text('Edit La Carte Item', textAlign: TextAlign.center,),
+          title: Text('Edit Combo Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
         ),
         body: SafeArea(
@@ -1024,6 +851,8 @@ class _SingleItemPageState extends State<SingleItemPage> {
     );
 
   }
+
+
 
   switchStepType() {
     setState(() => stepperType == StepperType.horizontal  ? stepperType = StepperType.vertical  : stepperType = StepperType.horizontal);
@@ -1089,7 +918,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 30,),
-          Text('Enter quantities and prices separated by commas and spaces'),
+          Text('Enter quantities and prices separated by commas'),
           SizedBox(height: 10,),
           Container(
             height: 60,
@@ -1112,6 +941,21 @@ class _SingleItemPageState extends State<SingleItemPage> {
     } else {
       return SizedBox();
     }
+  }
+
+  void getMenuItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-menus',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        });
+    Iterable menus = json.decode(response.body)['menus'];
+
+    setState(() {
+      menuItems = menus.map((e) =>  Item.fromJson(e)).toList().toList().where((element) => element.individual_items.length == 0).toList();
+      print(menuItems);
+    });
   }
 
   void getCategories() async  {
@@ -1244,4 +1088,18 @@ enum Healh_and_Safety_Labels {
 
 enum Allergens {
   egg, fish, shellfish, milk, peanut, soy, treenuts, wheat_or_gluten
+}
+
+class Item {
+  String id;
+  String name;
+  List<String> individual_items;
+  Item({this.id, this.name, this.individual_items});
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+        id: json['_id'] as String,
+        name: json['name'] as String,
+        individual_items: json['individual_items'].cast<String>()
+    );
+  }
 }

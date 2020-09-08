@@ -16,6 +16,13 @@ class ItemList {
   String description;
   List<ListItem> items;
   ItemList({this.name, this.description, this.items});
+  factory ItemList.fromJson(Map<String, dynamic> json) {
+    print(json);
+    return ItemList(
+      name: json['name'] as String,
+      description: json['description'] as String
+    );
+  }
 }
 
 class ListItem {

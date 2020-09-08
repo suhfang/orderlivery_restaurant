@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/create_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,15 +13,15 @@ import 'package:http/http.dart' as http;
 class CategoriesPage extends StatefulWidget {
   _CategoriesPageState createState() => _CategoriesPageState();
 }
+
 class Category {
   String name;
+
   String id;
   Category({this.name, this.id});
+
   factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
-        name: json['name'] as String,
-        id: json['_id'] as String
-    );
+    return Category(name: json['name'] as String, id: json['_id'] as String);
   }
 
 }
@@ -175,10 +176,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
       'Content-Type': 'application/json'
     });
     Iterable categories = json.decode(response.body)['categories'];
+
     setState(() {
       _categories = categories.map((e) => Category.fromJson(e)).toList();
+
     });
+
+
+
+
   }
+
 
 
 

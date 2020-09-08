@@ -3,14 +3,97 @@
 import 'dart:convert';
 
 //import 'package:Restaurant/categories.dart';
+import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/categories.dart';
-import 'package:Restaurant/combo_item.dart';
+import 'package:Restaurant/edit_combo_item.dart';
+import 'package:Restaurant/edit_single_item.dart';
 import 'package:Restaurant/single_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:Restaurant/constants.dart' as Constants;
+import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+
+
+class QuantityAndPrice {
+  int quantity;
+  double price;
+  String measurementLabel;
+  QuantityAndPrice({this.quantity, this.price, this.measurementLabel});
+}
+
+class Category {
+  String name;
+  String id;
+  List<Item> items;
+  Category({this.name, this.id});
+
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(name: json['name'] as String, id: json['_id'] as String);
+  }
+
+}
+class Item {
+
+  String id;
+  String name;
+  String description;
+  int flatPrice;
+  List<QuantityAndPrice> quantitiesAndPrices;
+  List<String> healthLabels;
+  List<String> allergens;
+  int startingPrice;
+  String imageUrl;
+  int cookingTime;
+  List<ItemList> lists;
+  List<String> individualItemIds;
+
+  Item({
+    this.id,
+    this.name,
+    this.description,
+    this.flatPrice,
+    this.quantitiesAndPrices,
+    this.healthLabels,
+    this.allergens,
+    this.startingPrice,
+    this.imageUrl,
+    this.cookingTime,
+    this.lists,
+    this.individualItemIds
+  });
+
+  factory Item.fromJson(Map<String, dynamic> json) {
+    var qp_map_list = json['quantities_and_prices'] as List;
+    List<QuantityAndPrice> qps = [];
+
+//    if (qp_map_list.isNotEmpty) {
+//        qp_map_list.forEach((element) {
+//
+//          qps.add(
+//              QuantityAndPrice(
+//                  quantity: element['quantity'] as int,
+//                  price: element['price'] as double
+//              )
+//          );
+//        });
+//    }
+
+
+
+    return Item(
+        id: json['_id'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        individualItemIds: json['individual_items'].cast<String>(),
+        flatPrice: json['flat_price'] as int,
+//        quantitiesAndPrices: qps
+    );
+  }
+}
 
 
 class MenuItemsPage extends StatefulWidget {
@@ -29,8 +112,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   int _prevControllerIndex = 0;
   double _aniValue = 0.0;
   double _prevAniValue = 0.0;
-  List<String> _titles = [
-  ];
+  List<Category> _titles = [];
   Color _foregroundOn = Colors.white;
   Color _foregroundOff = Colors.black;
   Color _backgroundOn = Colors.orange;
@@ -38,6 +120,23 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   ScrollController _scrollController = new ScrollController();
   List _keys = [];
   bool _buttonTap = false;
+
+
+
+
+  Future<List<Item>> getMenusForCategory(String category_id) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-items-by-category',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode({
+          'category_id': category_id
+        }));
+    Iterable items = json .decode(response.body)['menus'];
+    return items.map((e) => Item.fromJson(e)).toList();
+  }
 
   Future<void> getCategories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -50,42 +149,53 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
 
     setState(() {
       _categories = categories.map((e) => Category.fromJson(e)).toList();
-      _titles = _categories.map((e) => e.name).toList();
+      _categories.forEach((element) async {
+        var items = await getMenusForCategory(element.id);
+        setState(() {
+          element.items = items;
+        });
+
+      });
+    });
+    setState(() {
+      for (int index = 0; index < _categories.length; index++) {
+        _keys.add(new GlobalKey());
+      }
+      _controller = TabController(vsync: this, length: _categories.length);
+      _controller.animation.addListener(_handleTabAnimation);
+      _controller.addListener(_handleTabChange);
+
+      _animationControllerOff =
+          AnimationController(vsync: this, duration: Duration(milliseconds: 75));
+      _animationControllerOff.value = 1.0;
+      _colorTweenBackgroundOff =
+          ColorTween(begin: _backgroundOn, end: _backgroundOff)
+              .animate(_animationControllerOff);
+      _colorTweenForegroundOff =
+          ColorTween(begin: _foregroundOn, end: _foregroundOff)
+              .animate(_animationControllerOff);
+
+      _animationControllerOn =
+          AnimationController(vsync: this, duration: Duration(milliseconds: 150));
+      _animationControllerOn.value = 1.0;
+      _colorTweenBackgroundOn =
+          ColorTween(begin: _backgroundOff, end: _backgroundOn)
+              .animate(_animationControllerOn);
+      _colorTweenForegroundOn =
+          ColorTween(begin: _foregroundOff, end: _foregroundOn)
+              .animate(_animationControllerOn);
     });
 
-    for (int index = 0; index < _titles.length; index++) {
-      _keys.add(new GlobalKey());
-    }
-    _controller = TabController(vsync: this, length: _titles.length);
-    _controller.animation.addListener(_handleTabAnimation);
-    _controller.addListener(_handleTabChange);
 
-    _animationControllerOff =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 75));
-    _animationControllerOff.value = 1.0;
-    _colorTweenBackgroundOff =
-        ColorTween(begin: _backgroundOn, end: _backgroundOff)
-            .animate(_animationControllerOff);
-    _colorTweenForegroundOff =
-        ColorTween(begin: _foregroundOn, end: _foregroundOff)
-            .animate(_animationControllerOff);
 
-    _animationControllerOn =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 150));
-    _animationControllerOn.value = 1.0;
-    _colorTweenBackgroundOn =
-        ColorTween(begin: _backgroundOff, end: _backgroundOn)
-            .animate(_animationControllerOn);
-    _colorTweenForegroundOn =
-        ColorTween(begin: _foregroundOff, end: _foregroundOn)
-            .animate(_animationControllerOn);
   }
+
 
   List<Category> _categories = [];
 
   @override
   void initState() {
-    _controller = TabController(vsync: this, length: _titles.length);
+    _controller = TabController(vsync: this, length: _categories.length);
     getCategories();
     super.initState();
 
@@ -120,7 +230,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                   // make the list horizontal
                   scrollDirection: Axis.horizontal,
                   // number of tabs
-                  itemCount: _titles.length,
+                  itemCount: _categories.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       // each button's key
@@ -149,7 +259,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                                   },
                                   child: Text(
                                     // get the icon
-                                    _titles[index],
+                                    _categories[index].name,
                                     // get the color of the icon (dependent of its state)
 //                                    color: _getForegroundColor(index),
                                   )),
@@ -162,7 +272,42 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                 controller: _controller,
                 children: <Widget>[
                   // our Tab Views
-                  ..._titles.map((e) => Text(e)),
+                  ...(_categories
+                  .map((category) {
+                    if (category.items != null) {
+                      return ListView(
+                        children: [
+                          ...category.items.map((item) {
+                            return GestureDetector(
+                              onTap: () {
+                                if (item.individualItemIds.isEmpty) {
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (BuildContext context) => EditSingleItemPage(id: item.id)
+                                  ));
+                                } else {
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (BuildContext context) => ComboItemPage(id: item.id)
+                                  ));
+                                }
+                              },
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    trailing: Icon(LineIcons.edit),
+                                    title: Text(item.name),
+                                    subtitle: Text(item.description),
+                                  ),
+                                  Divider()
+                                ],
+                              ),
+                            );
+                          })
+                        ],
+                      );
+                    } else {
+                      return SizedBox();
+                    }
+                  })).toList()
 
                 ],
               )),
@@ -291,7 +436,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
       // if the button is to the right of the middle
 
       // get the last button
-      renderBox = _keys[_titles.length - 1].currentContext.findRenderObject();
+      renderBox = _keys[_categories.length - 1].currentContext.findRenderObject();
       // get its position
       position = renderBox.localToGlobal(Offset.zero).dx;
       // and size

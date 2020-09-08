@@ -16,13 +16,15 @@ import 'dart:math' as math;
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SingleItemPage extends StatefulWidget {
-  _SingleItemPageState createState() => _SingleItemPageState();
+class EditSingleItemPage extends StatefulWidget {
+  final String id;
+  EditSingleItemPage({this.id});
+  _EditSingleItemPageState createState() => _EditSingleItemPageState();
 }
 
 Category chooseCategory = Category(name: 'Choose Category type');
 
-class _SingleItemPageState extends State<SingleItemPage> {
+class _EditSingleItemPageState extends State<EditSingleItemPage> {
   Category dropdownValue = chooseCategory;
   List<Category> items = [chooseCategory, Category(name: 'Two')];
   PricingType _character = PricingType.none;
@@ -151,11 +153,11 @@ class _SingleItemPageState extends State<SingleItemPage> {
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
-    headers: {
-      'token': prefs.getString('token'),
-      'Content-Type': 'application/json'
-    },
-    body: json.encode(_json));
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode(_json));
     print(response.body);
   }
 
@@ -436,14 +438,14 @@ class _SingleItemPageState extends State<SingleItemPage> {
       if (dropdownValue.name.toLowerCase().contains('type')) {
         return;
       }
-        setState(() {
-          stepTwoActive = true;
-          stepTwoState = StepState.complete;
+      setState(() {
+        stepTwoActive = true;
+        stepTwoState = StepState.complete;
 
-          stepThreeActive = true;
-          stepThreeState = StepState.editing;
-          FocusScope.of(context).unfocus();
-        });
+        stepThreeActive = true;
+        stepThreeState = StepState.editing;
+        FocusScope.of(context).unfocus();
+      });
     }
     if (currentStep == 2) {
       setState(() {
@@ -500,6 +502,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
   initState() {
     super.initState();
     getCategories();
+    getItem();
   }
 
 
@@ -670,11 +673,11 @@ class _SingleItemPageState extends State<SingleItemPage> {
                   },
                   items: items
                       .map<DropdownMenuItem<Category>>((Category value) {
-                        return DropdownMenuItem<Category>(
-                          value: value,
-                          child: Text(value.name, style: TextStyle(fontSize: 19),),
-                        );
-                      }).toList(),
+                    return DropdownMenuItem<Category>(
+                      value: value,
+                      child: Text(value.name, style: TextStyle(fontSize: 19),),
+                    );
+                  }).toList(),
                 ),
               ),
               width: MediaQuery.of(context).size.width,
@@ -684,14 +687,14 @@ class _SingleItemPageState extends State<SingleItemPage> {
             Row(
               children: [
                 Text('Minutes: '),
-               Expanded(
-                 child:  _TextFormField(
-                   focusNode: minutesFocusNode,
-                   controller: minutesController,
-                   keyboardType: TextInputType.number,
-                   hintText: 'Average cooking time',
-                 ),
-               )
+                Expanded(
+                  child:  _TextFormField(
+                    focusNode: minutesFocusNode,
+                    controller: minutesController,
+                    keyboardType: TextInputType.number,
+                    hintText: 'Average cooking time',
+                  ),
+                )
               ],
             )
           ],
@@ -715,12 +718,12 @@ class _SingleItemPageState extends State<SingleItemPage> {
                         child: Text('List with Prices', style: TextStyle(color: Colors.blue),),
                         onPressed: () async {
                           Navigator.pop(context);
-                           ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
-                           setState(() {
-                             if (list != null) {
-                               lists.add(list);
-                             }
-                           });
+                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
+                          setState(() {
+                            if (list != null) {
+                              lists.add(list);
+                            }
+                          });
                         },
                       ),
                       CupertinoActionSheetAction(
@@ -789,10 +792,16 @@ class _SingleItemPageState extends State<SingleItemPage> {
         title: const Text('Upload a bright image of the menu item'),
         content: Column(
           children: <Widget>[
+            imageUrl.startsWith('http')
+            ? Container(
+              height: 200,
+              child:  Image.network(imageUrl, fit: BoxFit.cover,),
+            ) :
             Container(
               height: 200,
               child:  Image.asset(imageUrl, fit: BoxFit.cover,),
             ),
+
             SizedBox(height: 10,),
             GestureDetector(
               onTap: () async {
@@ -834,168 +843,168 @@ class _SingleItemPageState extends State<SingleItemPage> {
         ),
       ),
       Step(
-        state: stepFiveState,
-        isActive: stepFiveActive,
-        title: const Text('Health & Safety Labels'),
-        content: Container(
-          height: 350,
-          child: ListView(
-            children: [
-              CheckboxListTile(
-                title: Text('Vegan'),
-                value: isVegan,
-                onChanged: (newValue) {
-                  setState(() {
-                    isVegan = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Vegetarian'),
-                value: isVegetarian,
-                onChanged: (newValue) {
-                  setState(() {
-                    isVegetarian = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Gluten Free'),
-                value: isGlutenFree,
-                onChanged: (newValue) {
-                  setState(() {
-                    isGlutenFree = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Halal'),
-                value: isHalal,
-                onChanged: (newValue) {
-                  setState(() {
-                    isHalal = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Kosher'),
-                value: isKosher,
-                onChanged: (newValue) {
-                  setState(() {
-                    isKosher = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Sugar Free'),
-                value: isSugarFree,
-                onChanged: (newValue) {
-                  setState(() {
-                    isSugarFree = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              )
-            ],
-          ),
-        )
+          state: stepFiveState,
+          isActive: stepFiveActive,
+          title: const Text('Health & Safety Labels'),
+          content: Container(
+            height: 350,
+            child: ListView(
+              children: [
+                CheckboxListTile(
+                  title: Text('Vegan'),
+                  value: isVegan,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isVegan = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Vegetarian'),
+                  value: isVegetarian,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isVegetarian = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Gluten Free'),
+                  value: isGlutenFree,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isGlutenFree = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Halal'),
+                  value: isHalal,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isHalal = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Kosher'),
+                  value: isKosher,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isKosher = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Sugar Free'),
+                  value: isSugarFree,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isSugarFree = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                )
+              ],
+            ),
+          )
       ),
       Step(
-        state: stepSixState,
-        isActive: stepSixActive,
-        title: const Text('Allergens'),
-        content: Container(
-          height: 450,
-          child: ListView(
-            children: [
-              CheckboxListTile(
-                title: Text('Egg'),
-                value: isEgg,
-                onChanged: (newValue) {
-                  setState(() {
-                    isEgg = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Fish'),
-                value: isFish,
-                onChanged: (newValue) {
-                  setState(() {
-                    isFish = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('ShellFish'),
-                value: isShellFish,
-                onChanged: (newValue) {
-                  setState(() {
-                    isShellFish = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Milk'),
-                value: isMilk,
-                onChanged: (newValue) {
-                  setState(() {
-                    isMilk = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Peanut'),
-                value: isPeanut,
-                onChanged: (newValue) {
-                  setState(() {
-                    isPeanut = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Soy'),
-                value: isSoy,
-                onChanged: (newValue) {
-                  setState(() {
-                    isSoy = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Treenuts'),
-                value: isTreenuts,
-                onChanged: (newValue) {
-                  setState(() {
-                    isTreenuts = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              ),
-              CheckboxListTile(
-                title: Text('Wheat / Gluten'),
-                value: isWheatOrGluten,
-                onChanged: (newValue) {
-                  setState(() {
-                    isWheatOrGluten = newValue;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-              )
-            ],
-          ),
-        )
+          state: stepSixState,
+          isActive: stepSixActive,
+          title: const Text('Allergens'),
+          content: Container(
+            height: 450,
+            child: ListView(
+              children: [
+                CheckboxListTile(
+                  title: Text('Egg'),
+                  value: isEgg,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isEgg = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Fish'),
+                  value: isFish,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isFish = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('ShellFish'),
+                  value: isShellFish,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isShellFish = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Milk'),
+                  value: isMilk,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isMilk = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Peanut'),
+                  value: isPeanut,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isPeanut = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Soy'),
+                  value: isSoy,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isSoy = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Treenuts'),
+                  value: isTreenuts,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isTreenuts = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                ),
+                CheckboxListTile(
+                  title: Text('Wheat / Gluten'),
+                  value: isWheatOrGluten,
+                  onChanged: (newValue) {
+                    setState(() {
+                      isWheatOrGluten = newValue;
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                )
+              ],
+            ),
+          )
       ),
     ];
 
@@ -1006,7 +1015,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.white,
-          title: Text('Edit La Carte Item', textAlign: TextAlign.center,),
+          title: Text('Edit A La Carte Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
         ),
         body: SafeArea(
@@ -1114,6 +1123,139 @@ class _SingleItemPageState extends State<SingleItemPage> {
     }
   }
 
+  void getItem() async  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-item',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode({
+          'item_id': widget.id
+        }));
+    var menu = json.decode(response.body)['menus'][0];
+   setState(() {
+     nameController.text = menu['name'] as String;
+     descriptionController.text = menu['description'] as String;
+
+     if ((menu['flat_price'] as int) != null) {
+       _character = PricingType.flat_price;
+       flatPriceController.text = '${menu['flat_price']}';
+     }
+
+     if ((menu['starting_price'] as int) != null) {
+       _character = PricingType.starting_from;
+       startingFromController.text = '${menu['starting_price']}';
+     }
+
+     if ((menu['cooking_time'] as int) != null) {
+       minutesController.text = '${menu['cooking_time'] as int}';
+     }
+
+     if ((menu['lists'] as List) != null) {
+       Iterable items = menu['lists'];
+       lists = items.map((e) => ItemList.fromJson(e)).toList();
+     }
+     if ((menu['image_url'] as String) != null) {
+       imageUrl = menu['image_url'] as String;
+     }
+     dropdownValue = items.where((element) => element.id == menu['category_id'] as String).first;
+     Iterable health_labels = menu['health_labels'];
+     var labels = health_labels.map((e) => e as String).toList();
+     labels.forEach((element) {
+       print(element);
+       if (element == 'Vegan') {
+         setState(() {
+           isVegan = true;
+         });
+       }
+       if (element == 'Vegetarian') {
+         setState(() {
+           isVegetarian = true;
+         });
+       }
+       if (element == 'Gluten Free') {
+         setState(() {
+           isGlutenFree = true;
+         });
+       }
+       if (element == 'Halal') {
+         setState(() {
+           isHalal = true;
+         });
+       }
+       if (element == 'Kosher') {
+         setState(() {
+           isKosher = true;
+         });
+       }
+       if (element == 'Sugar Free') {
+         setState(() {
+           isSugarFree = true;
+         });
+       }
+     });
+
+     Iterable allergens = menu['allergens'];
+     var _allergens = allergens.map((e) => e as String).toList();
+     _allergens.forEach((element) {
+       print(element);
+       if (element == 'Egg') {
+         setState(() {
+           isEgg = true;
+         });
+       }
+       if (element == 'Fish') {
+         setState(() {
+           isFish = true;
+         });
+       }
+       if (element == 'ShellFish') {
+         setState(() {
+           isShellFish = true;
+         });
+       }
+       if (element == 'Milk') {
+         setState(() {
+           isMilk = true;
+         });
+       }
+       if (element == 'Peanut') {
+         setState(() {
+           isPeanut = true;
+         });
+       }
+       if (element == 'Soy') {
+         setState(() {
+           isSoy = true;
+         });
+       }
+       if (element == 'Treenuts') {
+         setState(() {
+           isTreenuts = true;
+         });
+       }
+       if (element.contains('Wheat')) {
+         setState(() {
+           isWheatOrGluten = true;
+         });
+       }
+     });
+
+   });
+
+//    if ((menu['cooking_time'] as int) != null) {
+//      print(menu['cooking_time'] as int);
+//      minutesController.text = '${menu['cooking_time'] as int}';
+//    }
+
+
+//    if ((menu['flat_price'] as int) != null) {
+//      _character = PricingType.flat_price;
+//      flatPriceController.text = '${menu['flat_price']}';
+//    }
+  }
+  
   void getCategories() async  {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-categories',
