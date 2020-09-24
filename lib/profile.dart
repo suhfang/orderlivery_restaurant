@@ -30,11 +30,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   TextEditingController restaurantNameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-
-
-
   TextEditingController accessTokenController = TextEditingController();
-
   FToast fToast;
 
   var nameFocusNode = new FocusNode();
@@ -42,7 +38,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   var addressFocusNode = new FocusNode();
   var phoneFocusNode = new FocusNode();
   var accessTokenNode = new FocusNode();
-  String dropdownValue = 'Choose Restaurant type';
+  String dropdownValue = "Choose restaurant type";
   String _cover_image_url = 'http://via.placeholder.com/1000x800';
   String _logo_image_url = 'http://via.placeholder.com/640x360';
 
@@ -96,12 +92,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             });
             _showToast('Logo image updated');
           }
-
-
-
         }
-
-
       }
     }
   }
@@ -236,7 +227,6 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 //                  child: ButtonTheme(
 //                    alignedDropdown: true,
                         child: DropdownButton<String>(
-
                           value: dropdownValue,
                           icon: Icon(LineIcons.angle_down),
                           iconSize: 15,
@@ -254,7 +244,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                               dropdownValue = newValue;
                             });
                           },
-                          items: <String>['Choose Restaurant type', "Afghan", "African", "Albanian", "American", "Arabian", "Argentinian", "Armenian", "Asian Fusion", "Australian", "Austrian", "Bagels", "Bakery", "Bangladeshi", "Barbeque", "Belgian", "Brasseries", "Brazilian", "Breakfast", "British", "Brunch", "Buffets", "Burgers", "Burmese", "Cafes", "Cafeteria", "Cajun", "Californian", "Calzones", "Cambodian", "Cantonese", "Caribbean", "Catalan", "Cheesesteaks", "Chicken", "Chicken Wings", "Chili", "Chinese", "Classic", "Coffee and Tea", "Colombian", "Comfort Food", "Costa", "Rican", "Creole", "Crepes", "Cuban", "Czech", "Delis", "Dessert", "Dim Sum", "Diner", "Dominican", "Eclectic", "Ecuadorian", "Egyptian", "El Salvadoran", "Empanadas", "English", "Ethiopian", "Fast Food", "Filipino", "Fine Dining", "Fish & Chips", "Fondue", "Food Cart", "Food Court", "Food Stands", "French", "Fresh Fruits", "Frozen Yogurt", "Gastropubs", "German", "Gluten-Free", "Greek", "Grill", "Guatemalan", "Gyro", "Haitian", "Halal", "Hawaiian", "Himalayan", "Hoagies", "Hot Dogs", "Hot Pot", "Hungarian", "Iberian", "Ice Cream", "Indian", "Indonesian", "Irish", "Italian", "Jamaican", "Japanese", "Kids", "Korean", "Kosher", "Laotian", "Late Night", "Latin American", "Lebanese", "Live/Raw Food", "Low Carb", "Malaysian", "Mandarin", "Mediterranean", "Mexican", "Middle Eastern", "Modern European", "Mongolian", "Moroccan", "Nepalese", "Noodles", "Nouvelle Cuisine", "Nutritious", "Organic", "Pakistani", "Pancakes", "Pasta", "Persian", "Persian/Iranian", "Peruvian", "Pitas", "Pizza", "Polish", "Portuguese", "Potato", "Poutineries", "Pub Food", "Puerto Rican", "Ribs", "Russian", "Salad", "Sandwiches", "Scandinavian", "Scottish", "Seafood", "Senegalese", "Singaporean", "Slovakian", "Small", "Plates", "Smoothies and Juices", "Soul Food", "Soup", "South African", "South American", "Southern", "Southwestern", "Spanish", "Sri Lankan", "Steakhouses", "Subs", "Supper Clubs", "Sushi Bars", "Syrian", "Szechwan", "Taiwanese", "Tapas", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Ukrainian", "Uzbek", "Vegan", "Vegetarian", "Vietnamese", "Wraps"]
+                          items: <String>["Choose restaurant type", "Afghan", "African", "Albanian", "American", "Arabian", "Argentinian", "Armenian", "Asian Fusion", "Australian", "Austrian", "Bagels", "Bakery", "Bangladeshi", "Barbeque", "Belgian", "Brasseries", "Brazilian", "Breakfast", "British", "Brunch", "Buffets", "Burgers", "Burmese", "Cafes", "Cafeteria", "Cajun", "Californian", "Calzones", "Cambodian", "Cantonese", "Caribbean", "Catalan", "Cheesesteaks", "Chicken", "Chicken Wings", "Chili", "Chinese", "Classic", "Coffee and Tea", "Colombian", "Comfort Food", "Costa", "Rican", "Creole", "Crepes", "Cuban", "Czech", "Delis", "Dessert", "Dim Sum", "Diner", "Dominican", "Eclectic", "Ecuadorian", "Egyptian", "El Salvadoran", "Empanadas", "English", "Ethiopian", "Fast Food", "Filipino", "Fine Dining", "Fish & Chips", "Fondue", "Food Cart", "Food Court", "Food Stands", "French", "Fresh Fruits", "Frozen Yogurt", "Gastropubs", "German", "Gluten-Free", "Greek", "Grill", "Guatemalan", "Gyro", "Haitian", "Halal", "Hawaiian", "Himalayan", "Hoagies", "Hot Dogs", "Hot Pot", "Hungarian", "Iberian", "Ice Cream", "Indian", "Indonesian", "Irish", "Italian", "Jamaican", "Japanese", "Kids", "Korean", "Kosher", "Laotian", "Late Night", "Latin American", "Lebanese", "Live/Raw Food", "Low Carb", "Malaysian", "Mandarin", "Mediterranean", "Mexican", "Middle Eastern", "Modern European", "Mongolian", "Moroccan", "Nepalese", "Noodles", "Nouvelle Cuisine", "Nutritious", "Organic", "Pakistani", "Pancakes", "Pasta", "Persian", "Persian/Iranian", "Peruvian", "Pitas", "Pizza", "Polish", "Portuguese", "Potato", "Poutineries", "Pub Food", "Puerto Rican", "Ribs", "Russian", "Salad", "Sandwiches", "Scandinavian", "Scottish", "Seafood", "Senegalese", "Singaporean", "Slovakian", "Small", "Plates", "Smoothies and Juices", "Soul Food", "Soup", "South African", "South American", "Southern", "Southwestern", "Spanish", "Sri Lankan", "Steakhouses", "Subs", "Supper Clubs", "Sushi Bars", "Syrian", "Szechwan", "Taiwanese", "Tapas", "Tex-Mex", "Thai", "Tibetan", "Turkish", "Ukrainian", "Uzbek", "Vegan", "Vegetarian", "Vietnamese", "Wraps"]
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,

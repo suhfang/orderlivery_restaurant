@@ -310,6 +310,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
           Navigator.pop(context);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', data.token);
+          prefs.setBool('is_restaurant', true);
           Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (BuildContext context) => InitPage(),
               fullscreenDialog: true));

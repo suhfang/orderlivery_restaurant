@@ -4,7 +4,8 @@ import 'dart:io';
 
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/add_list_without_prices.dart';
-import 'package:Restaurant/categories.dart';
+//import 'package:Restaurant/categories.dart';
+import 'package:Restaurant/menu_items.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,18 +18,18 @@ import 'dart:math' as math;
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ComboItemPage extends StatefulWidget {
+class EditComboItemPage extends StatefulWidget {
   final String id;
-  ComboItemPage({this.id});
-  _ComboItemPageState createState() => _ComboItemPageState();
+  EditComboItemPage({this.id});
+  _EditComboItemPageState createState() => _EditComboItemPageState();
 }
 
 Category chooseCategory = Category(name: 'Choose Category type');
 
-class _ComboItemPageState extends State<ComboItemPage> {
+class _EditComboItemPageState extends State<EditComboItemPage> {
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   Category dropdownValue = chooseCategory;
-  List<Category> items = [chooseCategory, Category(name: 'Two')];
+  List<Category> categoryItems = [chooseCategory];
   List<Item> menuItems = [];
   PricingType _character = PricingType.none;
   FocusNode descriptionNode = FocusNode();
@@ -80,6 +81,8 @@ class _ComboItemPageState extends State<ComboItemPage> {
   String imageUrl = 'assets/images/menu.png';
   File imageFile;
 
+  List<String> chosenIds;
+
   Future<void> createFlatPriceMenu() async {
     String name = nameController.text.trim();
     String description = descriptionController.text.trim();
@@ -92,7 +95,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
-        'price': item.price != null ? double.parse(item.price) : item.price
+        'price': item.price
       }).toList()
     }).toList();
     List<String> labels = [];
@@ -100,7 +103,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -122,7 +125,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -148,7 +151,8 @@ class _ComboItemPageState extends State<ComboItemPage> {
       'lists': _lists,
       'health_labels': labels,
       'allergens': allergens,
-      'individual_items': added_ids
+      'individual_items': added_ids,
+      "item_id": widget.id
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -157,7 +161,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -230,7 +234,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -252,7 +256,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -278,7 +282,8 @@ class _ComboItemPageState extends State<ComboItemPage> {
       'lists': _lists,
       'health_labels': labels,
       'allergens': allergens,
-      'individual_items': added_ids
+      'individual_items': added_ids,
+      "item_id": widget.id
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -287,7 +292,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -316,7 +321,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -338,7 +343,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -364,7 +369,8 @@ class _ComboItemPageState extends State<ComboItemPage> {
       'lists': _lists,
       'health_labels': labels,
       'allergens': allergens,
-      'individual_items': added_ids
+      'individual_items': added_ids,
+      "item_id": widget.id
     };
 
     if (imageFile != null) {
@@ -374,7 +380,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -474,9 +480,22 @@ class _ComboItemPageState extends State<ComboItemPage> {
         stepSixActive = true;
         stepSixState = StepState.complete;
       });
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+                backgroundColor: Colors.transparent,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [CircularProgressIndicator()],
+                ));
+          });
       await createMenuItem();
+      Navigator.pop(context);
       Future.delayed(Duration(seconds: 1), () {
-        Navigator.pop(context);
+        Navigator.pop(context, 'created');
       });
       return;
     }
@@ -497,7 +516,6 @@ class _ComboItemPageState extends State<ComboItemPage> {
   initState() {
     super.initState();
     getCategories();
-    getMenuItems();
   }
 
 
@@ -666,7 +684,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
                       dropdownValue = newValue;
                     });
                   },
-                  items: items
+                  items: categoryItems
                       .map<DropdownMenuItem<Category>>((Category value) {
                     return DropdownMenuItem<Category>(
                       value: value,
@@ -707,12 +725,13 @@ class _ComboItemPageState extends State<ComboItemPage> {
             Form(
               key: _formKey,
               autovalidate: true,
-              child: MultiSelect(
+              child: menuItems.isNotEmpty ? MultiSelect(
                 buttonBarColor: Colors.white,
                 searchBoxHintText: 'Search',
                 autovalidate: false,
                 titleText: 'Add at least two items from the list',
                 validator: (value) {
+                  print('saved');
                   _formKey.currentState.save();
                   if (value == null) {
                     return 'Please select two or more items';
@@ -730,6 +749,9 @@ class _ComboItemPageState extends State<ComboItemPage> {
                 valueField: 'value',
                 filterable: true,
                 required: true,
+                initialValue: menuItems.where((element) => element.individual_items.length == 0 && chosenIds.contains(element.id)).toList().map((e) {
+                  return  e.id;
+                }).toList(),
                 onSaved: (value) {
                   if (value != null) {
                     List<String> ids = value.cast<String>();
@@ -746,7 +768,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
                     });
                   }
                 },
-              ),
+              ) : SizedBox(),
             ),
             SizedBox(height: 10,),
             Text('Added ${added_ids.length} items'),
@@ -779,6 +801,11 @@ class _ComboItemPageState extends State<ComboItemPage> {
         title: const Text('Upload a bright image of the menu item'),
         content: Column(
           children: <Widget>[
+            imageUrl.startsWith('http')
+                ? Container(
+              height: 200,
+              child:  Image.network(imageUrl, fit: BoxFit.cover,),
+            ) :
             Container(
               height: 200,
               child:  Image.asset(imageUrl, fit: BoxFit.cover,),
@@ -927,7 +954,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
               children: [
                 Expanded(
                   child: _TextFormField(
-                    hintText: '3 Pieces/\$5.00, 7.5 Pieces/\$10.00, 10 Pieces/\$15',
+                    hintText: '3 Pieces/\$5.75, 7.5 Pieces/\$10.75, 10 Pieces/\$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
                     textInputAction: TextInputAction.done,
@@ -943,7 +970,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
     }
   }
 
-  void getMenuItems() async {
+  Future<void> getMenuItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-menus',
         headers: {
@@ -951,10 +978,21 @@ class _ComboItemPageState extends State<ComboItemPage> {
           'Content-Type': 'application/json'
         });
     Iterable menus = json.decode(response.body)['menus'];
+    final response1 = await http.post('${Constants.apiBaseUrl}/restaurants/get-item',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode({
+          'item_id': widget.id
+        }));
+    var menu = json.decode(response1.body)['menus'][0];
+    List<String> ids = menu['individual_items'].cast<String>();
 
+    print(ids);
     setState(() {
-      menuItems = menus.map((e) =>  Item.fromJson(e)).toList().toList().where((element) => element.individual_items.length == 0).toList();
-      print(menuItems);
+      chosenIds = ids;
+      menuItems = menus.map((e) =>  Item.fromJson(e)).toList().where((element) => element.individual_items.isEmpty).toList();
     });
   }
 
@@ -967,7 +1005,58 @@ class _ComboItemPageState extends State<ComboItemPage> {
         });
     Iterable categories = json.decode(response.body)['categories'];
     setState(() {
-      items = [chooseCategory] + categories.map((e) =>  Category.fromJson(e)).toList().toList();
+      categoryItems = [chooseCategory] + categories.map((e) =>  Category.fromJson(e)).toList().toList();
+      getItem();
+    });
+  }
+
+
+  void getItem() async  {
+    await getMenuItems();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-item',
+        headers: {
+          'token': prefs.getString('token'),
+          'Content-Type': 'application/json'
+        },
+        body: json.encode({
+          'item_id': widget.id
+        }));
+    var menu = json.decode(response.body)['menus'][0];
+    dropdownValue = categoryItems.where((element) => element.id == menu['category_id'] as String).first;
+
+    nameController.text = menu['name'] as String;
+    descriptionController.text = menu['description'] as String;
+
+    if ((menu['flat_price']) != null) {
+      _character = PricingType.flat_price;
+      flatPriceController.text = '${menu['flat_price']}';
+    }
+
+    if ((menu['starting_price']) != null) {
+      _character = PricingType.starting_from;
+      startingFromController.text = '${menu['starting_price']}';
+    }
+    Iterable qps = menu['quantities_and_prices'];
+
+    List<QuantityAndPrice> qps_list = qps.map((e) => QuantityAndPrice.fromJson(e)).toList();
+
+    if (qps.isNotEmpty) {
+      _character = PricingType.price_and_quantity;
+      priceAndQuantityController.text = '${qps_list.map((e) => '${e.quantity} ${e.measurementLabel}/\$${e.price}').toList().join(', ')}';
+    }
+
+    if ((menu['cooking_time']) != null) {
+      minutesController.text = '${menu['cooking_time']}';
+    }
+    if ((menu['image_url']) != null) {
+      imageUrl = '${menu['image_url']}';
+      print(imageUrl);
+    }
+
+    setState(() {
+
     });
   }
 }

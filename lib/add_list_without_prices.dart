@@ -19,6 +19,8 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
   String _description;
 
   List<ListItem> list_items = [];
+
+  bool is_required = false;
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -36,7 +38,19 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   Text('Lists with no prices are perfect for things like wings, ice cream, or drinks that have multiple options included in the price. You can always add a price to these items too'),
+                  SizedBox(height: 20,),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.all(0),
+                    value: is_required,
+                    onChanged: (bool value) {
+                      setState(() {
+                        is_required = value;
+                      });
+                    },
+                    title: Text('Required', style: TextStyle(fontSize: 19),),
+                  ),
                   SizedBox(height: 20,),
                   Text('List name', style: TextStyle(fontSize: 19),),
                   SizedBox(height: 10,),
@@ -179,7 +193,8 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
                                 ItemList data = ItemList(
                                     name: _title,
                                     description: _description,
-                                    items: list_items
+                                    items: list_items,
+                                    is_required: is_required
                                 );
                                 if (list_items.isNotEmpty) {
                                   Navigator.pop(context, data);

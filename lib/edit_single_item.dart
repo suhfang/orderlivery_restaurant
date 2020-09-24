@@ -4,7 +4,8 @@ import 'dart:io';
 
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/add_list_without_prices.dart';
-import 'package:Restaurant/categories.dart';
+//import 'package:Restaurant/categories.dart';
+import 'package:Restaurant/menu_items.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,7 +77,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
   String imageUrl = 'assets/images/menu.png';
   File imageFile;
 
-  Future<void> createFlatPriceMenu() async {
+  Future<void> updateFlatPriceMenu() async {
+
     String name = nameController.text.trim();
     String description = descriptionController.text.trim();
     String price = flatPriceController.text.trim();
@@ -85,18 +87,21 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
-      'items': itemList.items.map((item) =>
-      {
-        'name': item.name,
-        'price': item.price != null ? double.parse(item.price) : item.price
+      'items': itemList.items.map((item) {
+        return {
+          'name': item.name,
+          'price': item.price
+        };
       }).toList()
     }).toList();
+    print(_lists);
+    print('hello');
     List<String> labels = [];
     if (isVegan) {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -118,7 +123,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -136,6 +141,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       allergens.add('Wheat');
       allergens.add('Gluten');
     }
+
     var _json = {
       'name': name,
       'description': description,
@@ -143,7 +149,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'category_id': category_id,
       'lists': _lists,
       'health_labels': labels,
-      'allergens': allergens
+      'allergens': allergens,
+      "item_id": widget.id
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -151,8 +158,9 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     if (cookingTime.isNotEmpty) {
       _json['cooking_time'] = cookingTime;
     }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -180,11 +188,12 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       }).toList();
       return true;
     } catch(e) {
+      print(e);
       return false;
     }
   }
 
-  Future<void> createPriceAndQuantityMenu() async {
+  Future<void> updatePriceAndQuantityMenu() async {
     String name = nameController.text.trim();
     String description = descriptionController.text.trim();
     List pq = priceAndQuantityController.text.trim().split(', ');
@@ -216,7 +225,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
-        'price': item.price != null ? double.parse(item.price) : item.price
+        'price': item.price
       }).toList()
     }).toList();
     List<String> labels = [];
@@ -224,7 +233,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -246,7 +255,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -271,7 +280,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'category_id': category_id,
       'lists': _lists,
       'health_labels': labels,
-      'allergens': allergens
+      'allergens': allergens,
+      "item_id": widget.id
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -280,7 +290,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -289,7 +299,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     print(response.body);
   }
 
-  Future<void> createStartingFromMenu() async {
+  Future<void> updateStartingFromMenu() async {
     String name = nameController.text.trim();
     String description = descriptionController.text.trim();
     String price = startingFromController.text.trim();
@@ -301,7 +311,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
-        'price': item.price != null ? double.parse(item.price) : item.price
+        'price': item.price
       }).toList()
     }).toList();
     List<String> labels = [];
@@ -309,7 +319,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -331,7 +341,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -356,7 +366,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'category_id': category_id,
       'lists': _lists,
       'health_labels': labels,
-      'allergens': allergens
+      'allergens': allergens,
+      "item_id": widget.id
     };
     if (imageFile != null) {
       _json['base64'] = base64Encode(imageFile.readAsBytesSync().cast<int>());
@@ -365,7 +376,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/create-menu',
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -374,15 +385,15 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     print(response.body);
   }
 
-  createMenuItem() async {
+  updateMenuItem() async {
     if (_character == PricingType.flat_price) {
-      await createFlatPriceMenu();
+      await updateFlatPriceMenu();
     }
     if (_character == PricingType.price_and_quantity) {
-      await createPriceAndQuantityMenu();
+      await updatePriceAndQuantityMenu();
     }
     if (_character == PricingType.starting_from) {
-      await createStartingFromMenu();
+      await updateStartingFromMenu();
     }
   }
 
@@ -479,7 +490,20 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
         stepSixActive = true;
         stepSixState = StepState.complete;
       });
-      await createMenuItem();
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+                backgroundColor: Colors.transparent,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [CircularProgressIndicator()],
+                ));
+          });
+      await updateMenuItem();
+      Navigator.pop(context);
       Future.delayed(Duration(seconds: 1), () {
         Navigator.pop(context);
       });
@@ -502,7 +526,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
   initState() {
     super.initState();
     getCategories();
-    getItem();
+
   }
 
 
@@ -801,7 +825,6 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
               height: 200,
               child:  Image.asset(imageUrl, fit: BoxFit.cover,),
             ),
-
             SizedBox(height: 10,),
             GestureDetector(
               onTap: () async {
@@ -810,18 +833,6 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                   setState(() {
                     imageFile = File(image.path);
                   });
-//                  showDialog(
-//                      context: context,
-//                      barrierDismissible: false,
-//                      builder: (BuildContext context) {
-//                        return Dialog(
-//                            backgroundColor: Colors.transparent,
-//                            child: Column(
-//                              mainAxisAlignment: MainAxisAlignment.center,
-//                              crossAxisAlignment: CrossAxisAlignment.center,
-//                              children: [CircularProgressIndicator()],
-//                            ));
-//                      });
                   setState(() {
                     imageUrl = image.path;
                   });
@@ -1107,7 +1118,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
               children: [
                 Expanded(
                   child: _TextFormField(
-                    hintText: '3 Pieces/\$5.00, 7.5 Pieces/\$10.00, 10 Pieces/\$15',
+                    hintText: '3 Pieces/\$5.75, 7.5 Pieces/\$10.75, 10 Pieces/\$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
                     textInputAction: TextInputAction.done,
@@ -1134,126 +1145,97 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
           'item_id': widget.id
         }));
     var menu = json.decode(response.body)['menus'][0];
-   setState(() {
-     nameController.text = menu['name'] as String;
-     descriptionController.text = menu['description'] as String;
+    dropdownValue = items.where((element) => element.id == menu['category_id'] as String).first;
+    nameController.text = menu['name'] as String;
+    descriptionController.text = menu['description'] as String;
 
-     if ((menu['flat_price'] as int) != null) {
-       _character = PricingType.flat_price;
-       flatPriceController.text = '${menu['flat_price']}';
-     }
+    if ((menu['flat_price']) != null) {
+      _character = PricingType.flat_price;
+      flatPriceController.text = '${menu['flat_price']}';
+    }
 
-     if ((menu['starting_price'] as int) != null) {
-       _character = PricingType.starting_from;
-       startingFromController.text = '${menu['starting_price']}';
-     }
+    if ((menu['starting_price']) != null) {
+      _character = PricingType.starting_from;
+      startingFromController.text = '${menu['starting_price']}';
+    }
+    Iterable qps = menu['quantities_and_prices'];
 
-     if ((menu['cooking_time'] as int) != null) {
-       minutesController.text = '${menu['cooking_time'] as int}';
-     }
+    List<QuantityAndPrice> qps_list = qps.map((e) => QuantityAndPrice.fromJson(e)).toList();
+    if (qps.isNotEmpty) {
+      _character = PricingType.price_and_quantity;
+       priceAndQuantityController.text = '${qps_list.map((e) => '${e.quantity} ${e.measurementLabel}/\$${e.price}').toList().join(', ')}';
+    }
 
-     if ((menu['lists'] as List) != null) {
-       Iterable items = menu['lists'];
-       lists = items.map((e) => ItemList.fromJson(e)).toList();
-     }
-     if ((menu['image_url'] as String) != null) {
-       imageUrl = menu['image_url'] as String;
-     }
-     dropdownValue = items.where((element) => element.id == menu['category_id'] as String).first;
-     Iterable health_labels = menu['health_labels'];
-     var labels = health_labels.map((e) => e as String).toList();
-     labels.forEach((element) {
-       print(element);
-       if (element == 'Vegan') {
-         setState(() {
-           isVegan = true;
-         });
-       }
-       if (element == 'Vegetarian') {
-         setState(() {
-           isVegetarian = true;
-         });
-       }
-       if (element == 'Gluten Free') {
-         setState(() {
-           isGlutenFree = true;
-         });
-       }
-       if (element == 'Halal') {
-         setState(() {
-           isHalal = true;
-         });
-       }
-       if (element == 'Kosher') {
-         setState(() {
-           isKosher = true;
-         });
-       }
-       if (element == 'Sugar Free') {
-         setState(() {
-           isSugarFree = true;
-         });
-       }
+    if ((menu['cooking_time']) != null) {
+      minutesController.text = '${menu['cooking_time'] as int}';
+    }
+
+    if ((menu['lists'] as List) != null) {
+      Iterable items = menu['lists'];
+      print('${items.length} bar');
+      lists = items.map((e) => ItemList.fromJson(e)).toList();
+      print('${lists.length} foo');
+    }
+    if ((menu['image_url']) != null) {
+      imageUrl = '${menu['image_url']}';
+    }
+
+    print('the id is ' + dropdownValue.id);
+    Iterable health_labels = menu['health_labels'];
+    var labels = health_labels.map((e) => e as String).toList();
+    labels.forEach((element) {
+
+      if (element == 'Vegan') {
+        isVegan = true;
+      }
+      if (element == 'Vegetarian') {
+        isVegetarian = true;
+      }
+      if (element == 'Gluten Free') {
+        isGlutenFree = true;
+      }
+      if (element == 'Halal') {
+        isHalal = true;
+      }
+      if (element == 'Kosher') {
+        isKosher = true;
+      }
+      if (element == 'Sugar Free') {
+        isSugarFree = true;
+      }
      });
 
-     Iterable allergens = menu['allergens'];
-     var _allergens = allergens.map((e) => e as String).toList();
-     _allergens.forEach((element) {
-       print(element);
-       if (element == 'Egg') {
-         setState(() {
-           isEgg = true;
-         });
-       }
-       if (element == 'Fish') {
-         setState(() {
-           isFish = true;
-         });
-       }
-       if (element == 'ShellFish') {
-         setState(() {
-           isShellFish = true;
-         });
-       }
-       if (element == 'Milk') {
-         setState(() {
-           isMilk = true;
-         });
-       }
-       if (element == 'Peanut') {
-         setState(() {
-           isPeanut = true;
-         });
-       }
-       if (element == 'Soy') {
-         setState(() {
-           isSoy = true;
-         });
-       }
-       if (element == 'Treenuts') {
-         setState(() {
-           isTreenuts = true;
-         });
-       }
-       if (element.contains('Wheat')) {
-         setState(() {
-           isWheatOrGluten = true;
-         });
-       }
-     });
 
-   });
-
-//    if ((menu['cooking_time'] as int) != null) {
-//      print(menu['cooking_time'] as int);
-//      minutesController.text = '${menu['cooking_time'] as int}';
-//    }
-
-
-//    if ((menu['flat_price'] as int) != null) {
-//      _character = PricingType.flat_price;
-//      flatPriceController.text = '${menu['flat_price']}';
-//    }
+    Iterable allergens = menu['allergens'];
+    var _allergens = allergens.map((e) => e as String).toList();
+    _allergens.forEach((element) {
+      if (element == 'Egg') {
+        isEgg = true;
+      }
+      if (element == 'Fish') {
+        isFish = true;
+      }
+      if (element == 'ShellFish') {
+        isShellFish = true;
+      }
+      if (element == 'Milk') {
+        isMilk = true;
+      }
+      if (element == 'Peanut') {
+        isPeanut = true;
+      }
+      if (element == 'Soy') {
+        isSoy = true;
+      }
+      if (element == 'Treenuts') {
+        isTreenuts = true;
+      }
+      if (element.contains('Wheat')) {
+        isWheatOrGluten = true;
+      }
+    });
+    setState(() {
+    });
   }
   
   void getCategories() async  {
@@ -1266,6 +1248,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     Iterable categories = json.decode(response.body)['categories'];
     setState(() {
       items = [chooseCategory] + categories.map((e) =>  Category.fromJson(e)).toList().toList();
+      getItem();
     });
   }
 }

@@ -46,6 +46,7 @@ dependencies:
   url_launcher: ^5.5.0
   carousel_slider: ^2.2.1
   flutter_multiselect: ^0.5.0
+  flutter_ringtone_player: ^2.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -5,6 +5,7 @@ import 'dart:convert';
 //import 'package:Restaurant/categories.dart';
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/categories.dart';
+import 'package:Restaurant/combo_item.dart';
 import 'package:Restaurant/edit_combo_item.dart';
 import 'package:Restaurant/edit_single_item.dart';
 import 'package:Restaurant/single_item.dart';
@@ -19,10 +20,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class QuantityAndPrice {
-  int quantity;
-  double price;
+  dynamic quantity;
+  dynamic price;
   String measurementLabel;
   QuantityAndPrice({this.quantity, this.price, this.measurementLabel});
+  factory QuantityAndPrice.fromJson(Map<String, dynamic> json) {
+    return QuantityAndPrice(
+      quantity: json['quantity'].toDouble(),
+      price: json['price'].toDouble(),
+      measurementLabel: json['measurement_label'] as String
+    );
+  }
 }
 
 class Category {
@@ -41,11 +49,11 @@ class Item {
   String id;
   String name;
   String description;
-  int flatPrice;
+  dynamic flatPrice;
   List<QuantityAndPrice> quantitiesAndPrices;
   List<String> healthLabels;
   List<String> allergens;
-  int startingPrice;
+  dynamic startingPrice;
   String imageUrl;
   int cookingTime;
   List<ItemList> lists;
@@ -67,8 +75,8 @@ class Item {
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
-    var qp_map_list = json['quantities_and_prices'] as List;
-    List<QuantityAndPrice> qps = [];
+    Iterable list = json['quantities_and_prices'];
+    List<QuantityAndPrice> qps = list.map((e) => QuantityAndPrice.fromJson(e)).toList();
 
 //    if (qp_map_list.isNotEmpty) {
 //        qp_map_list.forEach((element) {
@@ -89,8 +97,8 @@ class Item {
         name: json['name'] as String,
         description: json['description'] as String,
         individualItemIds: json['individual_items'].cast<String>(),
-        flatPrice: json['flat_price'] as int,
-//        quantitiesAndPrices: qps
+        flatPrice: json['flat_price'] != null ? json['flat_price'].toDouble() ?? json['flat_price'] as int : null,
+        quantitiesAndPrices: qps
     );
   }
 }
@@ -135,6 +143,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
           'category_id': category_id
         }));
     Iterable items = json .decode(response.body)['menus'];
+
     return items.map((e) => Item.fromJson(e)).toList();
   }
 
@@ -146,7 +155,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
           'Content-Type': 'application/json'
         });
     Iterable categories = json.decode(response.body)['categories'];
-
     setState(() {
       _categories = categories.map((e) => Category.fromJson(e)).toList();
       _categories.forEach((element) async {
@@ -154,7 +162,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
         setState(() {
           element.items = items;
         });
-
       });
     });
     setState(() {
@@ -185,19 +192,16 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
           ColorTween(begin: _foregroundOff, end: _foregroundOn)
               .animate(_animationControllerOn);
     });
-
-
-
   }
-
 
   List<Category> _categories = [];
 
   @override
   void initState() {
     _controller = TabController(vsync: this, length: _categories.length);
-    getCategories();
+
     super.initState();
+    getCategories();
 
 
   }
@@ -206,6 +210,103 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void deleteItem(String id) async {
+    showModalBottomSheet(context: context, builder: (BuildContext context) {
+      return Container(
+        color: Color(0xFF737373),
+        height: 200,
+        child: Container(
+          decoration: BoxDecoration(
+              color: Theme.of(context).canvasColor,
+              borderRadius: BorderRadius.only(topRight: const Radius.circular(10), topLeft: const Radius.circular(10))
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 10,),
+              Container(
+                height: 5,
+                width: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ),
+              SizedBox(height: 15,),
+              Text('CONFIRM!', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+              SizedBox(height: 5,),
+              Divider(),
+              Padding(
+                padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
+                child: Text('Are you sure you want to delete this item?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                  decoration: BoxDecoration(
+                  ),
+                  width: MediaQuery.of(context).size.width - 40,
+                  height: 40,
+
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                          child: GestureDetector(
+                            onTap: () async  {
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              final response = http.post('${Constants.apiBaseUrl}/restaurants/delete-menu',
+                                  headers: {
+                                    'token': prefs.getString('token'),
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: json.encode({
+                                    'menu_id': id
+                                  }));
+                              getCategories();
+                              Navigator.pop(context);
+                            },
+                            child:  Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                              ),
+                              height: 50,
+                              child: Center(child: Text('YES', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.orange, fontWeight: FontWeight.bold),),),
+                            ),
+                          )
+                      ),
+                      SizedBox(width: 10,),
+                      Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop(true);
+                              setState(() {});
+                              return false;
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.orange,
+                              ),
+                              height: 50,
+                              child: Center(child: Text('NO', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),),
+                            ),
+                          )
+                      ),
+                    ],
+                  )
+              ),
+
+            ],
+          ),
+        ),
+      );
+    });
+
+
   }
 
   @override
@@ -219,7 +320,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
         ),
         backgroundColor: Colors.white,
         body: Column(children: <Widget>[
-          // this is the TabBar
           Container(
               height: 49.0,
               // this generates our tabs buttons
@@ -266,12 +366,9 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                             )));
                   })),
           Flexible(
-            // this will host our Tab Views
               child: TabBarView(
-                // and it is controlled by the controller
                 controller: _controller,
                 children: <Widget>[
-                  // our Tab Views
                   ...(_categories
                   .map((category) {
                     if (category.items != null) {
@@ -286,16 +383,21 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                                   ));
                                 } else {
                                   Navigator.push(context, MaterialPageRoute(
-                                      builder: (BuildContext context) => ComboItemPage(id: item.id)
+                                      builder: (BuildContext context) => EditComboItemPage(id: item.id)
                                   ));
                                 }
                               },
                               child: Column(
                                 children: [
                                   ListTile(
-                                    trailing: Icon(LineIcons.edit),
+                                    trailing: GestureDetector(
+                                      onTap: () {
+                                        deleteItem(item.id);
+                                      },
+                                      child: Icon(LineIcons.trash),
+                                    ),
                                     title: Text(item.name),
-                                    subtitle: Text(item.description),
+                                    subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold), ) : Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold),),
                                   ),
                                   Divider()
                                 ],
@@ -308,7 +410,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                       return SizedBox();
                     }
                   })).toList()
-
                 ],
               )),
         Padding(
@@ -319,7 +420,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                 children: [
                   GestureDetector(
                       onTap: askMenuType,
-
                       child: Container(
                         height: 70,
                         child: Column(
@@ -526,7 +626,12 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                           child: GestureDetector(
                             onTap: () async  {
                             Navigator.pop(context);
-                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ComboItemPage()));
+                            String result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ComboItemPage()));
+                              if (result == 'created') {
+                                setState(() {
+                                  getCategories();
+                                });
+                              }
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -542,9 +647,14 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                       Expanded(
 
                           child: GestureDetector(
-                            onTap: () {
+                            onTap: () async {
                               Navigator.pop(context);
-                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SingleItemPage()));
+                              String result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SingleItemPage()));
+                              if (result == 'created') {
+                                setState(() {
+                                  getCategories();
+                                });
+                              }
                             },
                             child: Container(
                               decoration: BoxDecoration(

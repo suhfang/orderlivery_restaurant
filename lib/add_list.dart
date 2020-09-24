@@ -12,30 +12,44 @@ class AddListWithPricePage extends StatefulWidget {
 }
 
 class ItemList {
+
   String name;
   String description;
   List<ListItem> items;
-  ItemList({this.name, this.description, this.items});
+  bool is_required;
+  ItemList({this.name, this.description, this.items, this.is_required});
+
   factory ItemList.fromJson(Map<String, dynamic> json) {
-    print(json);
+     Iterable items = json['items'];
     return ItemList(
       name: json['name'] as String,
-      description: json['description'] as String
+      description: json['description'] as String,
+      items: items.map((e) => ListItem.fromJson(e)).toList(),
+      is_required: json['is_required'] as bool
     );
   }
 }
 
 class ListItem {
+
   String name;
-  String price;
+  dynamic price;
   ListItem({this.name, this.price});
+
+  factory ListItem.fromJson(Map<String, dynamic> json) {
+    return ListItem(
+      name: json['name'] as String,
+      price: json['price'] != null ? json['price'].toDouble() : null
+    );
+  }
+
 }
 
 class _AddListWithPricePageState extends State<AddListWithPricePage> {
 
   String _title;
   String _description;
-
+  bool is_required = false;
   List<ListItem> list_items = [];
   @override
   Widget build(BuildContext context) {
@@ -56,6 +70,17 @@ class _AddListWithPricePageState extends State<AddListWithPricePage> {
                 children: [
                   Text('Lists with prices are a great to add Extras, Add-Ons, and more that the user can add for an additional price. For example, if you want to charge the user \$0.50 for an extra sauce on top of the one that comes with the item.'),
 
+                  SizedBox(height: 20,),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.all(0),
+                      value: is_required,
+                      onChanged: (bool value) {
+                        setState(() {
+                          is_required = value;
+                        });
+                      },
+                    title: Text('Required', style: TextStyle(fontSize: 19),),
+                  ),
                   SizedBox(height: 20,),
                   Text('List name', style: TextStyle(fontSize: 19),),
                   SizedBox(height: 10,),
@@ -171,7 +196,8 @@ class _AddListWithPricePageState extends State<AddListWithPricePage> {
                                 ItemList data = ItemList(
                                   name: _title,
                                   description: _description,
-                                  items: list_items
+                                  items: list_items,
+                                  is_required: is_required
                                 );
                                 if (list_items.isNotEmpty) {
                                   Navigator.pop(context, data);

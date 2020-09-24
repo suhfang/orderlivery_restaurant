@@ -40,27 +40,27 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationProfilePage(locationId: widget.addressId,)));
               }
             ),
-            ListTile(
-              title: Text('LOCATION MENU'),
-              trailing: Icon(LineIcons.angle_right),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationFoodMenuPage()));
-                }
-            ),
-            ListTile(
-              title: Text('LOCATION ORDERS'),
-              trailing: Icon(LineIcons.angle_right),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantLocationProfilePage()));
-                }
-            ),
-            ListTile(
-              title: Text('LOCATION RATINGS'),
-              trailing: Icon(LineIcons.angle_right),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantLocationProfilePage()));
-                }
-            ),
+//            ListTile(
+//              title: Text('LOCATION MENU'),
+//              trailing: Icon(LineIcons.angle_right),
+//                onTap: () {
+//                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationFoodMenuPage()));
+//                }
+//            ),
+//            ListTile(
+//              title: Text('LOCATION ORDERS'),
+//              trailing: Icon(LineIcons.angle_right),
+//                onTap: () {
+//                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantLocationProfilePage()));
+//                }
+//            ),
+//            ListTile(
+//              title: Text('LOCATION RATINGS'),
+//              trailing: Icon(LineIcons.angle_right),
+//                onTap: () {
+//                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantLocationProfilePage()));
+//                }
+//            ),
           ],
         ),
       ),

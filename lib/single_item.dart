@@ -83,6 +83,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
+      'is_required': itemList.description,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -94,7 +95,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -116,7 +117,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -211,6 +212,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
+      'is_required': itemList.is_required,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -222,7 +224,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -244,7 +246,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -296,6 +298,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
+      'is_required': itemList.is_required,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -307,7 +310,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       labels.add('Vegan');
     }
     if (isVegetarian) {
-      labels.add('isVegetarian');
+      labels.add('Vegetarian');
     }
     if (isGlutenFree) {
       labels.add('Gluten Free');
@@ -329,7 +332,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
       allergens.add('Fish');
     }
     if (isShellFish) {
-      allergens.add('Shell Fish');
+      allergens.add('ShellFish');
     }
     if (isMilk) {
       allergens.add('Milk');
@@ -477,9 +480,22 @@ class _SingleItemPageState extends State<SingleItemPage> {
         stepSixActive = true;
         stepSixState = StepState.complete;
       });
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+                backgroundColor: Colors.transparent,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [CircularProgressIndicator()],
+                ));
+          });
       await createMenuItem();
+      Navigator.pop(context);
       Future.delayed(Duration(seconds: 1), () {
-        Navigator.pop(context);
+        Navigator.pop(context, 'created');
       });
       return;
     }
@@ -1006,7 +1022,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.white,
-          title: Text('Edit La Carte Item', textAlign: TextAlign.center,),
+          title: Text('New La Carte Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
         ),
         body: SafeArea(
@@ -1098,7 +1114,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
               children: [
                 Expanded(
                   child: _TextFormField(
-                    hintText: '3 Pieces/\$5.00, 7.5 Pieces/\$10.00, 10 Pieces/\$15',
+                    hintText: '3 Pieces/\$5.75, 7.5 Pieces/\$10.75, 10 Pieces/\$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
                     textInputAction: TextInputAction.done,

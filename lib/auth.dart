@@ -330,7 +330,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                     signUpEmailController,
                                                     validator: (String value) {
                                                       if (!EmailValidator
-                                                          .validate(value)) {
+                                                          .validate(value.trim())) {
                                                         return 'Enter your email';
                                                       }
                                                       return null;
@@ -577,7 +577,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                     loginEmailController,
                                                     validator: (String value) {
                                                       if (!EmailValidator
-                                                          .validate(value)) {
+                                                          .validate(value.trim())) {
                                                         return 'Enter your email';
                                                       }
                                                       return null;
@@ -765,9 +765,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   }
 
   void login(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
    if (loginEmailController.text.isEmpty && loginPasswordController.text.isEmpty && accessTokenController.text.isNotEmpty) {
+     prefs.setBool('is_location', true);
      loginWithAccessToken();
    } else if (loginEmailController.text.isNotEmpty && loginPasswordController.text.isNotEmpty && accessTokenController.text.isEmpty) {
+     prefs.setBool('is_restaurant', true);
      loginWithEmailAndPassword();
    }
   }
@@ -782,7 +785,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
-    final email = signUpEmailController.text.trim();
+    final email = signUpEmailController.text.trim().toLowerCase();
     final password = signUpPasswordController.text.trim();
     final phoneNumber = signUpPhoneController.text.trim();
 
@@ -845,7 +848,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
     Future.delayed(Duration(seconds: 1), () async {
       var url = Constants.apiBaseUrl + '/restaurants/login';
 
-      final email = loginEmailController.text.trim();
+      final email = loginEmailController.text.trim().toLowerCase();
       final password = loginPasswordController.text.trim();
 
       Map jsonMap = {
@@ -897,9 +900,6 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   }
 
   void loginWithAccessToken() {
-//    if (!_loginFormKey.currentState.validate()) {
-//      return;
-//    }
     showDialog(
         context: context,
         barrierDismissible: false,

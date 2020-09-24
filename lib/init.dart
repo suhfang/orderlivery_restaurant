@@ -25,11 +25,14 @@ class _InitPageState extends State<InitPage> {
   }
 
   doInit() async {
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if ((prefs.getString('token') ?? '').isNotEmpty) {
+
       bool is_restaurant = prefs.getBool('is_restaurant');
       bool is_location = prefs.getBool('is_location');
+      print(is_restaurant);
         if (is_restaurant) {
           if (await filledProfile()) {
             Navigator.push(context,
