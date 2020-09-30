@@ -806,11 +806,18 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                   return ListTile(
                     title: GestureDetector(
                       onTap: () async {
-                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required, minimum_length: item.minimum_length, maximum_length: item.maximum_length,)));
+                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required, minimum_length:lists[index].minimum_length, maximum_length: lists[index].maximum_length ,)));
                         print(result);
+                      setState(() {
+                        int minimum_length = result['minimum_length'] as int;
+                        int maximum_length = result['maximum_length'] as int;
+
                         lists[index].is_required = result['is_required'];
-                        lists[index].minimum_length = result['minimum_length'];
-                        lists[index].maximum_length = result['maximum_length'];
+                        lists[index].minimum_length = minimum_length;
+                        lists[index].maximum_length = maximum_length;
+
+
+                      });
                       },
                       child: Text(item.name),
                     ),

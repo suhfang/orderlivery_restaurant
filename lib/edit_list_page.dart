@@ -28,6 +28,8 @@ class _EditListPageState extends State<EditListPage> {
   @override
   void initState() {
     is_required = widget.first_required;
+    minimum_length = widget.minimum_length;
+    maximum_length = widget.maximum_length;
     minItemsController.text = '${widget.minimum_length}';
     maxItemsController.text = '${widget.maximum_length != null ? widget.maximum_length : ''}';
   }
@@ -154,13 +156,13 @@ class _EditListPageState extends State<EditListPage> {
   }
 
   void saveList()  {
-    if (_formKey.currentState.validate()) {
+    // if (_formKey.currentState.validate()) {
       Navigator.pop(context, {
         'is_required': is_required,
         'minimum_length': minimum_length,
         'maximum_length': maximum_length,
       });
-    }
+    // }
   }
 }
 
