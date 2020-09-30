@@ -17,10 +17,12 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
 
   String _title;
   String _description;
-
+  int minimum_length;
+  int maximum_length;
   List<ListItem> list_items = [];
-
   bool is_required = false;
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -32,209 +34,269 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
         shadowColor: Colors.transparent,
       ),
       body: SafeArea(
-        child: Container(
-            child: Padding(
-              padding: EdgeInsets.only(top: 20, right: 20, left: 20, bottom: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+        child: Form(
+          key: _formKey,
+          child:  Container(
+              child: Padding(
+                padding: EdgeInsets.only(top: 20, right: 20, left: 20, bottom: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-                  Text('Lists with no prices are perfect for things like wings, ice cream, or drinks that have multiple options included in the price. You can always add a price to these items too'),
-                  SizedBox(height: 20,),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.all(0),
-                    value: is_required,
-                    onChanged: (bool value) {
-                      setState(() {
-                        is_required = value;
-                      });
-                    },
-                    title: Text('Required', style: TextStyle(fontSize: 19),),
-                  ),
-                  is_required ? Container(
-                    height: 60,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          decoration: InputDecoration(
-                            hintText: 'Minimum number of items',
-                          ),
-                          keyboardType: TextInputType.number,
-                        )
-                      ],
+                    Text('Lists with no prices are perfect for things like wings, ice cream, or drinks that have multiple options included in the price. You can always add a price to these items too'),
+                    SizedBox(height: 20,),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      value: is_required,
+                      onChanged: (bool value) {
+                        setState(() {
+                          is_required = value;
+                        });
+                      },
+                      title: Text('Required', style: TextStyle(fontSize: 19),),
                     ),
-                  ) : SizedBox(),
-                  SizedBox(height: 20,),
-                  Text('List name', style: TextStyle(fontSize: 19),),
-                  SizedBox(height: 10,),
-                  Container(
-                    alignment:
-                    Alignment.topCenter,
-                    child: _TextFormField(
+                    is_required ? Container(
+                      height: 70,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Minimum number of items',
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (String value) {
+                              if (is_required && value.isNotEmpty && int.parse(value) < 1) {
+                                return 'Minimum number of items should be greater than zero';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onChanged: (String value) {
+                              setState(() {
+                                if (is_required) {
+                                  if (value.isEmpty) {
+                                    minimum_length = 1;
+                                  } else {
+                                    minimum_length = int.parse(value);
+                                  }
+                                } else {
+                                  minimum_length = 0;
+                                }
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ) : SizedBox(),
+                    is_required ? Container(
+                      height: 70,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Maximum number of items',
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (String value) {
+                              if (is_required && value.isNotEmpty && int.parse(value) < 1) {
+                                return 'Maximum number of items should be greater than zero';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onChanged: (String value) {
+                              setState(() {
+                                if (is_required) {
+                                  if (value.isEmpty) {
+                                    maximum_length = 1;
+                                  } else {
+                                    maximum_length = int.parse(value);
+                                  }
+                                } else {
+                                  maximum_length = null;
+                                }
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ) : SizedBox(),
+                    SizedBox(height: 20,),
+                    Text('List name', style: TextStyle(fontSize: 19),),
+                    SizedBox(height: 10,),
+                    Container(
+                      alignment:
+                      Alignment.topCenter,
+                      child: _TextFormField(
 
 //                    focusNode: nameFocusNode,
-                      inputFormatters: [],
-                      hintText: 'Ex: Choose your Flavor, Pick a Topping, Choose Drink, etc.',
-                      onChanged: (String value) {
-                        _title = value.trim();
+                        inputFormatters: [],
+                        hintText: 'Ex: Choose your Flavor, Pick a Topping, Choose Drink, etc.',
+                        onChanged: (String value) {
+                          _title = value.trim();
 //                          _formKey.currentState.validate();
-                      },
+                        },
 //                    controller: nameController,
-                      validator:
-                          (String value) {
-                        if (value.length < 1) {
-                          return 'Enter the name of your menu';
-                        }
-                        return null;
-                      },
-                      onSaved: (String value) {
-                      },
+                        validator:
+                            (String value) {
+                          if (value.length < 1) {
+                            return 'Enter the name of your menu';
+                          }
+                          return null;
+                        },
+                        onSaved: (String value) {
+                        },
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20,),
-                  Text('Description', style: TextStyle(fontSize: 19),),
-                  SizedBox(height: 10,),
-                  TextFormField(
-                    onChanged: (String value) {
-                      _description = value.trim();
-                    },
+                    SizedBox(height: 20,),
+                    Text('Description', style: TextStyle(fontSize: 19),),
+                    SizedBox(height: 10,),
+                    TextFormField(
+                      onChanged: (String value) {
+                        _description = value.trim();
+                      },
 //                  focusNode: descriptionNode,
 //                  controller: descriptionController,
-                    textInputAction: TextInputAction.done,
-                    style: TextStyle(fontSize: 20),
-                    decoration: InputDecoration(
-                        hintText: 'Ex: Please choose at least one flavor in order to proceed',
-                        hintMaxLines: 200, border: InputBorder.none,
-                        disabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(width: 0.3, color: Colors.orange)
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                        )),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                  ),
-                  SizedBox(height: 10,),
-                  Text('You can create a list of items. Ex: Flavors of Wings, Sauce, Dressing, etc.'),
-                  SizedBox(height: 10,),
-                  Expanded(
-                      child: Stack(
-                        children: [
-
-                          GestureDetector(
-                            onTap: () {
-                              final act = CupertinoActionSheet(
-                                  title: Text('Add List Item'),
-                                  actions: <Widget>[
-                                    CupertinoActionSheetAction(
-                                      child: Text('Add List Item with Price ', style: TextStyle(color: Colors.blue),),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        _showNameAndPriceDialog();
-                                      },
-                                    ),
-                                    CupertinoActionSheetAction(
-                                      child: Text('Add List Item with name only', style: TextStyle(color: Colors.blue),),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        _showNameDialog();
-                                      },
-                                    )
-                                  ],
-                                  cancelButton: CupertinoActionSheetAction(
-                                    child: Text('Cancel'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ));
-                              showCupertinoModalPopup(
-                                  context: context,
-                                  builder: (BuildContext context) => act);
-
-                            },
-                            child: Container(
-                              height: 50,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.orange)
-                              ),
-                              child: Center(
-                                child: Text('ADD ITEM', style: TextStyle(color: Colors.orange),),
-                              ),
-                            ),
+                      textInputAction: TextInputAction.done,
+                      style: TextStyle(fontSize: 20),
+                      decoration: InputDecoration(
+                          hintText: 'Ex: Please choose at least one flavor in order to proceed',
+                          hintMaxLines: 200, border: InputBorder.none,
+                          disabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(width: 0.3, color: Colors.orange)
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 60),
-                            child: Container(
-                              height: 200,
-                              child: ListView.builder(
-                                itemCount: list_items.length,
-                                itemBuilder: (context, index) {
-                                  ListItem item = list_items[index];
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(width: 0.3, color: Colors.grey)
+                          )),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                    ),
+                    SizedBox(height: 10,),
+                    Text('You can create a list of items. Ex: Flavors of Wings, Sauce, Dressing, etc.'),
+                    SizedBox(height: 10,),
+                    Expanded(
+                        child: Stack(
+                          children: [
 
-                                      Container(
-                                        height: 50,
-                                        child: ListTile(
-                                          title: Text(item.name),
-                                          subtitle: Text(item.price != null ? ('\$' + item.price) : ''),
-                                          trailing: GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                list_items.removeAt(index);
-                                              });
-                                            },
-                                            child: Icon(LineIcons.trash),
-                                          ),
-                                        ),
-                                      ),
-                                      Divider(),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child:  GestureDetector(
+                            GestureDetector(
                               onTap: () {
-                                ItemList data = ItemList(
-                                    name: _title,
-                                    description: _description,
-                                    items: list_items,
-                                    is_required: is_required
-                                );
-                                if (list_items.isNotEmpty) {
-                                  Navigator.pop(context, data);
-                                } else {
-                                  FocusScope.of(context).unfocus();
-                                }
+                                final act = CupertinoActionSheet(
+                                    title: Text('Add List Item'),
+                                    actions: <Widget>[
+                                      CupertinoActionSheetAction(
+                                        child: Text('Add List Item with Price ', style: TextStyle(color: Colors.blue),),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          _showNameAndPriceDialog();
+                                        },
+                                      ),
+                                      CupertinoActionSheetAction(
+                                        child: Text('Add List Item with name only', style: TextStyle(color: Colors.blue),),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          _showNameDialog();
+                                        },
+                                      )
+                                    ],
+                                    cancelButton: CupertinoActionSheetAction(
+                                      child: Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ));
+                                showCupertinoModalPopup(
+                                    context: context,
+                                    builder: (BuildContext context) => act);
+
                               },
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(
-                                    color: Colors.orange,
+                                    color: Colors.white,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(color: Colors.orange)
                                 ),
                                 child: Center(
-                                  child: Text('CREATE LIST', style: TextStyle(color: Colors.white),),
+                                  child: Text('ADD ITEM', style: TextStyle(color: Colors.orange),),
                                 ),
                               ),
                             ),
-                          )
-                        ],
-                      )
-                  )
-                ],
-              ),
-            )
-        ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 60),
+                              child: Container(
+                                height: 200,
+                                child: ListView.builder(
+                                  itemCount: list_items.length,
+                                  itemBuilder: (context, index) {
+                                    ListItem item = list_items[index];
+                                    return Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+
+                                        Container(
+                                          height: 50,
+                                          child: ListTile(
+                                            title: Text(item.name),
+                                            subtitle: Text(item.price != null ? ('\$' + item.price) : ''),
+                                            trailing: GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  list_items.removeAt(index);
+                                                });
+                                              },
+                                              child: Icon(LineIcons.trash),
+                                            ),
+                                          ),
+                                        ),
+                                        Divider(),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child:  GestureDetector(
+                                onTap: () {
+                                  ItemList data = ItemList(
+                                      name: _title,
+                                      description: _description,
+                                      items: list_items,
+                                      is_required: is_required,
+                                      minimum_length: minimum_length,
+                                      maximum_length: maximum_length,
+                                  );
+                                  if (list_items.isNotEmpty) {
+                                    if (_formKey.currentState.validate()) {
+                                      Navigator.pop(context, data);
+                                    }
+                                  } else {
+                                    FocusScope.of(context).unfocus();
+                                  }
+                                },
+                                child: Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.orange)
+                                  ),
+                                  child: Center(
+                                    child: Text('CREATE LIST', style: TextStyle(color: Colors.white),),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        )
+                    )
+                  ],
+                ),
+              )
+          ),
+        )
       ),
     );
   }

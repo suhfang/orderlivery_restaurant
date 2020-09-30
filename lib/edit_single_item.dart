@@ -89,6 +89,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'name': itemList.name,
       'description': itemList.description,
       'is_required': itemList.is_required,
+      'minimum_length': itemList.minimum_length,
+      'maximum_length': itemList.maximum_length,
       'items': itemList.items.map((item) {
         return {
           'name': item.name,
@@ -224,6 +226,9 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
+      'is_required': itemList.is_required,
+      'minimum_length': itemList.minimum_length,
+      'maximum_length': itemList.maximum_length,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -311,6 +316,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       'name': itemList.name,
       'description': itemList.description,
       'is_required': itemList.is_required,
+      'minimum_length': itemList.minimum_length,
+      'maximum_length': itemList.maximum_length,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -799,9 +806,11 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                   return ListTile(
                     title: GestureDetector(
                       onTap: () async {
-                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required)));
+                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required, minimum_length: item.minimum_length, maximum_length: item.maximum_length,)));
                         print(result);
-                        lists[index].is_required = result;
+                        lists[index].is_required = result['is_required'];
+                        lists[index].minimum_length = result['minimum_length'];
+                        lists[index].maximum_length = result['maximum_length'];
                       },
                       child: Text(item.name),
                     ),

@@ -84,6 +84,8 @@ class _SingleItemPageState extends State<SingleItemPage> {
       'name': itemList.name,
       'description': itemList.description,
       'is_required': itemList.is_required,
+      'minimum_length': itemList.minimum_length,
+      'maximum_length': itemList.maximum_length,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -213,6 +215,8 @@ class _SingleItemPageState extends State<SingleItemPage> {
       'name': itemList.name,
       'description': itemList.description,
       'is_required': itemList.is_required,
+      'minimum_length': itemList.minimum_length,
+      'maximum_length': itemList.maximum_length,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -299,6 +303,8 @@ class _SingleItemPageState extends State<SingleItemPage> {
       'name': itemList.name,
       'description': itemList.description,
       'is_required': itemList.is_required,
+      'minimum_length': itemList.minimum_length,
+      'maximum_length': itemList.maximum_length,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,

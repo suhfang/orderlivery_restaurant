@@ -26,6 +26,7 @@ class LocationProfilePage extends StatefulWidget {
 
 class _LocationProfilePageState extends State<LocationProfilePage> {
 
+  bool _doesPickup = true;
 //  TextEditingController nameController = TextEditingController();
 //  TextEditingController descriptionController = TextEditingController();
 //  TextEditingController addressController = TextEditingController();
@@ -93,6 +94,17 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                 child:  Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    CheckboxListTile(
+                      title: Text('Are you available for pickup?'),
+                      value: _doesPickup,
+                      onChanged: (newValue) {
+                        setState(() {
+                          _doesPickup = newValue;
+                        });
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                    ),
+                    SizedBox(height: 10,),
 //                    Text('What\'s the full main US address of your restaurant?'),
 //                    Container(
 //                      alignment:
@@ -153,6 +165,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                         },
                       ),
                     ),
+
                     Text('Generate an access token for this location'),
                     SizedBox(height: 5,),
                     Row(
@@ -649,6 +662,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
     super.initState();
     getProfile();
     fToast = FToast(context);
+
   }
 
   _showToast(String message) {
@@ -761,6 +775,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
 //    var coordinates = addresses.first.coordinates;
 
     final body = json.encode({
+      'does_pickup': _doesPickup,
       'location_id': widget.locationId,
       'phone_number': phoneController.text.trim(),
       'hours': {
@@ -828,7 +843,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
     setState(() {
 
       phoneController.text = profile.phone_number;
-
+      _doesPickup = profile.does_pickup;
       sundayFromController.text = profile.hours.sun.open;
       sundayToController.text = profile.hours.sun.close;
 
@@ -1012,7 +1027,8 @@ class Profile {
   String phone_number;
   String access_token;
   Hours hours;
-  Profile({this.access_token, this.phone_number, this.hours, });
+  bool does_pickup;
+  Profile({this.access_token, this.phone_number, this.hours, this.does_pickup});
 
   factory Profile.fromJson(Map<String, dynamic> json) {
     var hours = json['hours'];
@@ -1031,6 +1047,7 @@ class Profile {
 //        description: json['description'] as String,
         phone_number: json['phone_number'] as String,
         access_token: json['access_token'] as String,
+        does_pickup: json['does_pickup'] as bool,
 //        type: json['type'] as String,
 //        cover_image_url: json['cover_image_url'] as String,
 //        logo_image_url: json['logo_image_url'] as String,
