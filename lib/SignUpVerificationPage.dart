@@ -252,6 +252,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
   }
 
   void sendVerificationCode() async {
+    print('${SignupverificationPage.code}');
     showDialog(
         context: context,
         barrierDismissible: false,

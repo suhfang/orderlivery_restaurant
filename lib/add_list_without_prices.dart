@@ -51,6 +51,19 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
                     },
                     title: Text('Required', style: TextStyle(fontSize: 19),),
                   ),
+                  is_required ? Container(
+                    height: 60,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Minimum number of items',
+                          ),
+                          keyboardType: TextInputType.number,
+                        )
+                      ],
+                    ),
+                  ) : SizedBox(),
                   SizedBox(height: 20,),
                   Text('List name', style: TextStyle(fontSize: 19),),
                   SizedBox(height: 10,),

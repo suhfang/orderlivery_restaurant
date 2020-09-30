@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/add_list_without_prices.dart';
+import 'package:Restaurant/edit_list_page.dart';
 //import 'package:Restaurant/categories.dart';
 import 'package:Restaurant/menu_items.dart';
 import 'package:flutter/cupertino.dart';
@@ -87,6 +88,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
+      'is_required': itemList.is_required,
       'items': itemList.items.map((item) {
         return {
           'name': item.name,
@@ -158,7 +160,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     if (cookingTime.isNotEmpty) {
       _json['cooking_time'] = cookingTime;
     }
-
+    print(_json);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
@@ -308,6 +310,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
+      'is_required': itemList.is_required,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
@@ -794,7 +797,14 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                 itemBuilder: (context, index) {
                   ItemList item = lists[index];
                   return ListTile(
-                    title: Text(item.name),
+                    title: GestureDetector(
+                      onTap: () async {
+                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required)));
+                        print(result);
+                        lists[index].is_required = result;
+                      },
+                      child: Text(item.name),
+                    ),
                     trailing: GestureDetector(
                       onTap: () {
                         setState(() {

@@ -13,15 +13,17 @@ class AddListWithPricePage extends StatefulWidget {
 
 class ItemList {
 
+  String id;
   String name;
   String description;
   List<ListItem> items;
   bool is_required;
-  ItemList({this.name, this.description, this.items, this.is_required});
+  ItemList({this.id, this.name, this.description, this.items, this.is_required});
 
   factory ItemList.fromJson(Map<String, dynamic> json) {
      Iterable items = json['items'];
     return ItemList(
+      id: json['_id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
       items: items.map((e) => ListItem.fromJson(e)).toList(),

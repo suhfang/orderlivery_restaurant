@@ -83,7 +83,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
     List _lists = lists.map((itemList) => {
       'name': itemList.name,
       'description': itemList.description,
-      'is_required': itemList.description,
+      'is_required': itemList.is_required,
       'items': itemList.items.map((item) =>
       {
         'name': item.name,
