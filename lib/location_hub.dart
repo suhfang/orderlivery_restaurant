@@ -1,8 +1,12 @@
 
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Restaurant/auth.dart';
+import 'package:badges/badges.dart';
+import 'package:device_info/device_info.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
@@ -32,27 +36,51 @@ class CartItem {
   }
 }
 class _LocationHubPageState extends State<LocationHubPage> {
-
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   List<CartItem> items_to_buy = [];
   String order_id;
   double order_total;
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    print(widget.notificationData);
-    Constants.isOnOrdersPage = true;
-   if (widget.notificationData != null) {
-     Iterable items = json.decode(widget.notificationData['gcm.notification.additional_data'])['items'];
-     order_id = json.decode(widget.notificationData['gcm.notification.additional_data'])['order_id'] as String;
-     order_total = json.decode(widget.notificationData['gcm.notification.additional_data'])['amount'];
-     items_to_buy = items.map((e) => CartItem.fromJson(e)).toList();
-     print(items_to_buy);
 
-   }
+   //  Constants.isOnOrdersPage = true;
+   // if (widget.notificationData != null) {
+   //   Iterable items = json.decode(widget.notificationData['gcm.notification.additional_data'])['items'];
+   //   order_id = json.decode(widget.notificationData['gcm.notification.additional_data'])['order_id'] as String;
+   //   order_total = json.decode(widget.notificationData['gcm.notification.additional_data'])['amount'];
+   //   items_to_buy = items.map((e) => CartItem.fromJson(e)).toList();
+
+     print('fuck');
+     getLocationId();
+    // setToken();
+   // }
   }
 
   bool _allowing = true;
+  String location_id;
+
+  getLocationId() async  {
+    SharedPreferences prefs  = await SharedPreferences.getInstance();
+    print(prefs.getString('token'));
+    print('soup');
+    final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+   _firebaseMessaging.getToken().then((value) async {
+     location_id = json.decode(response.body)['location_id'] as String;
+     final _response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token', headers: {
+        'Content-Type': 'application/json'
+     },
+         body: json.encode({
+           'token': value,
+           'location_id': location_id,
+           'device_id': await _getId()
+         }));
+     print(_response.body);
+   });
+
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -60,6 +88,7 @@ class _LocationHubPageState extends State<LocationHubPage> {
       DefaultTabController(
         length: 3,
       child:  Scaffold(
+        key: scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('ORDERS'),
@@ -111,6 +140,19 @@ class _LocationHubPageState extends State<LocationHubPage> {
                     setState(() {
                       _allowing = newValue;
                     });
+                    if (!_allowing) {
+                      scaffoldKey.currentState.showSnackBar(
+                        SnackBar(
+                          content: Text('You are no longer accepting orders'),
+                        )
+                      );
+                    } else {
+                      scaffoldKey.currentState.showSnackBar(
+                          SnackBar(
+                            content: Text('You are now accepting orders'),
+                          )
+                      );
+                    }
                   },
                 ),
               ],
@@ -119,15 +161,20 @@ class _LocationHubPageState extends State<LocationHubPage> {
             TabBar(
               tabs: [
                 Tab(
-                  child:  Text('New orders', textAlign: TextAlign.center,),
+                  child:  Badge(
+                    child: Text('New orders', textAlign: TextAlign.center,)
+                  ),
                 ),
                 Tab(
-                  child:  Text('In-progress orders', textAlign: TextAlign.center,),
+                  child:  Badge(
+                      child: Text('In-progress orders', textAlign: TextAlign.center,)
+                  ),
                 ),
                 Tab(
-                  child:  Text('Past orders', textAlign: TextAlign.center,),
+                  child:  Badge(
+                      child: Text('Past orders', textAlign: TextAlign.center,)
+                  ),
                 ),
-
               ],
             ),
             SizedBox(height: 20,),
@@ -223,5 +270,17 @@ class _LocationHubPageState extends State<LocationHubPage> {
       )
     )
       );
+  }
+
+
+  Future<String> _getId() async {
+    var deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) { // import 'dart:io'
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      return iosDeviceInfo.identifierForVendor; // unique ID on iOS
+    } else {
+      var androidDeviceInfo = await deviceInfo.androidInfo;
+      return androidDeviceInfo.androidId; // unique ID on Android
+    }
   }
 }

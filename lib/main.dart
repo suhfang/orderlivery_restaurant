@@ -30,7 +30,8 @@ class MyApp extends StatelessWidget {
 
     _firebaseMessaging.getToken().then((token) {
       print(token);
-      Constants.messagingToken = token;
+      print('foo');
+      Constants.firebaseMessagingToken = token;
       registerMessagingToken(token);
     });
 
@@ -89,20 +90,20 @@ class MyApp extends StatelessWidget {
 }
 
 void registerMessagingToken(String token) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String authToken = prefs.getString('token') ?? '';
-  if (authToken.isNotEmpty) {
-    Map jsonMap = {
-      'firebase_messaging_token': token
-    };
-    print(jsonMap);
-    print(authToken);
-    final response = await http.post(Constants.apiBaseUrl + '/restaurants/set-firebase-messaging-token', body: json.encode(jsonMap), headers: {
-      'token': authToken,
-      'Content-Type': 'application/json'
-    });
-    print(response.statusCode);
-  }
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // String authToken = prefs.getString('token') ?? '';
+  // if (authToken.isNotEmpty) {
+  //   Map jsonMap = {
+  //     'firebase_messaging_token': token
+  //   };
+  //   print(jsonMap);
+  //   print(authToken);
+  //   final response = await http.post(Constants.apiBaseUrl + '/restaurants/set-firebase-messaging-token', body: json.encode(jsonMap), headers: {
+  //     'token': authToken,
+  //     'Content-Type': 'application/json'
+  //   });
+  //   print(response.statusCode);
+  // }
 
 }
 

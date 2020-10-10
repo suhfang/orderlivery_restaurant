@@ -55,7 +55,7 @@ class DrawerScaffold extends StatelessWidget {
                   child: Badge(
                     badgeColor: Colors.orange,
 //                    badgeContent: Text('3', style: TextStyle(color: Colors.white),),
-                    child:  Icon(LineIcons.bell),
+                    child:  Icon(CupertinoIcons.bell),
                   )
               ),
             )
@@ -76,14 +76,14 @@ class DrawerScaffold extends StatelessWidget {
                     children: <Widget>[
                       ListTile(
                         title: Text('MY HUB'),
-                        leading: Icon(LineIcons.home),
+                        leading: Icon(CupertinoIcons.home),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
                         }
                       ),
                       ListTile(
                         title: Text('RESTAURANT PROFILE'),
-                        leading: Icon(Icons.food_bank),
+                        leading: Icon(CupertinoIcons.profile_circled),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantDetailPage()));
                         }
@@ -119,7 +119,7 @@ class DrawerScaffold extends StatelessWidget {
                       ),
                       ListTile(
                           title: Text('ACCOUNT SETTINGS'),
-                          leading: Icon(LineIcons.gear),
+                          leading: Icon(CupertinoIcons.settings),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SettingsPage()));
                           }

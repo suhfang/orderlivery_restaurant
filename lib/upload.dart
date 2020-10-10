@@ -41,8 +41,10 @@ class _UploadPageState extends State<UploadPage> {
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () async {
-                        File file  = await FilePicker.getFile(allowedExtensions: ['csv']);
-                        print(file);
+                        FilePickerResult result = await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['csv']
+                        );
                       },
                       child: Padding(
                         padding: EdgeInsets.only(top: 50),

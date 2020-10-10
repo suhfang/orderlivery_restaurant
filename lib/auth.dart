@@ -866,6 +866,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         if (data.token.isNotEmpty) {
           Navigator.pop(context);
           SharedPreferences prefs = await SharedPreferences.getInstance();
+
           await prefs.setString('token', data.token);
           await prefs.setBool('is_location', false);
           await prefs.setBool('is_restaurant', true);
@@ -931,6 +932,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
           Navigator.pop(context);
           SharedPreferences prefs = await SharedPreferences.getInstance();
+
           await prefs.setString('token', accessTokenController.text.trim());
            await prefs.setBool('is_location', true);
           await prefs.setBool('is_restaurant', false);

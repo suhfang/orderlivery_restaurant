@@ -394,7 +394,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                                       onTap: () {
                                         deleteItem(item.id);
                                       },
-                                      child: Icon(LineIcons.trash),
+                                      child: Icon(CupertinoIcons.trash),
                                     ),
                                     title: Text(item.name),
                                     subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold), ) : Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold),),

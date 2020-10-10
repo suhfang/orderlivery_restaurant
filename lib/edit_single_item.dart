@@ -807,7 +807,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                     title: GestureDetector(
                       onTap: () async {
                         final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required, minimum_length:lists[index].minimum_length, maximum_length: lists[index].maximum_length ,)));
-                        print(result);
+
                       setState(() {
                         int minimum_length = result['minimum_length'] as int;
                         int maximum_length = result['maximum_length'] as int;

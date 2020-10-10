@@ -156,13 +156,13 @@ class _EditListPageState extends State<EditListPage> {
   }
 
   void saveList()  {
-    // if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate()) {
       Navigator.pop(context, {
         'is_required': is_required,
         'minimum_length': minimum_length,
         'maximum_length': maximum_length,
       });
-    // }
+    }
   }
 }
 
