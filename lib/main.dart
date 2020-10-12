@@ -27,85 +27,8 @@ class MyApp extends StatelessWidget {
   void firebaseCloudMessaging_Listeners() {
     if (Platform.isIOS) iOS_Permission();
     if (Platform.isAndroid) Android_Permission();
-
-    _firebaseMessaging.getToken().then((token) {
-      print(token);
-      print('foo');
-      Constants.firebaseMessagingToken = token;
-      registerMessagingToken(token);
-    });
-
-    if (Constants.messagingToken.isEmpty) {
-      _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print(message);
-          print('app onMessage');
-//          FlutterRingtonePlayer.play(
-//            android: AndroidSounds.notification,
-//            ios: IosSounds.glass,
-//            looping: true, // Android only - API >= 28
-//            volume: 0.1, // Android only - API >= 28
-//            asAlarm: false, // Android only - all APIs
-//          );
-//          if (!Constants.isOnOrdersPage) {
-            navigatorKey.currentState.push(
-                MaterialPageRoute(builder: (_) => LocationHubPage(notificationData: message,))
-            );
-
-//          }
-        },
-        onResume: (Map<String, dynamic> message) async {
-          print(message);
-          print('app onResume');
-//          FlutterRingtonePlayer.play(
-//            android: AndroidSounds.notification,
-//            ios: IosSounds.glass,
-//            looping: true, // Android only - API >= 28
-//            volume: 0.1, // Android only - API >= 28
-//            asAlarm: false, // Android only - all APIs
-//          );
-//          if (!Constants.isOnOrdersPage) {
-            navigatorKey.currentState.push(
-                MaterialPageRoute(builder: (_) => LocationHubPage(notificationData: message,))
-            );
-
-//          }
-        },
-        onLaunch: (Map<String, dynamic> message) async {
-          print(message);
-//          FlutterRingtonePlayer.play(
-//            android: AndroidSounds.notification,
-//            ios: IosSounds.glass,
-//            looping: true, // Android only - API >= 28
-//            volume: 0.1, // Android only - API >= 28
-//            asAlarm: false, // Android only - all APIs
-//          );
-  print('app onLaunch');
-  navigatorKey.currentState.push(
-  MaterialPageRoute(builder: (_) => LocationHubPage(notificationData: message,))
-  );
-},
-);
-}
 }
 
-void registerMessagingToken(String token) async {
-  // SharedPreferences prefs = await SharedPreferences.getInstance();
-  // String authToken = prefs.getString('token') ?? '';
-  // if (authToken.isNotEmpty) {
-  //   Map jsonMap = {
-  //     'firebase_messaging_token': token
-  //   };
-  //   print(jsonMap);
-  //   print(authToken);
-  //   final response = await http.post(Constants.apiBaseUrl + '/restaurants/set-firebase-messaging-token', body: json.encode(jsonMap), headers: {
-  //     'token': authToken,
-  //     'Content-Type': 'application/json'
-  //   });
-  //   print(response.statusCode);
-  // }
-
-}
 
 
 

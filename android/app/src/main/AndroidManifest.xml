@@ -18,6 +18,7 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/themeColor" />
 
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
