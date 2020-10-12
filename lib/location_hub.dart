@@ -69,15 +69,17 @@ class _LocationHubPageState extends State<LocationHubPage> {
     final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
    _firebaseMessaging.getToken().then((value) async {
      location_id = json.decode(response.body)['location_id'] as String;
-     final _response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token', headers: {
-        'Content-Type': 'application/json'
-     },
-         body: json.encode({
-           'token': value,
-           'location_id': location_id,
-           'device_id': await _getId()
-         }));
-     print(_response.body);
+      if (location_id != null) {
+        final _response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token', headers: {
+          'Content-Type': 'application/json'
+        },
+            body: json.encode({
+              'token': value,
+              'location_id': location_id,
+              'device_id': await _getId()
+            }));
+        print(_response.body);
+      }
    });
 
   }

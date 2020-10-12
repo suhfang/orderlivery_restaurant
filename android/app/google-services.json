@@ -35,7 +35,8 @@
               "client_id": "293801835530-m6ulf9koc1qollhsrrv1f6b2v92mcr2b.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.orderlivery.Restaurant"
+                "bundle_id": "com.orderlivery.Restaurant",
+                "app_store_id": "1527117597"
               }
             }
           ]
@@ -71,7 +72,8 @@
               "client_id": "293801835530-m6ulf9koc1qollhsrrv1f6b2v92mcr2b.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.orderlivery.Restaurant"
+                "bundle_id": "com.orderlivery.Restaurant",
+                "app_store_id": "1527117597"
               }
             }
           ]
@@ -107,7 +109,8 @@
               "client_id": "293801835530-m6ulf9koc1qollhsrrv1f6b2v92mcr2b.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.orderlivery.Restaurant"
+                "bundle_id": "com.orderlivery.Restaurant",
+                "app_store_id": "1527117597"
               }
             }
           ]
