@@ -58,8 +58,8 @@ void iOS_Permission() async {
     });
 
     return MaterialApp(
-        navigatorKey: navigatorKey,
-      title: 'Flutter Demo',
+        // navigatorKey: navigatorKey,
+      title: 'Restaurant',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.orange,

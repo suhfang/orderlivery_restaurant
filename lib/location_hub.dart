@@ -11,10 +11,14 @@ import 'package:device_info/device_info.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Restaurant/constants.dart' as Constants;
 import 'package:http/http.dart' as http;
+import 'package:wakelock/wakelock.dart';
 
 class LocationHubPage extends StatefulWidget {
 
@@ -50,7 +54,7 @@ class _LocationHubPageState extends State<LocationHubPage> {
   @override
   void initState() {
     super.initState();
-
+  Wakelock.enable();
    //  Constants.isOnOrdersPage = true;
    // if (widget.notificationData != null) {
    //   Iterable items = json.decode(widget.notificationData['gcm.notification.additional_data'])['items'];
@@ -67,6 +71,18 @@ class _LocationHubPageState extends State<LocationHubPage> {
   bool _allowing = false;
   String location_id;
 
+  @override
+  void dispose() async {
+    super.dispose();
+    handleWakeLock();
+  }
+
+  handleWakeLock() async {
+    if (await Wakelock.enabled) {
+      Wakelock.disable();
+    }
+  }
+
   getLocationId() async  {
     SharedPreferences prefs  = await SharedPreferences.getInstance();
     print(prefs.getString('token'));
@@ -78,14 +94,17 @@ class _LocationHubPageState extends State<LocationHubPage> {
        onMessage: (Map<String, dynamic> message) async {
          print(message);
          print('app onMessage');
+         showNotification(title: message['title'], body: message['body']);
          getOrders(location_id: location_id);
        },
        onResume: (Map<String, dynamic> message) async {
+         showNotification(title: message['title'], body: message['body']);
          print(message);
          getOrders(location_id: location_id);
          print('app onResume');
        },
        onLaunch: (Map<String, dynamic> message) async {
+         showNotification(title: message['title'], body: message['body']);
          print(message);
          getOrders(location_id: location_id);
          print('app onLaunch');
@@ -133,6 +152,9 @@ class _LocationHubPageState extends State<LocationHubPage> {
                     ListTile(
                       title: Text('ORDERS'),
                       leading: Icon(LineIcons.newspaper_o),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
                     ),
                     ListTile(
                         tileColor: Colors.orange,
@@ -157,18 +179,21 @@ class _LocationHubPageState extends State<LocationHubPage> {
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Allowing Orders',),
-                CupertinoSwitch(
-                  value: _allowing,
-                  onChanged: (bool newValue) async {
-                    if (location_id != null) {
-                      bool result = await setAcceptingStatus(value: newValue, location_id: location_id);
-                      setState(()  {
-                        _allowing = result;
-                      });
+            Container(
+              width: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Allowing Orders',),
+                  CupertinoSwitch(
+                    activeColor: Colors.orange,
+                    value: _allowing,
+                    onChanged: (bool newValue) async {
+                      if (location_id != null) {
+                        bool result = await setAcceptingStatus(value: newValue, location_id: location_id);
+                        setState(()  {
+                          _allowing = result;
+                        });
 
 
                         if (!_allowing) {
@@ -186,27 +211,40 @@ class _LocationHubPageState extends State<LocationHubPage> {
                         }
 
 
-                    }
-                  },
-                ),
-              ],
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 20,),
             TabBar(
               tabs: [
                 Tab(
                   child:  Badge(
-                    child: Text('New orders', textAlign: TextAlign.center,)
+                      badgeContent: Text('${new_orders.length}', style: TextStyle(color: Colors.white),),
+                    child: Container(
+                      width: 150,
+                      child: Text('New', textAlign: TextAlign.center,),
+                    )
                   ),
                 ),
                 Tab(
                   child:  Badge(
-                      child: Text('In-progress orders', textAlign: TextAlign.center,)
+                      badgeContent: Text('${current_orders.length}', style: TextStyle(color: Colors.white),),
+                      child: Container(
+                        width: 150,
+                        child: Text('In-progress', textAlign: TextAlign.center,),
+                      )
                   ),
                 ),
                 Tab(
                   child:  Badge(
-                      child: Text('Past orders', textAlign: TextAlign.center,)
+                      badgeContent: Text('${past_orders.length}', style: TextStyle(color: Colors.white),),
+                      child: Container(
+                        width: 150,
+                        child: Text('Past', textAlign: TextAlign.center,),
+                      )
                   ),
                 ),
               ],
@@ -219,7 +257,8 @@ class _LocationHubPageState extends State<LocationHubPage> {
                   new_orders.isNotEmpty ? Container(
                       height: 400,
                       child: new_orders.isNotEmpty ?
-                          ListView.separated(itemBuilder: (context, index) {
+                          ListView.separated(
+                              itemBuilder: (context, index) {
                             final item = new_orders[index];
                             return Column(
                               children: [
@@ -230,29 +269,23 @@ class _LocationHubPageState extends State<LocationHubPage> {
                                      Container(
                                        height: 100,
                                        child: ListView.separated(
-
+                                           physics: NeverScrollableScrollPhysics(),
                                            itemBuilder: (context, subIndex) {
                                              final item = new_orders[index].items[subIndex];
-                                             return Column(
-                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                               children: [
-                                                 Row(
-                                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                   children: [
-                                                     Text('(${item.quantity})'),
-                                                     Text(item.name),
-                                                     Text('\$${item.quantity*item.flat_price}'),
-                                                 ],
-                                                 ),
-                                                 item.special_instructions != null && item.special_instructions.isNotEmpty ? Column(
-                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                   children: [
-                                                     SizedBox(height: 10,),
-                                                     Text('Special instructions', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                     Text(item.special_instructions)
-                                                   ],
-                                                 ) : SizedBox()
-                                               ],
+                                             return Container(
+                                                 width: MediaQuery.of(context).size.width,
+                                                 child: SingleChildScrollView(
+                                                   scrollDirection: Axis.horizontal,
+                                                   child: Row(
+
+                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                     children: [
+                                                       Text('(${item.quantity})'),
+                                                       Text(item.name + '          '),
+                                                       Text('\$${item.quantity*item.flat_price}'),
+                                                     ],
+                                                   ),
+                                                 )
                                              );
                                            }, separatorBuilder: (context, subIndex) {
                                          return Divider();
@@ -275,10 +308,14 @@ class _LocationHubPageState extends State<LocationHubPage> {
                                                await acceptOrder(order_id: item.id);
                                              },
                                              child: Container(
-                                               color: Colors.orange,
+
                                                height: 50,
                                                child: Center(
-                                                 child: Text('ACCEPT'),
+                                                 child: Text('ACCEPT', style: TextStyle(fontWeight: FontWeight.bold),),
+                                               ),
+                                               decoration: BoxDecoration(
+                                                 color: Colors.orange,
+                                                 borderRadius: BorderRadius.circular(10)
                                                ),
                                              ),
                                            )
@@ -289,17 +326,97 @@ class _LocationHubPageState extends State<LocationHubPage> {
                                              onTap: () async {
                                                await declineOrder(order_id: item.id);
                                              },
-                                             child:  Container(
-                                               color: Colors.red,
-                                               height: 50,
-                                               child: Center(
-                                                 child: Text('REJECT'),
+                                             child: GestureDetector(
+                                               onTap: () {
+                                                 showModalBottomSheet(context: context, builder: (context) {
+                                                   return Container(
+                                                     height: 150,
+                                                     color: Colors.white,
+                                                     child: Padding(
+                                                       padding: EdgeInsets.all(10),
+                                                       child: Column(
+                                                         children: [
+                                                          Expanded(
+                                                            child:  Row(
+                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                              children: [
+                                                                Text('Are you sure you want to reject this order?', style: TextStyle(fontSize: 17),)
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            child:  Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: GestureDetector(
+                                                                    onTap: () {
+                                                                      finishOrder(order_id: item.id);
+                                                                      Navigator.pop(context);
+                                                                      scaffoldKey.currentState.showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text('Your accepted this order '),
+                                                                          )
+                                                                      );
+                                                                    },
+                                                                    child: Container(
+                                                                      height: 50,
+                                                                      child: Center(
+                                                                        child: Text('YES', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                      ),
+                                                                      decoration: BoxDecoration(
+                                                                          color: Colors.orange,
+                                                                          borderRadius: BorderRadius.circular(20)
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                ),
+                                                                Expanded(
+                                                                  child: GestureDetector(
+                                                                    onTap: () {
+                                                                      Navigator.pop(context);
+                                                                      scaffoldKey.currentState.showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text('Your declined this order '),
+                                                                        )
+                                                                      );
+                                                                    },
+                                                                    child: Container(
+                                                                      height: 50,
+                                                                      child: Center(
+                                                                        child: Text('NO', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                      ),
+                                                                      decoration: BoxDecoration(
+                                                                          color: Color(0xF1F1F1F1),
+                                                                          borderRadius: BorderRadius.circular(20)
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                )
+                                                              ],
+                                                            ),
+                                                          )
+                                                         ],
+                                                       )
+                                                     ),
+                                                   );
+                                                 });
+                                                },
+                                               child:  Container(
+
+                                                 height: 50,
+                                                 child: Center(
+                                                   child: Text('REJECT', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                 ),
+                                                 decoration: BoxDecoration(
+                                                     color: Color(0xF1F1F1F1),
+                                                     borderRadius: BorderRadius.circular(10)
+                                                 ),
                                                ),
-                                             ),
+                                             )
                                            )
                                          ),
                                        ],
-                                     )
+                                     ),
                                    ],
                                  )
                                )
@@ -324,16 +441,23 @@ class _LocationHubPageState extends State<LocationHubPage> {
                                     Container(
                                       height: 100,
                                       child: ListView.separated(
-
+                                          physics: NeverScrollableScrollPhysics(),
                                           itemBuilder: (context, subIndex) {
                                             final item = current_orders[index].items[subIndex];
-                                            return Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Text('(${item.quantity})'),
-                                                Text(item.name),
-                                                Text('\$${item.quantity*item.flat_price}'),
-                                              ],
+                                            return Container(
+                                                width: MediaQuery.of(context).size.width,
+                                                child: SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: Row(
+
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Text('(${item.quantity}) '),
+                                                      Text(item.name + '          '),
+                                                      Text('\$${item.quantity*item.flat_price}'),
+                                                    ],
+                                                  ),
+                                                )
                                             );
                                           }, separatorBuilder: (context, subIndex) {
                                         return Divider();
@@ -351,18 +475,84 @@ class _LocationHubPageState extends State<LocationHubPage> {
                                     Row(
                                       children: [
                                         Expanded(
-                                            child: GestureDetector(
+                                            child: item.cooked_at != null ?
+                                            GestureDetector(
+
                                               onTap: () async {
                                                 await finishOrder(order_id: item.id);
                                               },
                                               child: Container(
-                                                color: Colors.orange,
+
                                                 height: 50,
                                                 child: Center(
-                                                  child: Text('READY FOR PICKUP'),
+                                                  child: Text('MARK AS READY FOR PICKUP', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                ),
+                                                decoration: BoxDecoration(
+                                                    color: Color(0xF1F1F1F1),
+                                                    borderRadius: BorderRadius.circular(10)
                                                 ),
                                               ),
-                                            )
+                                            ) :
+                                           GestureDetector(
+                                             onTap: () {
+                                                showCupertinoModalPopup(context: context, builder: (context) {
+                                                  return Scaffold(
+                                                    body: SafeArea(
+                                                      child: Padding(
+                                                        padding: EdgeInsets.all(20),
+                                                        child: Column(
+                                                          mainAxisAlignment: MainAxisAlignment.start,
+                                                          children: [
+                                                           Row(
+                                                             mainAxisAlignment: MainAxisAlignment.start,
+                                                             children: [
+                                                               GestureDetector(
+                                                                 onTap: () {
+                                                                   Navigator.pop(context);
+                                                                 },
+                                                                 child: Padding(
+                                                                   padding: EdgeInsets.all(20),
+                                                                   child: Icon(LineIcons.close),
+                                                                 ),
+                                                               ),
+                                                             ],
+                                                           ),
+                                                            Container(
+                                                              width: MediaQuery.of(context).size.width,
+                                                              child: Column(
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+
+                                                                SizedBox(height: 50,),
+                                                              Text('Scan the QR Code below to collect your recipient\'s food', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19), textAlign: TextAlign.center,),
+                                                              SizedBox(height: 50,),
+                                                              QrImage(
+                                                                data: item.id,
+                                                                version: QrVersions.auto,
+                                                                size: 300.0,
+                                                              ),
+                                                                ],
+                                                              )
+                                                            ),
+                                                          ],
+                                                        )
+                                                      )
+                                                    )
+                                                  );
+                                                });
+                                             },
+                                             child:  Container(
+
+                                               height: 50,
+                                               child: Center(
+                                                 child: Text('HAND TO DRIVER', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                               ),
+                                               decoration: BoxDecoration(
+                                                   color: Color(0xF1F1F1F1),
+                                                   borderRadius: BorderRadius.circular(10)
+                                               ),
+                                             ),
+                                           )
                                         ),
 
                                       ],
@@ -380,7 +570,8 @@ class _LocationHubPageState extends State<LocationHubPage> {
                   past_orders.isNotEmpty ? Container(
                       height: 350,
                       child: past_orders.isNotEmpty ?
-                      ListView.separated(itemBuilder: (context, index) {
+                      ListView.separated(
+                          itemBuilder: (context, index) {
                         final item = past_orders[index];
                         return Column(
                           children: [
@@ -391,16 +582,23 @@ class _LocationHubPageState extends State<LocationHubPage> {
                                     Container(
                                       height: 100,
                                       child: ListView.separated(
-
+                                          physics: NeverScrollableScrollPhysics(),
                                           itemBuilder: (context, subIndex) {
                                             final item = past_orders[index].items[subIndex];
-                                            return Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Text('(${item.quantity})'),
-                                                Text(item.name),
-                                                Text('\$${item.quantity*item.flat_price}'),
-                                              ],
+                                            return Container(
+                                              width: MediaQuery.of(context).size.width,
+                                              child: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Row(
+
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Text('(${item.quantity}) '),
+                                                    Text(item.name + '          '),
+                                                    Text('\$${item.quantity*item.flat_price}'),
+                                                  ],
+                                                ),
+                                              )
                                             );
                                           }, separatorBuilder: (context, subIndex) {
                                         return Divider();
@@ -437,6 +635,32 @@ class _LocationHubPageState extends State<LocationHubPage> {
   }
 
 
+  void showNotification({
+    String title,
+    String body,
+  }) {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'your channel id',
+        'your channel name',
+        'your channel description',
+        importance: Importance.max,
+        priority: Priority.max,
+        ticker: 'ticker',
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('arrive')
+    );
+
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(presentSound: true);
+
+    var platformChannelSpecifics = NotificationDetails(
+     android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics
+    );
+    flutterLocalNotificationsPlugin.show(0, title, body, platformChannelSpecifics, payload: 'sounds/sound.mp3',);
+
+
+  }
+
   Future<String> _getId() async {
     var deviceInfo = DeviceInfoPlugin();
     if (Platform.isIOS) { // import 'dart:io'
@@ -449,7 +673,6 @@ class _LocationHubPageState extends State<LocationHubPage> {
   }
 
   getOrders({String location_id}) async {
-    audioPlugin.play('assets/sounds/sound.mp3', isLocal: true);
     print(location_id);
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-orders', headers: {
       'Content-Type': 'application/json'
@@ -460,7 +683,11 @@ class _LocationHubPageState extends State<LocationHubPage> {
     Iterable _orders = json.decode(response.body);
     setState(() {
     print(_orders.length);
+
       var all = _orders.map((e) => Order.fromJson(e)).toList();
+    all.sort((a,b) {
+      return b.createdAt.compareTo(a.createdAt);
+    });
       print(all);
       new_orders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
       current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
@@ -564,11 +791,21 @@ class OrderItem {
   double flat_price;
   String special_instructions;
   OrderItem({this.name, this.quantity, this.flat_price, this.special_instructions});
+
+
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+    double convertToDouble(dynamic value) {
+      if (value is int) {
+        return value.toDouble();
+      } else {
+        return value;
+      }
+    }
+
     return OrderItem(
         name: json['name'] as String,
         quantity: json['quantity'] as int,
-        flat_price: json['flat_price'] as double,
+        flat_price: convertToDouble(json['flat_price']),
         special_instructions: json['special_instructions'] as String
     );
   }
@@ -595,6 +832,8 @@ class Order {
   double service_fee;
   double discount_amount;
   PaymentMethod paymentMethod;
+  DateTime createdAt;
+
 
   Order({
     this.restaurant_name,
@@ -617,7 +856,8 @@ class Order {
     this.discount_amount,
     this.paymentMethod,
     this.id,
-    this.cooked_at
+    this.cooked_at,
+    this.createdAt
   });
 
 
@@ -655,6 +895,8 @@ class Order {
           json['delivered_at'] as String) : null,
         cooked_at: json['cooked_at'] != null ? getDartDateFromNetUTC(
             json['cooked_at'] as String) : null,
+        createdAt: json['createdAt'] != null ? getDartDateFromNetUTC(
+            json['createdAt'] as String) : null,
       items: _items.map((e) => OrderItem.fromJson(e)).toList(),
       tax: convertToDouble(json['tax']),
       grand_total: convertToDouble(json['grand_total']),
@@ -663,12 +905,7 @@ class Order {
       service_fee: convertToDouble(json['service_fee']),
       discount_amount: json['discount_amount'],
       id: json['_id'] as String
-      // paymentMethod: PaymentMethod.fromJson(json['payment_method'])
-
     );
-
-
-
   }
 
 }
@@ -820,3 +1057,6 @@ class PaymentMethod {
 
 
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
