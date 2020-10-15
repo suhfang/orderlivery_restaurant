@@ -32,7 +32,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>NSCameraUsageDescription</string>
+	<string>Camera permission is required for qrcode scanning.</string>
 	<key>NSFileProviderDomainUsageDescription</key>
 	<string></string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -68,9 +68,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-    <key>NSCameraUsageDescription</key>
-    <string>Camera permission is required for qrcode scanning.</string>
-    <key>io.flutter.embedded_views_preview</key>
-    <true/>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>
