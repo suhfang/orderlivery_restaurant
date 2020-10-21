@@ -114,13 +114,14 @@ class _LocationHubPageState extends State<LocationHubPage> {
      getAcceptanceStatus(location_id: location_id);
      getOrders(location_id: location_id);
       if (location_id != null) {
+        String deviceId = await _getId();
         final _response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token', headers: {
           'Content-Type': 'application/json'
         },
             body: json.encode({
               'token': value,
               'location_id': location_id,
-              'device_id': await _getId()
+              'device_id': deviceId
             }));
         print(_response.body);
       }
@@ -685,10 +686,10 @@ class _LocationHubPageState extends State<LocationHubPage> {
     print(_orders.length);
 
       var all = _orders.map((e) => Order.fromJson(e)).toList();
-    all.sort((a,b) {
-      return b.createdAt.compareTo(a.createdAt);
-    });
-      print(all);
+    // all.sort((a,b) {
+    //   return b.createdAt.compareTo(a.createdAt);
+    // });
+    //   print(all);
       new_orders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
       current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
     past_orders = all.where((e) => e.picked_up_at != null || e.delivered_at != null || e.declined_at != null).toList();
@@ -728,7 +729,7 @@ class _LocationHubPageState extends State<LocationHubPage> {
       content: Text('You marked this order as ready for pickup'),
     ));
     if (location_id != null) {
-      getOrders(location_id: location_id);
+      await getOrders(location_id: location_id);
     }
   }
   declineOrder({String order_id}) async {
@@ -764,9 +765,6 @@ class _LocationHubPageState extends State<LocationHubPage> {
   }
 
 static AudioPlayer audioPlugin = AudioPlayer();
-
-
-
   getAcceptanceStatus({String location_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-status', headers: {
       'Content-Type': 'application/json'
