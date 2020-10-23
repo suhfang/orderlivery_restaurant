@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +42,7 @@ class CartItem {
     );
   }
 }
-class _LocationHubPageState extends State<LocationHubPage> {
+class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBindingObserver {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   List<CartItem> items_to_buy = [];
   List<Order> new_orders = [];
@@ -52,8 +53,26 @@ class _LocationHubPageState extends State<LocationHubPage> {
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
+  void dispose() {
+    handleWakeLock();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  AppLifecycleState _notification;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _notification = state;
+    });
+    if (_notification.index == 0) getOrders(location_id: location_id);
+  }
+
+  @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
   Wakelock.enable();
    //  Constants.isOnOrdersPage = true;
    // if (widget.notificationData != null) {
@@ -62,7 +81,7 @@ class _LocationHubPageState extends State<LocationHubPage> {
    //   order_total = json.decode(widget.notificationData['gcm.notification.additional_data'])['amount'];
    //   items_to_buy = items.map((e) => CartItem.fromJson(e)).toList();
   
-     print('fuck');
+
      getLocationId();
     // setToken();
    // }
@@ -71,11 +90,6 @@ class _LocationHubPageState extends State<LocationHubPage> {
   bool _allowing = false;
   String location_id;
 
-  @override
-  void dispose() async {
-    super.dispose();
-    handleWakeLock();
-  }
 
   handleWakeLock() async {
     if (await Wakelock.enabled) {
@@ -92,18 +106,21 @@ class _LocationHubPageState extends State<LocationHubPage> {
      location_id = json.decode(response.body)['location_id'] as String;
      _firebaseMessaging.configure(
        onMessage: (Map<String, dynamic> message) async {
+         await FlutterRingtonePlayer.playNotification();
          print(message);
          print('app onMessage');
          showNotification(title: message['title'], body: message['body']);
          getOrders(location_id: location_id);
        },
        onResume: (Map<String, dynamic> message) async {
+         await FlutterRingtonePlayer.playNotification();
          showNotification(title: message['title'], body: message['body']);
          print(message);
          getOrders(location_id: location_id);
          print('app onResume');
        },
        onLaunch: (Map<String, dynamic> message) async {
+         await FlutterRingtonePlayer.playNotification();
          showNotification(title: message['title'], body: message['body']);
          print(message);
          getOrders(location_id: location_id);
@@ -130,7 +147,6 @@ class _LocationHubPageState extends State<LocationHubPage> {
   }
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return
       DefaultTabController(
         length: 3,
@@ -674,6 +690,7 @@ class _LocationHubPageState extends State<LocationHubPage> {
   }
 
   getOrders({String location_id}) async {
+
     print(location_id);
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-orders', headers: {
       'Content-Type': 'application/json'
