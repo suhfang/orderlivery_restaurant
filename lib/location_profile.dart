@@ -82,7 +82,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text('LOCATION DETAILS'),
+        title: Text('Location Details'),
         backgroundColor: Colors.white,
         shadowColor: Colors.transparent,
       ),
@@ -218,11 +218,11 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
 
                                 decoration: BoxDecoration(
                                     color: Colors.orange,
-                                    borderRadius: BorderRadius.circular(10)
+                                    borderRadius: BorderRadius.circular(30)
                                 ),
-                                height: 50,
+                                height: 45,
                                 child: Center(
-                                  child: Text('GENERATE', style: TextStyle(color: Colors.white),),
+                                  child: Text('Generate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
 
                                 )
                             ),
@@ -635,12 +635,12 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.orange,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(30),
                           border: Border.all(color: Colors.orange),
                         ),
-                        height: 50,
+                        height: 45,
                         child: Center(
-                          child: Text('SAVE DETAILS', style: TextStyle(color: Colors.white),),
+                          child: Text('Save Details', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                         ),
                       ),
                       onTap: saveprofile,

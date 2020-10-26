@@ -1196,6 +1196,7 @@ class _TextFormField extends StatelessWidget {
             border: Border.all(color: Colors.white),
           ),
           child: TextFormField(
+
               enabled: enabled,
               textInputAction: textInputAction,
               focusNode: focusNode,
@@ -1207,14 +1208,18 @@ class _TextFormField extends StatelessWidget {
               controller: controller,
               validator: validator,
               decoration: InputDecoration(
-                  helperText: ' ',
-                  hintText: hintText,
-                  contentPadding: EdgeInsets.only(left: 10, right: 0, bottom: 5),
-                  filled: true,
-                  fillColor: Colors.white,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                  )
+                helperText: ' ',
+                hintText: hintText,
+                contentPadding: EdgeInsets.only(left: 20, right: 0, bottom: 5),
+                filled: true,
+                fillColor: Color(0xfff3f3f4),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(
+                    width: 0,
+                    style: BorderStyle.none,
+                  ),
+                ),
               ),
               obscureText: isPassword ? true : false,
               keyboardType: keyboardType

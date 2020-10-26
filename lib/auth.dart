@@ -236,7 +236,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       Alignment.topCenter,
                                                       width: deviceWidth,
                                                       child: _TextFormField(
-                                                        hintText: 'FIRST NAME',
+                                                        hintText: 'First Name',
                                                         onChanged:
                                                             (String value) {
                                                           _signUpFormKey
@@ -278,7 +278,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       Alignment.topCenter,
                                                       width: deviceWidth,
                                                       child: _TextFormField(
-                                                        hintText: 'LAST NAME',
+                                                        hintText: 'Last Name',
                                                         onChanged:
                                                             (String value) {
                                                           _signUpFormKey
@@ -317,7 +317,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'EMAIL',
+                                                    hintText: 'Email',
                                                     onChanged: (String value) {
                                                       _signUpFormKey.currentState
                                                           .validate();
@@ -353,7 +353,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'PASSWORD',
+                                                    hintText: 'Password',
                                                     onChanged: (String value) {
                                                       _signUpFormKey.currentState
                                                           .validate();
@@ -395,7 +395,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       FilteringTextInputFormatter
                                                           .allow(RegExp("[0-9]"))
                                                     ],
-                                                    hintText: 'PHONE NUMBER',
+                                                    hintText: 'Phone Number',
                                                     onChanged: (String value) {
                                                       _signUpFormKey.currentState
                                                           .validate();
@@ -433,7 +433,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                             children: [
                                               TextSpan(
                                                 recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/terms'),
-                                                style: TextStyle(color: Colors.blue, fontSize: 15, decoration: TextDecoration.underline),
+                                                style: TextStyle(color: Colors.purple, fontSize: 15, ),
                                                 text: ' Terms and Conditions '
                                               ),
                                               TextSpan(
@@ -442,11 +442,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                               ),
                                               TextSpan(
                                                   recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/privacy'),
-                                                  style: TextStyle(color: Colors.blue, fontSize: 15,  decoration: TextDecoration.underline),
+                                                  style: TextStyle(color: Colors.purple, fontSize: 15,),
                                                   text: ' Privacy Policy '
                                               ),
                                             ],
-                                            style: TextStyle(color: Colors.black, fontSize: 15),
+                                            style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
                                               text: 'By signing up, you agree to our'
                                           ),
                                         )
@@ -454,7 +454,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                       SizedBox(
                                           height: 50,
                                           width: MediaQuery.of(context).size.width-50,
-                                          child: InkWell(
+                                          child: GestureDetector(
                                             onTap: () {
                                               signup(context);
 
@@ -464,12 +464,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                 width: MediaQuery.of(context).size.width-50,
                                                 height: 50,
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(10),
+                                                  borderRadius: BorderRadius.circular(30),
                                                   color: Colors.orange,
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    'SIGN UP',
+                                                    'Sign Up',
                                                     style: TextStyle(
                                                       fontWeight: FontWeight.bold,
                                                       color: Colors.white,
@@ -500,16 +500,16 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   children: [
                                                     Icon(
                                                       LineIcons.arrow_right,
-                                                      color: Colors.blue,
+                                                      color: Colors.black,
                                                     ),
                                                     SizedBox(
                                                       width: 10,
                                                     ),
                                                     Text(
-                                                      'LOG IN',
+                                                      'Log In',
                                                       style: TextStyle(
                                                         fontWeight: FontWeight.bold,
-                                                          color: Colors.blue,
+                                                          color: Colors.black,
                                                           fontSize: 20),
                                                     ),
                                                   ],
@@ -564,7 +564,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'EMAIL',
+                                                    hintText: 'Email',
                                                     onChanged: (String value) {
                                                       accessTokenController.text = '';
                                                       _loginFormKey.currentState
@@ -600,7 +600,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   alignment: Alignment.topCenter,
                                                   width: deviceWidth,
                                                   child: _TextFormField(
-                                                    hintText: 'PASSWORD',
+                                                    hintText: 'Password',
                                                     onChanged: (String value) {
                                                       accessTokenController.text = '';
                                                       _loginFormKey.currentState
@@ -636,7 +636,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                        },
                                        child:  Padding(
                                          padding: EdgeInsets.all(20),
-                                         child: Text('Forgot password?', style: TextStyle(color: Colors.blue, fontSize: 19,  decoration: TextDecoration.underline,),),
+                                         child: Text('Forgot password?', style: TextStyle(color: Colors.black, fontSize: 19, fontWeight: FontWeight.bold,),),
                                        ),
                                      ),
                                       SizedBox(height: 20,),
@@ -649,7 +649,8 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                             alignment: Alignment.topCenter,
                                             width: deviceWidth,
                                             child: _TextFormField(
-                                              hintText: 'ACCESS TOKEN',
+                                              isPassword: true,
+                                              hintText: 'Access Token',
                                               onChanged: (String value) {
                                                 loginEmailController.text = '';
                                                 loginPasswordController.text = '';
@@ -657,7 +658,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                     .validate();
                                               },
                                               autofillHints: [
-                                                AutofillHints.email
+                                                AutofillHints.password
                                               ],
                                               controller:
                                               accessTokenController,
@@ -687,13 +688,13 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                 width: MediaQuery.of(context).size.width-50,
                                                 height: 50,
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(10),
+                                                  borderRadius: BorderRadius.circular(30),
                                                   color: Colors.orange,
 
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    'LOG IN',
+                                                    'Log In',
                                                     style: TextStyle(
                                                       fontWeight: FontWeight.bold,
                                                       color: Colors.white,
@@ -725,16 +726,16 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   children: [
                                                     Icon(
                                                       LineIcons.arrow_left,
-                                                      color: Colors.blue,
+                                                      color: Colors.black,
                                                     ),
                                                     SizedBox(
                                                       width: 10,
                                                     ),
                                                     Text(
-                                                      'SIGN UP',
+                                                      'Sign Up',
                                                       style: TextStyle(
                                                         fontWeight: FontWeight.bold,
-                                                          color: Colors.blue,
+                                                          color: Colors.black,
                                                           fontSize: 19),
                                                     ),
                                                   ],
@@ -992,18 +993,22 @@ class _TextFormField extends StatelessWidget {
             inputFormatters: inputFormatters,
             onChanged: onChanged,
             autofillHints: autofillHints,
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             controller: controller,
             validator: validator,
             decoration: InputDecoration(
               helperText: ' ',
               hintText: hintText,
-              contentPadding: EdgeInsets.only(left: 0, right: 0, bottom: 5),
-              enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(width: 0.3, color: Colors.grey)
-              ),
+              contentPadding: EdgeInsets.only(left: 20, right: 0, bottom: 5),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Color(0xfff3f3f4),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(
+                  width: 0,
+                  style: BorderStyle.none,
+                ),
+              ),
             ),
             obscureText: isPassword ? true : false,
             keyboardType:

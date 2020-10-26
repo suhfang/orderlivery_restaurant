@@ -314,7 +314,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
 
     return Scaffold(
         appBar: AppBar(
-          title: Text('MENU ITEMS'),
+          title: Text('Menu Items', style: TextStyle(fontWeight: FontWeight.bold),),
           backgroundColor: Colors.white,
           shadowColor: Colors.transparent,
         ),
@@ -359,7 +359,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                                   },
                                   child: Text(
                                     // get the icon
-                                    _categories[index].name,
+                                    _categories[index].name, style: TextStyle(fontWeight: FontWeight.bold),
                                     // get the color of the icon (dependent of its state)
 //                                    color: _getForegroundColor(index),
                                   )),
@@ -394,10 +394,11 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                                       onTap: () {
                                         deleteItem(item.id);
                                       },
-                                      child: Icon(CupertinoIcons.trash),
+                                      child: Icon(CupertinoIcons.trash, color: Colors.black,),
                                     ),
-                                    title: Text(item.name),
-                                    subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold), ) : Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold),),
+                                    subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black), ) :
+                                    Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                   ),
                                   Divider()
                                 ],
@@ -429,18 +430,18 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                             Container(
                               decoration: BoxDecoration(
                                   color: Colors.orange,
-                                  borderRadius: BorderRadius.circular(10)
+                                  borderRadius: BorderRadius.circular(30)
                               ),
-                              height: 50,
+                              height: 45,
 
                               width: MediaQuery
                                   .of(context)
                                   .size
                                   .width - 50,
                               child: Center(
-                                child: Text('CREATE NEW MENU ITEM', style: TextStyle(
+                                child: Text('Create New Menu Item', style: TextStyle(
 
-//                                        fontWeight: FontWeight.bold,
+                                       fontWeight: FontWeight.bold,
                                     color: Colors.white),),
                               ),
                             ),
@@ -584,7 +585,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
     showModalBottomSheet(context: context, builder: (BuildContext context) {
       return Container(
         color: Color(0xFF737373),
-        height: 200,
+        height: 150,
         child: Container(
           decoration: BoxDecoration(
               color: Theme.of(context).canvasColor,
@@ -593,21 +594,13 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
           child: Column(
             children: [
               SizedBox(height: 10,),
-              Container(
-                height: 5,
-                width: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.grey.withOpacity(0.5),
-                ),
-              ),
-              SizedBox(height: 15,),
-              Text('CHOOSE TYPE', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+
+
               SizedBox(height: 5,),
-              Divider(),
+
               Padding(
                 padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
-                child: Text('What type of menu do you want to create?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
+                child: Text('What type of menu do you want to create?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center,),
               ),
               SizedBox(
                 height: 10,
@@ -635,11 +628,11 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(30),
                                 color: Colors.orange,
                               ),
-                              height: 50,
-                              child: Center(child: Text('Combo', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),),
+                              height: 45,
+                              child: Center(child: Text('Combo', textAlign: TextAlign.center, style: TextStyle( color: Colors.white, fontWeight: FontWeight.bold),),),
                             ),
                           )
                       ),
@@ -658,11 +651,12 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(30),
                                 color: Colors.orange,
                               ),
-                              height: 50,
-                              child: Center(child: Text('A La Carte', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),),
+                              height: 45,
+                              child: Center(
+                                child: Text('A La Carte', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),),
                             ),
                           )
                       ),

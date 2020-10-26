@@ -11,6 +11,7 @@ import 'package:Restaurant/users.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -76,21 +77,21 @@ class DrawerScaffold extends StatelessWidget {
                     children: <Widget>[
                       ListTile(
                         title: Text('MY HUB'),
-                        leading: Icon(CupertinoIcons.home),
+                        leading: Icon(FontAwesomeIcons.home, color: Colors.black,),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
                         }
                       ),
                       ListTile(
                         title: Text('RESTAURANT PROFILE'),
-                        leading: Icon(CupertinoIcons.profile_circled),
+                        leading: Icon(CupertinoIcons.profile_circled, color: Colors.black,),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantDetailPage()));
                         }
                       ),
                       ListTile(
                         title: Text('FOOD MENU'),
-                        leading: Icon(Icons.menu_book),
+                        leading: Icon(Icons.menu_book, color: Colors.black,),
                         onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => FoodMenuPage()));
                         }
@@ -98,36 +99,36 @@ class DrawerScaffold extends StatelessWidget {
                       ),
                       ListTile(
                         title: Text('RATINGS'),
-                        leading: Icon(LineIcons.star),
+                        leading: Icon(LineIcons.star, color: Colors.black,),
                         onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RatingsPage()));
                         }
                       ),
                       ListTile(
                         title: Text('ORDERS'),
-                        leading: Icon(LineIcons.newspaper_o),
+                        leading: Icon(LineIcons.newspaper_o, color: Colors.black,),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => OrdersPage()));
                         }
                       ),
                       ListTile(
                           title: Text('PAYMENTS'),
-                          leading: Icon(LineIcons.credit_card),
+                          leading: Icon(LineIcons.credit_card, color: Colors.black,),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PaymentsPage()));
                           }
                       ),
                       ListTile(
                           title: Text('ACCOUNT SETTINGS'),
-                          leading: Icon(CupertinoIcons.settings),
+                          leading: Icon(FontAwesomeIcons.cog, color: Colors.black,),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SettingsPage()));
                           }
                       ),
                       ListTile(
-                        tileColor: Colors.orange,
-                          title: Text('LOG OUT',style: TextStyle(color: Colors.white),),
-                          leading: Icon(LineIcons.sign_out, color: Colors.white,),
+                        // tileColor: Colors.orange,
+                          title: Text('LOG OUT',style: TextStyle(color: Colors.black),),
+                          leading: Icon(LineIcons.sign_out, color: Colors.black,),
                           onTap: () async {
                             SharedPreferences prefs = await SharedPreferences.getInstance();
                             await prefs.setString('token', '');

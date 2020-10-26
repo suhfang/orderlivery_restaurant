@@ -164,6 +164,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('How do we call your restaurant?'),
+                    SizedBox(height: 10),
                     Container(
                       alignment:
                       Alignment.topCenter,
@@ -193,6 +194,8 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       ),
                     ),
                     Text('Briefly describe your restaurant'),
+                    SizedBox(height: 10),
+
                     Container(
                       alignment:
                       Alignment.topCenter,
@@ -275,12 +278,12 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(30),
                           border: Border.all(color: Colors.orange),
                         ),
-                        height: 50,
+                        height: 45,
                         child: Center(
-                          child: Text('UPDATE PHOTO', style: TextStyle(color: Colors.orange),),
+                          child: Text('Update Photo', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
                         ),
                       ),
                     ),
@@ -304,13 +307,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       highlightColor: Colors.transparent,
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(30),
                           color: Colors.white,
                           border: Border.all(color: Colors.orange),
                         ),
-                        height: 50,
+                        height: 45,
                         child: Center(
-                          child: Text('UPDATE PHOTO', style: TextStyle(color: Colors.orange),),
+                          child: Text('Update Photo', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
                         ),
                       ),
                     ),
@@ -324,9 +327,9 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.orange),
                         ),
-                        height: 50,
+                        height: 45,
                         child: Center(
-                          child: Text('SAVE PROFILE', style: TextStyle(color: Colors.white),),
+                          child: Text('Save Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                         ),
                       ),
                       onTap: saveprofile,
@@ -609,12 +612,18 @@ class _TextFormField extends StatelessWidget {
             decoration: InputDecoration(
               helperText: ' ',
               hintText: hintText,
-              contentPadding: EdgeInsets.only(left: 10, right: 0, bottom: 5),
+              contentPadding: EdgeInsets.only(left: 20),
               filled: true,
-              fillColor: Colors.white,
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                )
+              // enabledBorder: UnderlineInputBorder(
+              //     borderSide: BorderSide(width: 0.3, color: Colors.grey)),
+              fillColor: Color(0xfff3f3f4),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(
+                  width: 0,
+                  style: BorderStyle.none,
+                ),
+              ),
             ),
             obscureText: isPassword ? true : false,
             keyboardType:

@@ -199,7 +199,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       appBar: AppBar(
         shadowColor: Colors.transparent,
         centerTitle: true,
-        title: Text('CATEGORIES'),
+        title: Text('Categories', style: TextStyle(fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
@@ -209,7 +209,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
               padding: EdgeInsets.all(20),
               child: Stack(
                 children: [
-                  Text('Please note: This will be the order the categories will appear in the app. We recommend starting with Appetizers at the top of the list, and desserts last. But it\'s up to you!'),
+                  Text('Please note: This will be the order the categories will appear in the app. We recommend starting with Appetizers at the top of the list, and desserts last. But it\'s up to you!',
+                  style: TextStyle(fontWeight: FontWeight.bold),),
                   Padding(
                     padding: EdgeInsets.only(left: 0, right: 0, top: 70,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ),
                     child:  ListView.builder(
@@ -234,9 +235,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                   child:  Column(
                                     children: [
                                       ListTile(
-                                        title: Text(item.name),
+                                        title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold),),
                                       ),
-                                      Divider()
+                                      Divider(color: Colors.black,)
                                     ],
                                   ),
                                 )
@@ -259,10 +260,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           height: 50,
                           decoration: BoxDecoration(
                               color: Colors.orange,
-                              borderRadius: BorderRadius.circular(10)
+                              borderRadius: BorderRadius.circular(30)
                           ),
                           child: Center(
-                            child: Text('CREATE NEW CATEGORY', style: TextStyle(color: Colors.white),),
+                            child: Text('Create New Category', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                           ),
                         ),
                       )

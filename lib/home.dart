@@ -160,12 +160,12 @@ class _HomePageState extends State<HomePage> {
                                 Container(
                                   decoration: BoxDecoration(
                                       color: Colors.orange,
-                                      borderRadius: BorderRadius.circular(10)
+                                      borderRadius: BorderRadius.circular(30)
                                   ),
                                   height: 50,
                                   width: MediaQuery.of(context).size.width - 50,
                                   child: Center(
-                                    child: Text('ADD LOCATION', style: TextStyle(color: Colors.white),),
+                                    child: Text('Add Location', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                                   ),
                                 ),
                               ],

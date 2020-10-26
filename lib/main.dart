@@ -10,6 +10,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:Restaurant/constants.dart' as Constants;
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,20 +53,24 @@ void iOS_Permission() async {
 
   @override
   Widget build(BuildContext context) {
+      final textTheme = Theme.of(context).textTheme;
 
-    Future.delayed(Duration(milliseconds: 1000), () async {
-      firebaseCloudMessaging_Listeners();
-    });
+      Future.delayed(Duration(milliseconds: 1000), () async {
+        firebaseCloudMessaging_Listeners();
+      });
 
-    return MaterialApp(
-        // navigatorKey: navigatorKey,
-      title: 'Restaurant',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: InitPage()
-    );
+      return MaterialApp(
+          // navigatorKey: navigatorKey,
+        title: 'Restaurant',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.orange,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
+            bodyText1: GoogleFonts.montserrat(textStyle: textTheme.bodyText1),
+          ),
+        ),
+        home: InitPage()
+      );
   }
 }

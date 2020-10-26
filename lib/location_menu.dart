@@ -34,7 +34,7 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
         child: ListView(
           children: [
             ListTile(
-              title: Text('LOCATION DETAILS'),
+              title: Text('Location Details'),
               trailing: Icon(LineIcons.angle_right),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationProfilePage(locationId: widget.addressId,)));
