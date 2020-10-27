@@ -159,385 +159,60 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       _pageLoaded = true;
     }
     final deviceWidth = MediaQuery.of(context).size.width - 50;
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
-      child: Scaffold(
-          backgroundColor: Colors.white,
-          body: Builder(
-            builder: (BuildContext context) {
-              return AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.dark,
-                child: SafeArea(
-                  child: Stack(
-                    children: [
-                      Padding(
-                          padding: EdgeInsets.only(top: 10, left: 0),
-                          child: SingleChildScrollView(
-                            child: Container(
-                              height: 800,
-                              child: PageView(
-                                physics: ClampingScrollPhysics(),
-                                controller: _pageController,
-                                onPageChanged: (int page) {
-                                  print(page);
-                                  setState(() {
-                                    _currentPage = page;
-                                    _segmentedControlGroupValue = _currentPage;
-                                  });
-                                },
-                                children: [
-                                  Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 20,
-                                            top: 0,
-                                            bottom: 10,
-                                            right: 10),
-                                        child: Container(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Sign Up',
-                                                  style: TextStyle(
-                                                      fontSize: 40,
-                                                      fontWeight: FontWeight.bold),
-                                                ),
-//                                                Padding(
-//                                                  padding: EdgeInsets.only(right: 10),
-//                                                  child: Image.asset(
-//                                                    'assets/images/logo.png',
-//                                                    height: 50,
-//                                                    width: 50,
-//                                                  ),
-//                                                )
-                                              ],
-                                            )),
-                                      ),
-                                      Form(
-                                        key: _signUpFormKey,
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 40,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      alignment:
-                                                      Alignment.topCenter,
-                                                      width: deviceWidth,
-                                                      child: _TextFormField(
-                                                        hintText: 'First Name',
-                                                        onChanged:
-                                                            (String value) {
-                                                          _signUpFormKey
-                                                              .currentState
-                                                              .validate();
-                                                        },
-                                                        controller:
-                                                        firstNameController,
-                                                        validator:
-                                                            (String value) {
-                                                          if (value.length < 2) {
-                                                            return 'Enter your first name';
-                                                          }
-                                                          return null;
-                                                        },
-                                                        onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                        },
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-
-                                              ],
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      alignment:
-                                                      Alignment.topCenter,
-                                                      width: deviceWidth,
-                                                      child: _TextFormField(
-                                                        hintText: 'Last Name',
-                                                        onChanged:
-                                                            (String value) {
-                                                          _signUpFormKey
-                                                              .currentState
-                                                              .validate();
-                                                        },
-                                                        controller:
-                                                        lastNameController,
-                                                        validator:
-                                                            (String value) {
-                                                          if (value.length < 2) {
-                                                            return 'Enter your last name';
-                                                          }
-                                                          return null;
-                                                        },
-                                                        onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                        },
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-
-                                              ],
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  alignment: Alignment.topCenter,
-                                                  width: deviceWidth,
-                                                  child: _TextFormField(
-                                                    hintText: 'Email',
-                                                    onChanged: (String value) {
-                                                      _signUpFormKey.currentState
-                                                          .validate();
-                                                    },
-                                                    autofillHints: [
-                                                      AutofillHints.email
-                                                    ],
-                                                    isEmail: true,
-                                                    controller:
-                                                    signUpEmailController,
-                                                    validator: (String value) {
-                                                      if (!EmailValidator
-                                                          .validate(value.trim())) {
-                                                        return 'Enter your email';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                    },
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  alignment: Alignment.topCenter,
-                                                  width: deviceWidth,
-                                                  child: _TextFormField(
-                                                    hintText: 'Password',
-                                                    onChanged: (String value) {
-                                                      _signUpFormKey.currentState
-                                                          .validate();
-                                                    },
-                                                    autofillHints: [
-                                                      AutofillHints.password
-                                                    ],
-                                                    isPassword: true,
-                                                    controller:
-                                                    signUpPasswordController,
-                                                    validator: (String value) {
-                                                      if (value.length < 1) {
-                                                        return 'Enter your password';
-                                                      }
-                                                      if (value.length < 8) {
-                                                        return 'Password should be at least 8 characters';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                    },
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  alignment: Alignment.topCenter,
-                                                  width: deviceWidth,
-                                                  child: _TextFormField(
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp("[0-9]"))
-                                                    ],
-                                                    hintText: 'Phone Number',
-                                                    onChanged: (String value) {
-                                                      _signUpFormKey.currentState
-                                                          .validate();
-                                                    },
-                                                    autofillHints: [
-                                                      AutofillHints
-                                                          .telephoneNumber
-                                                    ],
-                                                    controller:
-                                                    signUpPhoneController,
-                                                    validator: (String value) {
-                                                      if (value.length != 10) {
-                                                        return 'Enter your phone number';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                    },
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.all(20),
-                                        child: RichText(
-                                          textAlign: TextAlign.center,
-                                          text: TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/terms'),
-                                                style: TextStyle(color: Colors.purple, fontSize: 15, ),
-                                                text: ' Terms and Conditions '
-                                              ),
-                                              TextSpan(
-                                                  style: TextStyle(color: Colors.black, fontSize: 15),
-                                                  text: 'and'
-                                              ),
-                                              TextSpan(
-                                                  recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/privacy'),
-                                                  style: TextStyle(color: Colors.purple, fontSize: 15,),
-                                                  text: ' Privacy Policy '
-                                              ),
-                                            ],
-                                            style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
-                                              text: 'By signing up, you agree to our'
-                                          ),
-                                        )
-                                      ),
-                                      SizedBox(
-                                          height: 50,
-                                          width: MediaQuery.of(context).size.width-50,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              signup(context);
-
-                                            },
-                                            child: Container(
-                                              
-                                                width: MediaQuery.of(context).size.width-50,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  color: Colors.orange,
-                                                ),
-                                                child: Center(
-                                                  child: Text(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarDividerColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark
+      ),
+      child: WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: Scaffold(
+            backgroundColor: Colors.white,
+            body: Builder(
+              builder: (BuildContext context) {
+                return AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: SystemUiOverlayStyle.dark,
+                  child: SafeArea(
+                    child: Stack(
+                      children: [
+                        Padding(
+                            padding: EdgeInsets.only(top: 10, left: 0),
+                            child: SingleChildScrollView(
+                              child: Container(
+                                height: 800,
+                                child: PageView(
+                                  physics: ClampingScrollPhysics(),
+                                  controller: _pageController,
+                                  onPageChanged: (int page) {
+                                    print(page);
+                                    setState(() {
+                                      _currentPage = page;
+                                      _segmentedControlGroupValue = _currentPage;
+                                    });
+                                  },
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 20,
+                                              top: 0,
+                                              bottom: 10,
+                                              right: 10),
+                                          child: Container(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
                                                     'Sign Up',
                                                     style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                      fontSize: 19,
-                                                    ),
+                                                        fontSize: 40,
+                                                        fontWeight: FontWeight.bold),
                                                   ),
-                                                )),
-                                          )),
-
-                                      Padding(
-                                          padding: EdgeInsets.only(right: 25),
-                                          child: InkWell(
-                                              highlightColor: Colors.transparent,
-                                              splashColor: Colors.transparent,
-                                              onTap: () {
-                                                _pageController.nextPage(
-                                                  duration:
-                                                  Duration(milliseconds: 500),
-                                                  curve: Curves.ease,
-                                                );
-                                                print(_pageController.page);
-                                              },
-                                              child: Padding(
-                                                padding: EdgeInsets.all(10),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                                  children: [
-                                                    Icon(
-                                                      LineIcons.arrow_right,
-                                                      color: Colors.black,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text(
-                                                      'Log In',
-                                                      style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                          color: Colors.black,
-                                                          fontSize: 20),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )))
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 20,
-                                            top: 0,
-                                            bottom: 10,
-                                            right: 10),
-                                        child: Container(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Log In',
-                                                  style: TextStyle(
-                                                      fontSize: 40,
-                                                      fontWeight: FontWeight.bold,
-                                                    color: Colors.black
-                                                  ),
-                                                ),
 //                                                Padding(
 //                                                  padding: EdgeInsets.only(right: 10),
 //                                                  child: Image.asset(
@@ -546,213 +221,545 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 //                                                    width: 50,
 //                                                  ),
 //                                                )
-                                              ],
-                                            )),
-                                      ),
-                                      Form(
-                                        key: _loginFormKey,
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 40,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  alignment: Alignment.topCenter,
-                                                  width: deviceWidth,
-                                                  child: _TextFormField(
-                                                    hintText: 'Email',
-                                                    onChanged: (String value) {
-                                                      accessTokenController.text = '';
-                                                      _loginFormKey.currentState
-                                                          .validate();
-                                                    },
-                                                    autofillHints: [
-                                                      AutofillHints.email
-                                                    ],
-                                                    controller:
-                                                    loginEmailController,
-                                                    validator: (String value) {
-                                                      if (!EmailValidator
-                                                          .validate(value.trim())) {
-                                                        return 'Enter your email';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                    },
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  alignment: Alignment.topCenter,
-                                                  width: deviceWidth,
-                                                  child: _TextFormField(
-                                                    hintText: 'Password',
-                                                    onChanged: (String value) {
-                                                      accessTokenController.text = '';
-                                                      _loginFormKey.currentState
-                                                          .validate();
-                                                    },
-                                                    autofillHints: [
-                                                      AutofillHints.password
-                                                    ],
-                                                    isPassword: true,
-                                                    controller:
-                                                    loginPasswordController,
-                                                    validator: (String value) {
-                                                      if (value.length < 8) {
-                                                        return 'Password should be at least 8 characters';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onSaved: (String value) {
-//                                                  model.lastName = value;
-                                                    },
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-
-                                          ],
+                                                ],
+                                              )),
                                         ),
-                                      ),
-
-                                     GestureDetector(
-                                       onTap: () {
-                                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordPage()));
-                                       },
-                                       child:  Padding(
-                                         padding: EdgeInsets.all(20),
-                                         child: Text('Forgot password?', style: TextStyle(color: Colors.black, fontSize: 19, fontWeight: FontWeight.bold,),),
-                                       ),
-                                     ),
-                                      SizedBox(height: 20,),
-                                      SizedBox(height: 50, child: Text('OR'),),
-                                      Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            alignment: Alignment.topCenter,
-                                            width: deviceWidth,
-                                            child: _TextFormField(
-                                              isPassword: true,
-                                              hintText: 'Access Token',
-                                              onChanged: (String value) {
-                                                loginEmailController.text = '';
-                                                loginPasswordController.text = '';
-                                                _loginFormKey.currentState
-                                                    .validate();
-                                              },
-                                              autofillHints: [
-                                                AutofillHints.password
-                                              ],
-                                              controller:
-                                              accessTokenController,
-                                              validator: (String value) {
-                                                if (!EmailValidator
-                                                    .validate(value)) {
-                                                  return 'Enter your access token';
-                                                }
-                                                return null;
-                                              },
-                                              onSaved: (String value) {
+                                        Form(
+                                          key: _signUpFormKey,
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 40,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                        alignment:
+                                                        Alignment.topCenter,
+                                                        width: deviceWidth,
+                                                        child: _TextFormField(
+                                                          hintText: 'First Name',
+                                                          onChanged:
+                                                              (String value) {
+                                                            _signUpFormKey
+                                                                .currentState
+                                                                .validate();
+                                                          },
+                                                          controller:
+                                                          firstNameController,
+                                                          validator:
+                                                              (String value) {
+                                                            if (value.length < 2) {
+                                                              return 'Enter your first name';
+                                                            }
+                                                            return null;
+                                                          },
+                                                          onSaved: (String value) {
 //                                                  model.lastName = value;
-                                              },
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      
-                                      SizedBox(
-                                          height: 50,
-                                          width: MediaQuery.of(context).size.width-50,
-                                          child: InkWell(
-                                            onTap: () {
-                                              login(context);
-                                            },
-                                            child: Container(
-                                                width: MediaQuery.of(context).size.width-50,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  color: Colors.orange,
-
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    'Log In',
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                      fontSize: 19,
-                                                    ),
+                                                          },
+                                                        ),
+                                                      )
+                                                    ],
                                                   ),
-                                                )),
-                                          )),
 
+                                                ],
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                        alignment:
+                                                        Alignment.topCenter,
+                                                        width: deviceWidth,
+                                                        child: _TextFormField(
+                                                          hintText: 'Last Name',
+                                                          onChanged:
+                                                              (String value) {
+                                                            _signUpFormKey
+                                                                .currentState
+                                                                .validate();
+                                                          },
+                                                          controller:
+                                                          lastNameController,
+                                                          validator:
+                                                              (String value) {
+                                                            if (value.length < 2) {
+                                                              return 'Enter your last name';
+                                                            }
+                                                            return null;
+                                                          },
+                                                          onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                          },
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
 
-                                      Padding(
-                                          padding: EdgeInsets.only(left: 25),
-                                          child: InkWell(
-                                              highlightColor: Colors.transparent,
-                                              splashColor: Colors.transparent,
-                                              onTap: () {
-                                                _pageController.previousPage(
-                                                  duration:
-                                                  Duration(milliseconds: 500),
-                                                  curve: Curves.ease,
-                                                );
-                                                print(_pageController.page);
-                                              },
-                                              child: Padding(
-                                                padding: EdgeInsets.all(10),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                                ],
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    alignment: Alignment.topCenter,
+                                                    width: deviceWidth,
+                                                    child: _TextFormField(
+                                                      hintText: 'Email',
+                                                      onChanged: (String value) {
+                                                        _signUpFormKey.currentState
+                                                            .validate();
+                                                      },
+                                                      autofillHints: [
+                                                        AutofillHints.email
+                                                      ],
+                                                      isEmail: true,
+                                                      controller:
+                                                      signUpEmailController,
+                                                      validator: (String value) {
+                                                        if (!EmailValidator
+                                                            .validate(value.trim())) {
+                                                          return 'Enter your email';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                      },
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    alignment: Alignment.topCenter,
+                                                    width: deviceWidth,
+                                                    child: _TextFormField(
+                                                      hintText: 'Password',
+                                                      onChanged: (String value) {
+                                                        _signUpFormKey.currentState
+                                                            .validate();
+                                                      },
+                                                      autofillHints: [
+                                                        AutofillHints.password
+                                                      ],
+                                                      isPassword: true,
+                                                      controller:
+                                                      signUpPasswordController,
+                                                      validator: (String value) {
+                                                        if (value.length < 1) {
+                                                          return 'Enter your password';
+                                                        }
+                                                        if (value.length < 8) {
+                                                          return 'Password should be at least 8 characters';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                      },
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    alignment: Alignment.topCenter,
+                                                    width: deviceWidth,
+                                                    child: _TextFormField(
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter
+                                                            .allow(RegExp("[0-9]"))
+                                                      ],
+                                                      hintText: 'Phone Number',
+                                                      onChanged: (String value) {
+                                                        _signUpFormKey.currentState
+                                                            .validate();
+                                                      },
+                                                      autofillHints: [
+                                                        AutofillHints
+                                                            .telephoneNumber
+                                                      ],
+                                                      controller:
+                                                      signUpPhoneController,
+                                                      validator: (String value) {
+                                                        if (value.length != 10) {
+                                                          return 'Enter your phone number';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                      },
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                            padding: EdgeInsets.all(20),
+                                            child: RichText(
+                                              textAlign: TextAlign.center,
+                                              text: TextSpan(
                                                   children: [
-                                                    Icon(
-                                                      LineIcons.arrow_left,
-                                                      color: Colors.black,
+                                                    TextSpan(
+                                                        recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/terms'),
+                                                        style: TextStyle(color: Colors.purple, fontSize: 15, ),
+                                                        text: ' Terms and Conditions '
                                                     ),
-                                                    SizedBox(
-                                                      width: 10,
+                                                    TextSpan(
+                                                        style: TextStyle(color: Colors.black, fontSize: 15),
+                                                        text: 'and'
                                                     ),
-                                                    Text(
+                                                    TextSpan(
+                                                        recognizer: TapGestureRecognizer()..onTap = () => _launchInWebViewWithJavaScript('http://orderlivery.com/privacy'),
+                                                        style: TextStyle(color: Colors.purple, fontSize: 15,),
+                                                        text: ' Privacy Policy '
+                                                    ),
+                                                  ],
+                                                  style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
+                                                  text: 'By signing up, you agree to our'
+                                              ),
+                                            )
+                                        ),
+                                        SizedBox(
+                                            height: 50,
+                                            width: MediaQuery.of(context).size.width-50,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                signup(context);
+
+                                              },
+                                              child: Container(
+
+                                                  width: MediaQuery.of(context).size.width-50,
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(30),
+                                                    color: Colors.orange,
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
                                                       'Sign Up',
                                                       style: TextStyle(
                                                         fontWeight: FontWeight.bold,
-                                                          color: Colors.black,
-                                                          fontSize: 19),
+                                                        color: Colors.white,
+                                                        fontSize: 19,
+                                                      ),
                                                     ),
-                                                  ],
-                                                ),
-                                              )))
-                                    ],
-                                  ),
-                                ],
+                                                  )),
+                                            )),
+
+                                        Padding(
+                                            padding: EdgeInsets.only(right: 25),
+                                            child: InkWell(
+                                                highlightColor: Colors.transparent,
+                                                splashColor: Colors.transparent,
+                                                onTap: () {
+                                                  _pageController.nextPage(
+                                                    duration:
+                                                    Duration(milliseconds: 500),
+                                                    curve: Curves.ease,
+                                                  );
+                                                  print(_pageController.page);
+                                                },
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                    children: [
+                                                      Icon(
+                                                        LineIcons.arrow_right,
+                                                        color: Colors.black,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text(
+                                                        'Log In',
+                                                        style: TextStyle(
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.black,
+                                                            fontSize: 20),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )))
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 20,
+                                              top: 0,
+                                              bottom: 10,
+                                              right: 10),
+                                          child: Container(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Log In',
+                                                    style: TextStyle(
+                                                        fontSize: 40,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.black
+                                                    ),
+                                                  ),
+//                                                Padding(
+//                                                  padding: EdgeInsets.only(right: 10),
+//                                                  child: Image.asset(
+//                                                    'assets/images/logo.png',
+//                                                    height: 50,
+//                                                    width: 50,
+//                                                  ),
+//                                                )
+                                                ],
+                                              )),
+                                        ),
+                                        Form(
+                                          key: _loginFormKey,
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 40,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    alignment: Alignment.topCenter,
+                                                    width: deviceWidth,
+                                                    child: _TextFormField(
+                                                      hintText: 'Email',
+                                                      onChanged: (String value) {
+                                                        accessTokenController.text = '';
+                                                        _loginFormKey.currentState
+                                                            .validate();
+                                                      },
+                                                      autofillHints: [
+                                                        AutofillHints.email
+                                                      ],
+                                                      controller:
+                                                      loginEmailController,
+                                                      validator: (String value) {
+                                                        if (!EmailValidator
+                                                            .validate(value.trim())) {
+                                                          return 'Enter your email';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                      },
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    alignment: Alignment.topCenter,
+                                                    width: deviceWidth,
+                                                    child: _TextFormField(
+                                                      hintText: 'Password',
+                                                      onChanged: (String value) {
+                                                        accessTokenController.text = '';
+                                                        _loginFormKey.currentState
+                                                            .validate();
+                                                      },
+                                                      autofillHints: [
+                                                        AutofillHints.password
+                                                      ],
+                                                      isPassword: true,
+                                                      controller:
+                                                      loginPasswordController,
+                                                      validator: (String value) {
+                                                        if (value.length < 8) {
+                                                          return 'Password should be at least 8 characters';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                      },
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+
+                                            ],
+                                          ),
+                                        ),
+
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ForgotPasswordPage()));
+                                          },
+                                          child:  Padding(
+                                            padding: EdgeInsets.all(20),
+                                            child: Text('Forgot password?', style: TextStyle(color: Colors.black, fontSize: 19, fontWeight: FontWeight.bold,),),
+                                          ),
+                                        ),
+                                        SizedBox(height: 20,),
+                                        SizedBox(height: 50, child: Text('OR'),),
+                                        Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              alignment: Alignment.topCenter,
+                                              width: deviceWidth,
+                                              child: _TextFormField(
+                                                isPassword: true,
+                                                hintText: 'Access Token',
+                                                onChanged: (String value) {
+                                                  loginEmailController.text = '';
+                                                  loginPasswordController.text = '';
+                                                  _loginFormKey.currentState
+                                                      .validate();
+                                                },
+                                                autofillHints: [
+                                                  AutofillHints.password
+                                                ],
+                                                controller:
+                                                accessTokenController,
+                                                validator: (String value) {
+                                                  if (!EmailValidator
+                                                      .validate(value)) {
+                                                    return 'Enter your access token';
+                                                  }
+                                                  return null;
+                                                },
+                                                onSaved: (String value) {
+//                                                  model.lastName = value;
+                                                },
+                                              ),
+                                            )
+                                          ],
+                                        ),
+
+                                        SizedBox(
+                                            height: 50,
+                                            width: MediaQuery.of(context).size.width-50,
+                                            child: InkWell(
+                                              onTap: () {
+                                                login(context);
+                                              },
+                                              child: Container(
+                                                  width: MediaQuery.of(context).size.width-50,
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(30),
+                                                    color: Colors.orange,
+
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      'Log In',
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.white,
+                                                        fontSize: 19,
+                                                      ),
+                                                    ),
+                                                  )),
+                                            )),
+
+
+                                        Padding(
+                                            padding: EdgeInsets.only(left: 25),
+                                            child: InkWell(
+                                                highlightColor: Colors.transparent,
+                                                splashColor: Colors.transparent,
+                                                onTap: () {
+                                                  _pageController.previousPage(
+                                                    duration:
+                                                    Duration(milliseconds: 500),
+                                                    curve: Curves.ease,
+                                                  );
+                                                  print(_pageController.page);
+                                                },
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                    children: [
+                                                      Icon(
+                                                        LineIcons.arrow_left,
+                                                        color: Colors.black,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text(
+                                                        'Sign Up',
+                                                        style: TextStyle(
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.black,
+                                                            fontSize: 19),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )))
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ))
-                    ],
+                            ))
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          )),
+                );
+              },
+            )),
+      ),
     );
   }
 
