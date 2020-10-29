@@ -154,7 +154,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
         key: scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('ORDERS'),
+        title: Text('Orders', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
         centerTitle: true,
         shadowColor: Colors.transparent,
         backgroundColor: Colors.white,
@@ -236,33 +236,48 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
             ),
             SizedBox(height: 20,),
             TabBar(
+              unselectedLabelColor: Colors.black,
+              indicatorSize: TabBarIndicatorSize.tab,
+
+              indicator: BoxDecoration(),
+              labelColor: Colors.orange,
               tabs: [
                 Tab(
-                  child:  Badge(
-                      badgeContent: Text('${new_orders.length}', style: TextStyle(color: Colors.white),),
-                    child: Container(
-                      width: 150,
-                      child: Text('New', textAlign: TextAlign.center,),
-                    )
-                  ),
+
+                  child:  new_orders.isNotEmpty ?
+                  Badge(
+                      child: Container(
+                        width: 150,
+                        child: Text('New', textAlign: TextAlign.center,),
+                      )
+                  ) :  Container(
+                    width: 150,
+                    child: Text('New', textAlign: TextAlign.center,),
+                  )
                 ),
                 Tab(
-                  child:  Badge(
-                      badgeContent: Text('${current_orders.length}', style: TextStyle(color: Colors.white),),
+                  child:  current_orders.isNotEmpty ?
+                  Badge(
                       child: Container(
                         width: 150,
                         child: Text('In-progress', textAlign: TextAlign.center,),
                       )
-                  ),
+                  ) : Container(
+                    width: 150,
+                    child: Text('In-progress', textAlign: TextAlign.center,),
+                  )
                 ),
                 Tab(
-                  child:  Badge(
-                      badgeContent: Text('${past_orders.length}', style: TextStyle(color: Colors.white),),
+                  child:  past_orders.isNotEmpty ?
+                  Badge(
                       child: Container(
                         width: 150,
                         child: Text('Past', textAlign: TextAlign.center,),
                       )
-                  ),
+                  ) : Container(
+                    width: 150,
+                    child: Text('Past', textAlign: TextAlign.center,),
+                  )
                 ),
               ],
             ),
@@ -500,13 +515,13 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                               },
                                               child: Container(
 
-                                                height: 50,
+                                                height: 45,
                                                 child: Center(
-                                                  child: Text('MARK AS READY FOR PICKUP', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                  child: Text('Mark as Ready for Pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                 ),
                                                 decoration: BoxDecoration(
                                                     color: Color(0xF1F1F1F1),
-                                                    borderRadius: BorderRadius.circular(10)
+                                                    borderRadius: BorderRadius.circular(30)
                                                 ),
                                               ),
                                             ) :
@@ -541,13 +556,25 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                                 children: [
 
                                                                 SizedBox(height: 50,),
-                                                              Text('Scan the QR Code below to collect your recipient\'s food', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19), textAlign: TextAlign.center,),
+                                                              Text('Scan the QR Code below to collect your assigned order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19), textAlign: TextAlign.center,),
                                                               SizedBox(height: 50,),
-                                                              QrImage(
-                                                                data: item.id,
-                                                                version: QrVersions.auto,
-                                                                size: 300.0,
-                                                              ),
+                                                             Container(
+                                                               width: 300,
+                                                               height: 300,
+                                                               child:  Stack(
+                                                                 children: [
+                                                                   QrImage(
+                                                                     data: item.id,
+                                                                     version: QrVersions.auto,
+                                                                     size: 300.0,
+                                                                   ),
+                                                                   Align(
+                                                                     alignment: Alignment.center,
+                                                                     child: Image.asset('assets/images/logo.png', height: 20, width: 20,),
+                                                                   )
+                                                                 ],
+                                                               )
+                                                             )
                                                                 ],
                                                               )
                                                             ),
@@ -560,13 +587,13 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                              },
                                              child:  Container(
 
-                                               height: 50,
+                                               height: 45,
                                                child: Center(
-                                                 child: Text('HAND TO DRIVER', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                 child: Text('Hand to Driver', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
                                                decoration: BoxDecoration(
                                                    color: Color(0xF1F1F1F1),
-                                                   borderRadius: BorderRadius.circular(10)
+                                                   borderRadius: BorderRadius.circular(30)
                                                ),
                                              ),
                                            )
