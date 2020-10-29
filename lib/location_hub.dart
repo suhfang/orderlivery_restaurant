@@ -341,13 +341,13 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                              },
                                              child: Container(
 
-                                               height: 50,
+                                               height: 45,
                                                child: Center(
-                                                 child: Text('ACCEPT', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                 child: Text('Accept', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
                                                decoration: BoxDecoration(
                                                  color: Colors.orange,
-                                                 borderRadius: BorderRadius.circular(10)
+                                                 borderRadius: BorderRadius.circular(30)
                                                ),
                                              ),
                                            )
@@ -435,13 +435,13 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                 },
                                                child:  Container(
 
-                                                 height: 50,
+                                                 height: 45,
                                                  child: Center(
-                                                   child: Text('REJECT', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                   child: Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                  ),
                                                  decoration: BoxDecoration(
                                                      color: Color(0xF1F1F1F1),
-                                                     borderRadius: BorderRadius.circular(10)
+                                                     borderRadius: BorderRadius.circular(30)
                                                  ),
                                                ),
                                              )
