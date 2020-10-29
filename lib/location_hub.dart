@@ -341,7 +341,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                              },
                                              child: Container(
 
-                                               height: 45,
+                                               height: 40,
                                                child: Center(
                                                  child: Text('Accept', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
@@ -435,7 +435,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                 },
                                                child:  Container(
 
-                                                 height: 45,
+                                                 height: 40,
                                                  child: Center(
                                                    child: Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                  ),
