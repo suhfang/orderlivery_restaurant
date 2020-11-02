@@ -990,7 +990,6 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       ],
                     )
                   ),
-
               ],
             ),
           ),
