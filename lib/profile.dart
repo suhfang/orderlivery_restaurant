@@ -5,11 +5,14 @@ import 'dart:io';
 
 import 'package:Restaurant/drawer.dart';
 import 'package:Restaurant/home.dart';
+import 'package:Restaurant/location_profile.dart';
 import 'package:Restaurant/users.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_syntax_view/flutter_syntax_view.dart';
+import 'package:flutter_tagging/flutter_tagging.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -149,6 +152,12 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     }
   }
 
+  String _selectedValuesJson = 'No tags to show';
+  TextEditingController tagController = TextEditingController();
+  List<Tag> selectedTags = [
+
+  ];
+
   Widget build(BuildContext context) {
     return DrawerScaffold(
       showsNavBar: widget.showsNavBar ?? true,
@@ -258,6 +267,95 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 //                  ), "
                       ),
                     ),
+
+
+                   Container(
+                       height: selectedTags.isNotEmpty ? 200 : 107,
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           SizedBox(height: 10,),
+                           Text('Add Tags'),
+                           SizedBox(height: 10,),
+                           FlutterTagging<Tag>(
+                             initialItems: selectedTags,
+                             textFieldConfiguration: TextFieldConfiguration(
+                               textInputAction: TextInputAction.done,
+
+                               controller: tagController,
+                               decoration: InputDecoration(
+                                 helperText: ' ',
+                                 hintText: 'Add tags',
+                                 contentPadding: EdgeInsets.only(left: 20),
+                                 filled: true,
+                                 // enabledBorder: UnderlineInputBorder(
+                                 //     borderSide: BorderSide(width: 0.3, color: Colors.grey)),
+                                 fillColor: Color(0xfff3f3f4),
+                                 border: OutlineInputBorder(
+                                   borderRadius: BorderRadius.circular(30),
+                                   borderSide: BorderSide(
+                                     width: 0,
+                                     style: BorderStyle.none,
+                                   ),
+                                 ),
+                               ),
+                               onSubmitted: ( name) {
+                                 setState(() {
+                                   selectedTags.add(
+                                     Tag(
+                                       name: tagController.text.trim()
+                                     )
+                                   );
+                                 });
+                               }
+                             ),
+                             findSuggestions: TagService.getTags,
+                             additionCallback: (value) {
+                               return Tag(
+                                 name: value,
+                                 position: 0,
+                               );
+                             },
+                             onAdded: (tag) {
+                               // api calls here, triggered when add to tag button is pressed
+                               return Tag();
+                             },
+                             configureSuggestion: (lang) {
+                               return SuggestionConfiguration(
+                                 title: Text(lang.name),
+                                 additionWidget: Chip(
+                                   avatar: Icon(
+                                     Icons.add_circle,
+                                     color: Colors.white,
+                                   ),
+                                   label: Text('Add New Tag'),
+                                   labelStyle: TextStyle(
+                                     color: Colors.white,
+                                     fontSize: 14.0,
+                                     fontWeight: FontWeight.w300,
+                                   ),
+                                   backgroundColor: Colors.green,
+                                 ),
+                               );
+
+                             },
+                             configureChip: (tag) {
+                               return ChipConfiguration(
+                                 label: Text(tag.name),
+                                 backgroundColor: Colors.orange,
+                                 labelStyle: TextStyle(color: Colors.white),
+                                 deleteIconColor: Colors.white,
+                               );
+                             },
+                             onChanged: () {
+                               setState(() {
+                                 print(selectedTags.map((e) => e.name));
+                               });
+                             },
+                           ),
+                         ],
+                       )
+                   ),
                     SizedBox(height: 20,),
                     Text('Upload a bright and legible version of your restaurant\'s logo', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
                     Divider(),
@@ -324,7 +422,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       child: Container(
                         decoration: BoxDecoration(
                             color: Colors.orange,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(30),
                             border: Border.all(color: Colors.orange),
                         ),
                         height: 45,
@@ -458,6 +556,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       'name': restaurantNameController.text.trim(),
       'description': descriptionController.text.trim(),
       'type': dropdownValue,
+      'tags': selectedTags.map((e) => e.name).toList()
     });
 
 
@@ -491,6 +590,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
     setState(() {
       print(profile.name);
+      selectedTags = profile.tags.map((e) => Tag(name: e, position: 0)).toList();
       restaurantNameController.text = profile.name;
       descriptionController.text = profile.description;
 //      addressController.text = profile.address;
@@ -527,10 +627,12 @@ class Profile {
 //  Hours hours;
   String cover_image_url;
   String logo_image_url;
+  List<String> tags;
 //  Profile({this.name, this.description, this.address, this.phone_number, this.type, this.hours, this.cover_image_url, this.logo_image_url});
-  Profile({this.name, this.description, this.type, this.cover_image_url, this.logo_image_url});
+  Profile({this.name, this.description, this.type, this.cover_image_url, this.logo_image_url, this.tags});
 
   factory Profile.fromJson(Map<String, dynamic> json) {
+    Iterable tags = json['tags'];
 //    var hours = json['hours'];
 //
 //    var mon_period = Period(open: hours['mon']['open'] as String, close: hours['mon']['close'] as String);
@@ -558,6 +660,8 @@ class Profile {
 //            sat: sat_period,
 //            sun: sun_period
 //        )
+    tags: tags.map((e) => e as String).toList()
+      
     );
   }
 }

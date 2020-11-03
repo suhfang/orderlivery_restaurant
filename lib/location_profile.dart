@@ -9,6 +9,9 @@ import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_syntax_view/flutter_syntax_view.dart';
+import 'package:flutter_tagging/flutter_tagging.dart';
+import 'package:flutter_tags/flutter_tags.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +26,7 @@ class LocationProfilePage extends StatefulWidget {
   LocationProfilePage({@required this.locationId});
   _LocationProfilePageState createState() => _LocationProfilePageState();
 }
+
 
 class _LocationProfilePageState extends State<LocationProfilePage> {
 
@@ -74,6 +78,9 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
   File coverImage;
   File logoImage;
 
+  String _selectedValuesJson = 'Nothing tags to show';
+  List<Tag> _selectedLanguages;
+
 
 
   Widget build(BuildContext context) {
@@ -94,6 +101,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                 child:  Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
                     CheckboxListTile(
                       title: Text('Are you available for pickup?'),
                       value: _doesPickup,
@@ -1132,4 +1140,54 @@ class _TextFormField extends StatelessWidget {
   }
 
 
+}
+
+/// Language Class
+class Tag extends Taggable {
+  ///
+  final String name;
+
+  ///
+  final int position;
+
+  /// Creates Language
+  Tag({
+    this.name,
+    this.position,
+  });
+
+  @override
+  List<Object> get props => [name];
+
+  /// Converts the class to json string.
+  String toJson() => '''  {
+    "name": $name,\n
+    "position": $position\n
+  }''';
+}
+
+/// LanguageService
+class TagService {
+  /// Mocks fetching language from network API with delay of 500ms.
+  static Future<List<Tag>> getTags(String query) async {
+    await Future.delayed(Duration(milliseconds: 500), null);
+    return <Tag>[
+      Tag(name: 'Fast Food', position: 1),
+      Tag(name: 'Healthy', position: 2),
+      Tag(name: 'Pizza', position: 3),
+      Tag(name: 'Chicken', position: 4),
+      Tag(name: 'Burgers', position: 5),
+      Tag(name: 'Tacos', position: 6),
+      Tag(name: 'Asian', position: 7),
+      Tag(name: 'Sushi', position: 8),
+      Tag(name: 'Pho', position: 9),
+      Tag(name: 'Italian', position: 10),
+      Tag(name: 'Donuts', position: 11),
+      Tag(name: 'Seafood', position: 12),
+      Tag(name: 'Salad', position: 13),
+      Tag(name: 'Steak', position: 10),
+    ]
+        .where((lang) => lang.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 }
