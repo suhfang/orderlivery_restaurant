@@ -340,7 +340,6 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                await acceptOrder(order_id: item.id);
                                              },
                                              child: Container(
-
                                                height: 40,
                                                child: Center(
                                                  child: Text('Accept', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
@@ -355,96 +354,87 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                          SizedBox(width: 10,),
                                          Expanded(
                                            child: GestureDetector(
-                                             onTap: () async {
-                                               await declineOrder(order_id: item.id);
-                                             },
-                                             child: GestureDetector(
-                                               onTap: () {
-                                                 showModalBottomSheet(context: context, builder: (context) {
-                                                   return Container(
-                                                     height: 150,
-                                                     color: Colors.white,
-                                                     child: Padding(
+                                             onTap: () {
+                                               showModalBottomSheet(context: context, builder: (context) {
+                                                 return Container(
+                                                   height: 150,
+                                                   color: Colors.white,
+                                                   child: Padding(
                                                        padding: EdgeInsets.all(10),
                                                        child: Column(
                                                          children: [
-                                                          Expanded(
-                                                            child:  Row(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              children: [
-                                                                Text('Are you sure you want to reject this order?', style: TextStyle(fontSize: 17),)
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          Expanded(
-                                                            child:  Row(
-                                                              children: [
-                                                                Expanded(
-                                                                  child: GestureDetector(
-                                                                    onTap: () {
-                                                                      finishOrder(order_id: item.id);
-                                                                      Navigator.pop(context);
-                                                                      scaffoldKey.currentState.showSnackBar(
-                                                                          SnackBar(
-                                                                            content: Text('Your accepted this order '),
-                                                                          )
-                                                                      );
-                                                                    },
-                                                                    child: Container(
-                                                                      height: 50,
-                                                                      child: Center(
-                                                                        child: Text('YES', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                                      ),
-                                                                      decoration: BoxDecoration(
-                                                                          color: Colors.orange,
-                                                                          borderRadius: BorderRadius.circular(20)
-                                                                      ),
-                                                                    ),
-                                                                  )
-                                                                ),
-                                                                Expanded(
-                                                                  child: GestureDetector(
-                                                                    onTap: () {
-                                                                      Navigator.pop(context);
-                                                                      scaffoldKey.currentState.showSnackBar(
-                                                                        SnackBar(
-                                                                          content: Text('Your declined this order '),
-                                                                        )
-                                                                      );
-                                                                    },
-                                                                    child: Container(
-                                                                      height: 50,
-                                                                      child: Center(
-                                                                        child: Text('NO', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                                      ),
-                                                                      decoration: BoxDecoration(
-                                                                          color: Color(0xF1F1F1F1),
-                                                                          borderRadius: BorderRadius.circular(20)
-                                                                      ),
-                                                                    ),
-                                                                  )
-                                                                )
-                                                              ],
-                                                            ),
-                                                          )
+                                                           Expanded(
+                                                             child:  Row(
+                                                               mainAxisAlignment: MainAxisAlignment.center,
+                                                               children: [
+                                                                 Text('Are you sure you want to reject this order?', style: TextStyle(fontSize: 17),)
+                                                               ],
+                                                             ),
+                                                           ),
+                                                           Expanded(
+                                                             child:  Row(
+                                                               children: [
+                                                                 Expanded(
+                                                                     child: GestureDetector(
+                                                                       onTap: () {
+                                                                         declineOrder(order_id: item.id);
+                                                                         Navigator.pop(context);
+                                                                         scaffoldKey.currentState.showSnackBar(
+                                                                             SnackBar(
+                                                                               content: Text('You rejected this order '),
+                                                                             )
+                                                                         );
+                                                                       },
+                                                                       child: Container(
+                                                                         height: 50,
+                                                                         child: Center(
+                                                                           child: Text('Yes', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                         ),
+                                                                         decoration: BoxDecoration(
+                                                                             color: Colors.orange,
+                                                                             borderRadius: BorderRadius.circular(20)
+                                                                         ),
+                                                                       ),
+                                                                     )
+                                                                 ),
+                                                                 Expanded(
+                                                                     child: GestureDetector(
+                                                                       onTap: () {
+                                                                         Navigator.pop(context);
+
+
+                                                                       },
+                                                                       child: Container(
+                                                                         height: 50,
+                                                                         child: Center(
+                                                                           child: Text('No', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                         ),
+                                                                         decoration: BoxDecoration(
+                                                                             color: Color(0xF1F1F1F1),
+                                                                             borderRadius: BorderRadius.circular(20)
+                                                                         ),
+                                                                       ),
+                                                                     )
+                                                                 )
+                                                               ],
+                                                             ),
+                                                           )
                                                          ],
                                                        )
-                                                     ),
-                                                   );
-                                                 });
-                                                },
-                                               child:  Container(
-
-                                                 height: 40,
-                                                 child: Center(
-                                                   child: Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
-                                                 ),
-                                                 decoration: BoxDecoration(
-                                                     color: Color(0xF1F1F1F1),
-                                                     borderRadius: BorderRadius.circular(30)
-                                                 ),
+                                                   ),
+                                                 );
+                                               });
+                                             },
+                                             child:  Container(
+                                               height: 40,
+                                               child: Center(
+                                                 child: Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
-                                             )
+                                               decoration: BoxDecoration(
+                                                   color: Color(0xF1F1F1F1),
+                                                   borderRadius: BorderRadius.circular(30)
+                                               ),
+                                             ),
                                            )
                                          ),
                                        ],
@@ -507,17 +497,15 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                     Row(
                                       children: [
                                         Expanded(
-                                            child: item.cooked_at != null ?
+                                            child: item.approved_at != null && item.cooked_at == null ?
                                             GestureDetector(
-
                                               onTap: () async {
                                                 await finishOrder(order_id: item.id);
                                               },
                                               child: Container(
-
                                                 height: 45,
                                                 child: Center(
-                                                  child: Text('Mark as Ready for Pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                  child: Text('Mark as ready for pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                 ),
                                                 decoration: BoxDecoration(
                                                     color: Color(0xF1F1F1F1),

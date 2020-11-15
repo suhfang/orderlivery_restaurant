@@ -280,12 +280,15 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                            FlutterTagging<Tag>(
                              initialItems: selectedTags,
                              textFieldConfiguration: TextFieldConfiguration(
+                                 style: TextStyle(fontSize: 19),
                                textInputAction: TextInputAction.done,
 
                                controller: tagController,
                                decoration: InputDecoration(
                                  helperText: ' ',
                                  hintText: 'Add tags',
+
+                                 hintStyle: TextStyle(fontSize: 19),
                                  contentPadding: EdgeInsets.only(left: 20),
                                  filled: true,
                                  // enabledBorder: UnderlineInputBorder(
@@ -300,27 +303,24 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                  ),
                                ),
                                onSubmitted: ( name) {
-                                 setState(() {
-                                   selectedTags.add(
-                                     Tag(
-                                       name: tagController.text.trim()
-                                     )
-                                   );
-                                 });
+                                print(selectedTags.map((e) => e.name).toList());
                                }
                              ),
                              findSuggestions: TagService.getTags,
                              additionCallback: (value) {
                                return Tag(
-                                 name: value,
+                                 name: value.trim(),
                                  position: 0,
                                );
                              },
                              onAdded: (tag) {
                                // api calls here, triggered when add to tag button is pressed
-                               return Tag();
+                               String name = tagController.text.trim();
+                               tagController.clear();
+                               return Tag(name: name, position: 0);
                              },
                              configureSuggestion: (lang) {
+
                                return SuggestionConfiguration(
                                  title: Text(lang.name),
                                  additionWidget: Chip(
@@ -334,14 +334,14 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                      fontSize: 14.0,
                                      fontWeight: FontWeight.w300,
                                    ),
-                                   backgroundColor: Colors.green,
+                                   backgroundColor: Colors.orange,
                                  ),
                                );
 
                              },
                              configureChip: (tag) {
                                return ChipConfiguration(
-                                 label: Text(tag.name),
+                                 label: Text(tag.name.trim()),
                                  backgroundColor: Colors.orange,
                                  labelStyle: TextStyle(color: Colors.white),
                                  deleteIconColor: Colors.white,
@@ -349,7 +349,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                              },
                              onChanged: () {
                                setState(() {
-                                 print(selectedTags.map((e) => e.name));
+                                 print(selectedTags.map((e) => e.name).toList());
                                });
                              },
                            ),
@@ -556,7 +556,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       'name': restaurantNameController.text.trim(),
       'description': descriptionController.text.trim(),
       'type': dropdownValue,
-      'tags': selectedTags.map((e) => e.name).toList()
+      'tags': selectedTags.map((e) => e.name as String).toList()
     });
 
 

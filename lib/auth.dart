@@ -382,6 +382,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       onSaved: (String value) {
 //                                                  model.lastName = value;
                                                       },
+
                                                     ),
                                                   )
                                                 ],
@@ -973,6 +974,7 @@ class _TextFormField extends StatelessWidget {
   final TextEditingController controller;
   final Function onChanged;
   final Iterable<TextInputFormatter> inputFormatters;
+  final Icon suffixIcon;
 
   _TextFormField(
       {this.hintText,
@@ -983,7 +985,8 @@ class _TextFormField extends StatelessWidget {
         this.controller,
         this.autofillHints,
         this.onChanged,
-        this.inputFormatters});
+        this.inputFormatters,
+      this.suffixIcon});
 
 
   @override
@@ -996,6 +999,7 @@ class _TextFormField extends StatelessWidget {
             border: Border.all(color: Colors.white),
           ),
           child: TextFormField(
+
             textCapitalization: TextCapitalization.none,
             inputFormatters: inputFormatters,
             onChanged: onChanged,
@@ -1016,7 +1020,9 @@ class _TextFormField extends StatelessWidget {
                   style: BorderStyle.none,
                 ),
               ),
+              suffixIcon: suffixIcon
             ),
+
             obscureText: isPassword ? true : false,
             keyboardType:
             isEmail ? TextInputType.emailAddress : TextInputType.text,
