@@ -963,18 +963,17 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
 }
 
-class _TextFormField extends StatelessWidget {
+class _TextFormField extends StatefulWidget {
 
   final String hintText;
   final Function validator;
   final Function onSaved;
   final bool isPassword;
   final bool isEmail;
-  final Iterable<String> autofillHints;
   final TextEditingController controller;
   final Function onChanged;
   final Iterable<TextInputFormatter> inputFormatters;
-  final Icon suffixIcon;
+  final Iterable<String> autofillHints;
 
   _TextFormField(
       {this.hintText,
@@ -983,11 +982,16 @@ class _TextFormField extends StatelessWidget {
         this.isPassword = false,
         this.isEmail = false,
         this.controller,
-        this.autofillHints,
         this.onChanged,
         this.inputFormatters,
-      this.suffixIcon});
+        this.autofillHints,});
 
+  TextFormFieldState createState() => TextFormFieldState();
+}
+
+class TextFormFieldState extends State<_TextFormField> {
+
+  bool passwordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -999,17 +1003,24 @@ class _TextFormField extends StatelessWidget {
             border: Border.all(color: Colors.white),
           ),
           child: TextFormField(
-
             textCapitalization: TextCapitalization.none,
-            inputFormatters: inputFormatters,
-            onChanged: onChanged,
-            autofillHints: autofillHints,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            controller: controller,
-            validator: validator,
+            inputFormatters: widget.inputFormatters,
+            onChanged: widget.onChanged,
+            autofillHints: widget.autofillHints,
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            controller: widget.controller,
+            validator: widget.validator,
             decoration: InputDecoration(
+              suffixIcon: widget.isPassword ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    passwordVisible = !passwordVisible;
+                  });
+                },
+                child: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility, color: Colors.black,),
+              ): SizedBox(),
               helperText: ' ',
-              hintText: hintText,
+              hintText: widget.hintText,
               contentPadding: EdgeInsets.only(left: 20, right: 0, bottom: 5),
               filled: true,
               fillColor: Color(0xfff3f3f4),
@@ -1020,16 +1031,16 @@ class _TextFormField extends StatelessWidget {
                   style: BorderStyle.none,
                 ),
               ),
-              suffixIcon: suffixIcon
             ),
-
-            obscureText: isPassword ? true : false,
+            obscureText: !passwordVisible && widget.isPassword,
             keyboardType:
-            isEmail ? TextInputType.emailAddress : TextInputType.text,
+            widget.isEmail ? TextInputType.emailAddress : TextInputType.text,
+
           ),
         ));
   }
 }
+
 
 class TokenResponse {
   final String token;
