@@ -269,8 +269,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     ),
 
 
-                   Container(
-                       height: selectedTags.isNotEmpty ? 200 : 107,
+                   SingleChildScrollView(
                        child: Column(
                          crossAxisAlignment: CrossAxisAlignment.start,
                          children: [

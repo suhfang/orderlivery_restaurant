@@ -242,6 +242,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                         Alignment.topCenter,
                                                         width: deviceWidth,
                                                         child: _TextFormField(
+                                                          autofillHints: [
+                                                            AutofillHints.givenName
+                                                          ],
                                                           hintText: 'First Name',
                                                           onChanged:
                                                               (String value) {
@@ -284,6 +287,9 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                         Alignment.topCenter,
                                                         width: deviceWidth,
                                                         child: _TextFormField(
+                                                          autofillHints: [
+                                                            AutofillHints.familyName
+                                                          ],
                                                           hintText: 'Last Name',
                                                           onChanged:
                                                               (String value) {

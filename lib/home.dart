@@ -198,7 +198,7 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(context: context, builder: (BuildContext context) {
       return Container(
         color: Color(0xFF737373),
-        height: 200,
+        height: 225,
         child: Container(
           decoration: BoxDecoration(
               color: Theme.of(context).canvasColor,
@@ -221,7 +221,7 @@ class _HomePageState extends State<HomePage> {
               Divider(),
               Padding(
                 padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
-                child: Text('Are you sure you want to delete this location?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
+                child: Text('This action cannot be done. Are you sure you want to delete this location?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
               ),
               SizedBox(
                 height: 10,

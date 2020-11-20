@@ -42,26 +42,7 @@ class DrawerScaffold extends StatelessWidget {
           automaticallyImplyLeading: this.showsNavBar ?? true,
           shadowColor: Colors.transparent,
         centerTitle: true,
-        title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(),
-            Text(this.title.toUpperCase()),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => NotificationsPage()));
-              },
-              child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Badge(
-                    badgeColor: Colors.orange,
-//                    badgeContent: Text('3', style: TextStyle(color: Colors.white),),
-                    child:  Icon(CupertinoIcons.bell),
-                  )
-              ),
-            )
-          ],
-        ),
+        title:   Text(this.title.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
         ),
       backgroundColor: backgroundColor,
@@ -169,4 +150,6 @@ class DrawerScaffold extends StatelessWidget {
       ),
     );
   }
+
+
 }
