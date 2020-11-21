@@ -23,6 +23,7 @@ class _PaymentSettingsState extends State<PaymentSettings> {
         backgroundColor: Colors.white,
         shadowColor: Colors.transparent,
       ),
+
     );
   }
 }

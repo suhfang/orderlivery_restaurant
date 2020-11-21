@@ -7,6 +7,8 @@ import 'package:Restaurant/location_profile.dart';
 import 'package:Restaurant/menu.dart';
 import 'package:Restaurant/restaurant_location_profile.dart';
 import 'package:Restaurant/setup_stripe_account.dart';
+import 'package:Restaurant/stripe_dashboard.dart';
+import 'package:badges/badges.dart';
 import 'package:commons/commons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +20,8 @@ import 'package:Restaurant/constants.dart' as Constants;
 class LocationMenuPage extends StatefulWidget {
   final String addressName;
    String addressId;
-  LocationMenuPage({this.addressName, @required this.addressId});
+    bool activated;
+  LocationMenuPage({this.activated, this.addressName, @required this.addressId});
   _LocationMenuPageState createState() => _LocationMenuPageState();
 }
 
@@ -37,7 +40,8 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.addressName),
+        title: Text(widget.addressName.split(', ')[0], overflow: TextOverflow.clip, style: TextStyle(fontWeight: FontWeight.bold),),
+
         centerTitle: true,
         backgroundColor: Colors.white,
         shadowColor: Colors.transparent,
@@ -53,13 +57,22 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationProfilePage(locationId: widget.addressId,)));
               }
             ),
-            !payouts_enabled ? ListTile(
-                title: Text('Setup Stripe Account to start receiving payments', style: TextStyle(fontWeight: FontWeight.bold),),
+            !widget.activated ? ListTile(
+                title: Badge(
+                  child: Text('Setup a Stripe Account for this location to start receiving payments'),
+                ),
                 trailing: Icon(LineIcons.angle_right),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SetupStripeAccountPage(locationId: widget.addressId,)));
+                onTap: () async {
+                  final result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SetupStripeAccountPage(locationId: widget.addressId,)));
+                  getStripeAccountInfo();
                 }
-            ) :  SizedBox()
+            ) :  ListTile(
+                title: Text('View Stripe Dashboard'),
+                trailing: Icon(LineIcons.angle_right),
+                onTap: () async {
+                  viewStripeDashboardForLocation(location_id: widget.addressId);
+                }
+            )
           ],
         ),
       ),
@@ -78,9 +91,25 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
     }));
     print(response.body);
     final _payouts_enabled = json.decode(response.body)['account']['payouts_enabled'] as bool;
+
     setState(() {
-      payouts_enabled = _payouts_enabled;
+      widget.activated = _payouts_enabled;
     });
+  }
+
+  void viewStripeDashboardForLocation({String location_id}) async {
+    String token = (await SharedPreferences.getInstance()).getString('token');
+    final response = await http.post('${Constants.apiBaseUrl}/restaurants/generate-login-url',
+    headers: {
+      'Content-Type': 'application/json',
+      'token': token
+    },
+    body: json.encode({
+      'location_id': location_id
+    }));
+    var url = json.decode(response.body)['link']['url'] as String;
+    Navigator.push(context, MaterialPageRoute(builder: (context) => StripeDashboardPage(initialUrl: url,)));
+
   }
 
 }

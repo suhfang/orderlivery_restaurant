@@ -81,6 +81,7 @@ dependencies:
   flutter_tags: ^0.4.9
   flutter_tagging: ^2.2.0+3
   flutter_syntax_view: ^2.1.0
+  webview_flutter: ^1.0.7
 
 
   # The following adds the Cupertino Icons font to your application.

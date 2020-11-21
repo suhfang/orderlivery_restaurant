@@ -43,16 +43,16 @@ class RestaurantLocation {
 
   bool is_operating;
   Address address;
-
   final String id;
-  RestaurantLocation({this.is_operating, this.address, this.id});
+  final bool activated;
+  RestaurantLocation({this.is_operating, this.address, this.id, this.activated});
 
   factory RestaurantLocation.fromJson(Map<String, dynamic> json) {
 
     return RestaurantLocation(
       address: Address.fromJson(json['address']),
       id: json['_id'] as String,
-
+      activated: json['activated'] as bool
     );
   }
 }
@@ -78,12 +78,14 @@ class _HomePageState extends State<HomePage> {
       'Content-Type': 'application/json',
     });
     var _json = json.decode(response.body);
+    print(_json);
     Iterable data = _json['locations'];
 
     final addresses = data.map((e) => RestaurantLocation.fromJson(e)).toList();
-
+    print(addresses.map((e) => e.activated).toList());
     setState(() {
       _locations = addresses;
+
       _restaurantName = _json['name'] as String;
     });
   }
@@ -117,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                           },
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationMenuPage(addressName: item.address.name, addressId: item.id,)));
+                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationMenuPage(activated: item.activated, addressName: item.address.name, addressId: item.id,)));
                             },
                             child:  Column(
                               children: [

@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:Restaurant/onboarding_page.dart';
 import 'package:commons/commons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _SetupStripeAccountPageState extends State<SetupStripeAccountPage> {
                       borderRadius: BorderRadius.circular(30)
                   ),
                   child: Center(
-                    child: Text('Take me Stripe!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                    child: Text('Take me Stripe and setup my account', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
                   ),
                 ),
               )
@@ -68,15 +69,19 @@ class _SetupStripeAccountPageState extends State<SetupStripeAccountPage> {
   }
 
   Future<void> _launchInWebViewWithJavaScript(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: true,
-        forceWebView: true,
-        enableJavaScript: true,
-      );
-    } else {
-      throw 'Could not launch $url';
-    }
+    // if (await canLaunch(url)) {
+    //   await launch(
+    //     url,
+    //     forceSafariVC: true,
+    //     forceWebView: true,
+    //     enableJavaScript: true,
+    //   );
+    // } else {
+    //   throw 'Could not launch $url';
+    // }
+    Navigator.push(context,
+    MaterialPageRoute(
+      builder: (context) => OnBoardingPage(initialUrl: url,)
+    ));
   }
 }

@@ -148,8 +148,11 @@ class _MyAppState extends State<MyApp> {
   Future<void> _handlePressButton() async {}
 }
 
+int tapTimes = 0;
+
 Future<Null> displayPrediction(Prediction p, ScaffoldState scaffold) async {
-  if (p != null) {
+  if (p != null && tapTimes == 0) {
+    tapTimes = 1;
     // get detail (lat/lng)
     PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
     final lat = detail.result.geometry.location.lat;
