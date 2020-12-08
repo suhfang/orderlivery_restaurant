@@ -11,13 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:Restaurant/constants.dart' as Constants;
 import 'package:flutter/services.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+  if (Platform.isAndroid) {
+    FlutterStatusbarcolor.setStatusBarColor(Colors.white);
+  }
   runApp(MyApp());
 }
 

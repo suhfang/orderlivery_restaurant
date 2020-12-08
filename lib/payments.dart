@@ -54,7 +54,8 @@ class _PaymentsPageState extends State<PaymentsPage> {
                      items: _locations.map((RestaurantLocation value) {
                        return new DropdownMenuItem<RestaurantLocation>(
                          value: value,
-                         child: new Text(value.address.name),
+                         child:Text(value.address.name),
+
                        );
                      }).toList(),
                      onChanged: (location) {
@@ -63,6 +64,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
                        });
                      },
                      hint: Text('Select a location to view its payments'),
+                     value: selectedLocation != null ? selectedLocation :  null,
                    ),
 
                  )
@@ -96,7 +98,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
                        Expanded(
                          child:GestureDetector(
                            onTap: () {
-
+                              viewStripeDashboardForLocation(location_id: selectedLocation.id);
                            },
                            child:  Column(
                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,

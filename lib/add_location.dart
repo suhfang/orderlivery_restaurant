@@ -172,6 +172,7 @@ Future<Null> displayPrediction(Prediction p, ScaffoldState scaffold) async {
           'lon': '${lng}'
         }));
     Navigator.pop(scaffold.context, 'added');
+    tapTimes = 0;
     print(response.body);
 
 //    Navigator.pop(scaffold.context, 'added');
