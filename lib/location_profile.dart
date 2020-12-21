@@ -669,7 +669,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
     // TODO: implement initState
     super.initState();
     getProfile();
-    fToast = FToast(context);
+    fToast = FToast();
 
   }
 

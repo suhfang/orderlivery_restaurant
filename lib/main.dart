@@ -64,27 +64,34 @@ void iOS_Permission() async {
         firebaseCloudMessaging_Listeners();
       });
 
-      return MaterialApp(
-          // navigatorKey: navigatorKey,
-        title: 'Restaurant',
-        debugShowCheckedModeBanner: false,
-        theme:
-        ThemeData(
-          primarySwatch: Colors.orange,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-
-          textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
-            bodyText1: GoogleFonts.montserrat(textStyle: textTheme.bodyText1),
-          ),
-            highlightColor: Colors.transparent)
-            .copyWith(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: <TargetPlatform, PageTransitionsBuilder>{
-              TargetPlatform.android: ZoomPageTransitionsBuilder(),
-            },
-          ),
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarDividerColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark
         ),
-        home: InitPage()
+        child: MaterialApp(
+          // navigatorKey: navigatorKey,
+            title: 'Restaurant',
+            debugShowCheckedModeBanner: false,
+            theme:
+            ThemeData(
+                primarySwatch: Colors.orange,
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+
+                textTheme: GoogleFonts.latoTextTheme(textTheme).copyWith(
+                  bodyText1: GoogleFonts.montserrat(textStyle: textTheme.bodyText1),
+                ),
+                highlightColor: Colors.transparent)
+                .copyWith(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            home: InitPage()
+        )
       );
   }
 }

@@ -8,43 +8,11 @@ PODS:
     - Flutter
   - audioplayer (0.0.1):
     - Flutter
+  - charset_converter (0.0.1):
+    - Flutter
   - credit_card_input_form (0.0.1):
     - Flutter
   - device_info (0.0.1):
-    - Flutter
-  - DKImagePickerController/Core (4.3.2):
-    - DKImagePickerController/ImageDataManager
-    - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.2)
-  - DKImagePickerController/PhotoGallery (4.3.2):
-    - DKImagePickerController/Core
-    - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.2)
-  - DKPhotoGallery (0.0.17):
-    - DKPhotoGallery/Core (= 0.0.17)
-    - DKPhotoGallery/Model (= 0.0.17)
-    - DKPhotoGallery/Preview (= 0.0.17)
-    - DKPhotoGallery/Resource (= 0.0.17)
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Core (0.0.17):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Preview
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Model (0.0.17):
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.17):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Resource
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.17):
-    - SDWebImage
-    - SwiftyGif
-  - file_picker (0.0.1):
-    - DKImagePickerController/PhotoGallery
     - Flutter
   - Firebase/Analytics (6.27.1):
     - Firebase/Core
@@ -120,8 +88,11 @@ PODS:
     - Flutter
   - flutter_ringtone_player (0.0.1):
     - Flutter
+  - flutter_statusbarcolor (0.0.1):
+    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
+    - Toast
   - geocoder (0.0.1):
     - Flutter
   - "geolocator (5.3.2+2)":
@@ -195,11 +166,10 @@ PODS:
     - Flutter
   - path_provider (0.0.1):
     - Flutter
+  - "permission_handler (5.0.1+1)":
+    - Flutter
   - PromisesObjC (1.2.9)
   - Protobuf (3.12.0)
-  - SDWebImage (5.9.0):
-    - SDWebImage/Core (= 5.9.0)
-  - SDWebImage/Core (5.9.0)
   - share (0.0.1):
     - Flutter
   - shared_preferences (0.0.1):
@@ -212,10 +182,10 @@ PODS:
   - stripe_native (1.2.2):
     - Flutter
     - Stripe (> 19.0.0)
-  - SwiftyGif (5.3.0)
+  - Toast (4.0.0)
   - url_launcher (0.0.1):
     - Flutter
-  - vibration (1.7.1):
+  - vibration (1.7.3):
     - Flutter
   - wakelock (0.0.1):
     - Flutter
@@ -225,9 +195,9 @@ PODS:
 DEPENDENCIES:
   - apple_maps_flutter (from `.symlinks/plugins/apple_maps_flutter/ios`)
   - audioplayer (from `.symlinks/plugins/audioplayer/ios`)
+  - charset_converter (from `.symlinks/plugins/charset_converter/ios`)
   - credit_card_input_form (from `.symlinks/plugins/credit_card_input_form/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
-  - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -235,6 +205,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_ringtone_player (from `.symlinks/plugins/flutter_ringtone_player/ios`)
+  - flutter_statusbarcolor (from `.symlinks/plugins/flutter_statusbarcolor/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - geocoder (from `.symlinks/plugins/geocoder/ios`)
   - geolocator (from `.symlinks/plugins/geolocator/ios`)
@@ -246,6 +217,7 @@ DEPENDENCIES:
   - location_permissions (from `.symlinks/plugins/location_permissions/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
@@ -259,8 +231,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AppAuth
-    - DKImagePickerController
-    - DKPhotoGallery
     - Firebase
     - FirebaseAnalytics
     - FirebaseAuth
@@ -280,21 +250,20 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - Protobuf
-    - SDWebImage
     - Stripe
-    - SwiftyGif
+    - Toast
 
 EXTERNAL SOURCES:
   apple_maps_flutter:
     :path: ".symlinks/plugins/apple_maps_flutter/ios"
   audioplayer:
     :path: ".symlinks/plugins/audioplayer/ios"
+  charset_converter:
+    :path: ".symlinks/plugins/charset_converter/ios"
   credit_card_input_form:
     :path: ".symlinks/plugins/credit_card_input_form/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
-  file_picker:
-    :path: ".symlinks/plugins/file_picker/ios"
   firebase_analytics:
     :path: ".symlinks/plugins/firebase_analytics/ios"
   firebase_auth:
@@ -309,6 +278,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_ringtone_player:
     :path: ".symlinks/plugins/flutter_ringtone_player/ios"
+  flutter_statusbarcolor:
+    :path: ".symlinks/plugins/flutter_statusbarcolor/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   geocoder:
@@ -331,6 +302,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   share:
     :path: ".symlinks/plugins/share/ios"
   shared_preferences:
@@ -352,13 +325,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
-  apple_maps_flutter: 45925bdf704b86f713fcf6979ee1999d17b2a6e0
+  apple_maps_flutter: c59725efea39e13e703cde52a1d2b14866ad68a8
   audioplayer: 0584f31a697e4b0bbad405ae7903d7a93585e784
+  charset_converter: 215c7b04932ec2b9ba43be96a9bc34afed3e5322
   credit_card_input_form: c849da5e6fc6ebf157d84b06077f54d6aa12fae5
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
-  DKImagePickerController: b5eb7f7a388e4643264105d648d01f727110fc3d
-  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
   Firebase: 919186c8e119dd9372a45fd1dd17a8a942bc1892
   firebase_analytics: 9118044ffb98bee71d84733fc594f5134fe4bc1b
   firebase_auth: d99b993c1405096e66c58211b1cd956c23eed1c5
@@ -374,7 +345,8 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_ringtone_player: 15eba85187230b87b2512f0e1b92225618bc03e7
-  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
+  flutter_statusbarcolor: 8afb1071ed8c58be929f1e32b36c629771fd2259
+  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   geocoder: 3cfab70531a0b367e917bafe82df4c30f6d4c45a
   geolocator: f7622e0e7e2a24718285b73916d60c4a54b9f5b6
   get_version: 2bc18c4e26a265571662cab5d38f8b50dc8c1c77
@@ -394,21 +366,21 @@ SPEC CHECKSUMS:
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
   PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
   Protobuf: 2793fcd0622a00b546c60e7cbbcc493e043e9bb9
-  SDWebImage: 62ae4a18473520c67b79e9724c31a63599cc9423
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sign_in_with_apple: 34f3f5456a45fd7ac5fb42905e2ad31dae061b4a
   sms_autofill: c461043483362c3f1709ee76eaae6eb570b31686
   Stripe: dd5bfdd5f1daed4f9ddbfb47e9449ec302f9f708
   stripe_native: 20a5ba59c9d9287602a87382526fa2ae30d31139
-  SwiftyGif: e466e86c660d343357ab944a819a101c4127cb40
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
-  vibration: 4f4ded27b9d0e21e4110ca43978f057412d28c44
+  vibration: b5a33e764c3f609a975b9dca73dce20fdde627dc
   wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
   webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96
 
 PODFILE CHECKSUM: 9689f4bf49cc8772405db66e54b1536e1c907616
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.10.0

@@ -72,7 +72,7 @@ dependencies:
   flutter_local_notifications: ^2.0.0+1
   image_picker: ^0.6.7+11
   flutter_multiselect: ^0.5.1
-  file_picker: ^2.0.7
+#  file_picker: ^2.1.0
   audioplayer: ^0.8.1
   wakelock: ^0.2.0+1
   qr_flutter: ^3.1.0
@@ -83,6 +83,8 @@ dependencies:
   flutter_syntax_view: ^2.1.0
   flutter_statusbarcolor: ^0.2.3
   webview_flutter: ^1.0.7
+  permission_handler: ^5.0.1+1
+  esc_pos_printer: ^4.0.3
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -41,6 +41,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   var addressFocusNode = new FocusNode();
   var phoneFocusNode = new FocusNode();
   var accessTokenNode = new FocusNode();
+  
   String dropdownValue = "Choose restaurant type";
   String _cover_image_url = 'http://via.placeholder.com/1000x800';
   String _logo_image_url = 'http://via.placeholder.com/640x360';
@@ -446,7 +447,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     // TODO: implement initState
     super.initState();
     getProfile();
-    fToast = FToast(context);
+    fToast = FToast();
   }
 
   _showToast(String message) {

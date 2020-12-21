@@ -5,7 +5,9 @@ import 'package:commons/commons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class StripeDashboardPage extends StatefulWidget {
@@ -16,18 +18,22 @@ class StripeDashboardPage extends StatefulWidget {
 
 class _StripeDashboardPageState extends State<StripeDashboardPage> {
 
+ bool isLoading=true;
+  final _key = UniqueKey();
   GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    request();
   }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      key: key,
+      backgroundColor: Colors.white,
         appBar: AppBar(
             centerTitle: true,
             backgroundColor: Colors.white,
@@ -52,10 +58,14 @@ class _StripeDashboardPageState extends State<StripeDashboardPage> {
               ),
             )
         ),
-        body: WebView(
-          initialUrl: widget.initialUrl,
-          javascriptMode: JavascriptMode.unrestricted,
-          navigationDelegate: (NavigationRequest request) {
+      key: key,
+        body: Stack(
+        children: <Widget>[
+          WebView(
+            key: _key,
+            initialUrl: widget.initialUrl,
+            javascriptMode: JavascriptMode.unrestricted,
+            navigationDelegate: (NavigationRequest request) {
             if (request.url.contains('orderlivery.com')) {
               Navigator.pop(context);
               Navigator.pop(context);
@@ -63,7 +73,24 @@ class _StripeDashboardPageState extends State<StripeDashboardPage> {
             }
             return NavigationDecision.navigate;
           },
-        )
+            onPageFinished: (finish) {
+              setState(() {
+                isLoading = false;
+              });
+            },
+          ),
+          isLoading ? Center( child: SpinKitThreeBounce(color: Colors.orange,),)
+              : Stack(),
+        ],
+      ),
     );
+  }
+
+    void request() async {
+    bool storage = Platform.isAndroid ? await Permission.storage.isGranted : await Permission.photos.isGranted;
+    if (!storage) {
+      Platform.isAndroid? await Permission.storage.request() : await Permission.photos.request();
+      await Permission.mediaLibrary.request();
+    }
   }
 }

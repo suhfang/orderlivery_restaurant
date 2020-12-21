@@ -24,6 +24,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -31,8 +33,14 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>NSAppleMusicUsageDescription</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>NSCalendarsUsageDescription</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera permission is required for qrcode scanning.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>NSContactsUsageDescription</string>
 	<key>NSFileProviderDomainUsageDescription</key>
 	<string></string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -41,6 +49,8 @@
 	<string>This app needs access to location when in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>NSMotionUsageDescription</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>NSPhotoLibraryUsageDescription</string>
 	<key>UIBackgroundModes</key>
@@ -70,5 +80,7 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>NSSpeechRecognitionUsageDescription</string>
 </dict>
 </plist>

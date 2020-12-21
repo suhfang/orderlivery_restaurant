@@ -145,7 +145,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
                         fontWeight: FontWeight.bold,
                       ),
                       length: 6,
-                      obsecureText: false,
+                      obscureText: false,
                       animationType: AnimationType.fade,
                       validator: (v) {
                         if (v != '${SignupverificationPage.code}') {

@@ -852,7 +852,7 @@ class _ComboItemPageState extends State<ComboItemPage> {
         ),
         body: SafeArea(
             child: Padding(
-                padding: EdgeInsets.all(0),
+                padding: EdgeInsets.only(left: 50),
                 child: Stepper(
                   currentStep: currentStep,
                   onStepContinue: next,

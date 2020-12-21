@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:Restaurant/drawer.dart';
-import 'package:file_picker/file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -41,10 +41,10 @@ class _UploadPageState extends State<UploadPage> {
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () async {
-                        FilePickerResult result = await FilePicker.platform.pickFiles(
-                          type: FileType.custom,
-                          allowedExtensions: ['csv']
-                        );
+                        // FilePickerResult result = await FilePicker.platform.pickFiles(
+                        //   type: FileType.custom,
+                        //   allowedExtensions: ['csv']
+                        // );
                       },
                       child: Padding(
                         padding: EdgeInsets.only(top: 50),

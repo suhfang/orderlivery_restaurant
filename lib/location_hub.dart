@@ -20,6 +20,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Restaurant/constants.dart' as Constants;
 import 'package:http/http.dart' as http;
 import 'package:wakelock/wakelock.dart';
+import 'package:esc_pos_printer/esc_pos_printer.dart';
+import 'package:image/image.dart' as img;
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
+import 'package:esc_pos_utils/esc_pos_utils.dart';
 
 class LocationHubPage extends StatefulWidget {
 
@@ -66,12 +71,92 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
       _notification = state;
     });
     if (_notification.index == 0) getOrders(location_id: location_id);
+  
   }
+
+String printIpAddress = '192.168.14.243';
+double port = 9100;
+NetworkPrinter printer;
+
+Future<bool> initializePrinter(String ip) async {
+  const PaperSize  paper = PaperSize.mm80;
+  final profile = await CapabilityProfile.load();
+  printer = NetworkPrinter(paper, profile);
+  var res = await connectPrinter(printIpAddress);
+  return res;
+} 
+
+Future<bool> connectPrinter(String ip) async {
+  final PosPrintResult res = await printer.connect(ip, port: 9100);
+  bool val = res == PosPrintResult.success;
+  print ('printer connected: $val');
+  
+  return res == PosPrintResult.success;
+}
+
+void printItem(OrderItem item, int count) async {
+ 
+ 
+  printer.text('${item.quantity} x ${item.name}', linesAfter: 1, styles: PosStyles(codeTable: 'CP1252', align: PosAlign.center), containsChinese: true,);
+  if (item.special_instructions != null && item.special_instructions.isNotEmpty) {
+    printer.feed(1);
+    printer.text('Special instructions: ', linesAfter: 1, styles: PosStyles(bold: true));
+    printer.text('${item.special_instructions}', linesAfter: 1);
+    printer.feed(1);
+  }
+  item.lists.forEach((element) {
+    printer.text('${element.name}:', linesAfter: 1, styles: PosStyles(align: PosAlign.center));
+    element.items.forEach((elem) {
+      if (elem.quantity != 0) {
+        printer.text('${elem.quantity} x ${elem.name}', linesAfter: 1, styles: PosStyles(align: PosAlign.center)); 
+      } else {
+        printer.text('${elem.name}', linesAfter: 1, styles: PosStyles(align: PosAlign.center)); 
+      }
+    });
+    printer.feed(1);
+  });
+  printer.text('------------------------------------------', linesAfter: 1, styles: PosStyles(align: PosAlign.center));
+}
+
+
+
+// void testReceipt(NetworkPrinter printer) {
+//   printer.text(
+//         'Regular: aA bB cC dD eE fF gG hH iI jJ kK lL mM nN oO pP qQ rR sS tT uU vV wW xX yY zZ');
+//   printer.text('Special 1: àÀ èÈ éÉ ûÛ üÜ çÇ ôÔ',
+//       styles: PosStyles(codeTable: 'CP1252'));
+//   printer.text('Special 2: blåbærgrød',
+//       styles: PosStyles(codeTable: 'CP1252'));
+
+//   printer.text('Bold text', styles: PosStyles(bold: true));
+//   printer.text('Reverse text', styles: PosStyles(reverse: true));
+//   printer.text('Underlined text',
+//       styles: PosStyles(underline: true), linesAfter: 1);
+//   printer.text('Align left', styles: PosStyles(align: PosAlign.left));
+//   printer.text('Align center', styles: PosStyles(align: PosAlign.center));
+//   printer.text('Align right',
+//       styles: PosStyles(align: PosAlign.right), linesAfter: 1);
+
+//   printer.text('Text size 200%',
+//       styles: PosStyles(
+//         height: PosTextSize.size2,
+//         width: PosTextSize.size2,
+//       ));
+
+//   printer.feed(2);
+//   printer.cut();
+// }
+
 
   @override
   void initState() {
     super.initState();
+    
+    // initializePrinter(printIpAddress);
+    
     WidgetsBinding.instance.addObserver(this);
+
+
 
   Wakelock.enable();
    //  Constants.isOnOrdersPage = true;
@@ -147,8 +232,9 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   }
   @override
   Widget build(BuildContext context) {
-    return
-      DefaultTabController(
+    return WillPopScope(
+      onWillPop: () async => false,
+      child:  DefaultTabController(
         length: 3,
       child:  Scaffold(
         key: scaffoldKey,
@@ -160,6 +246,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
         backgroundColor: Colors.white,
       ),
       drawer: Drawer(
+        
         child: SafeArea(
           child: Container(
             child: Stack(
@@ -167,7 +254,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                 ListView(
                   children: [
                     ListTile(
-                      title: Text('ORDERS'),
+                      title: Text('Orders'),
                       leading: Icon(LineIcons.newspaper_o),
                       onTap: () {
                         Navigator.pop(context);
@@ -175,7 +262,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                     ),
                     ListTile(
                         tileColor: Colors.orange,
-                        title: Text('LOG OUT',style: TextStyle(color: Colors.white),),
+                        title: Text('Log Out',style: TextStyle(color: Colors.white),),
                         leading: Icon(LineIcons.sign_out, color: Colors.white,),
                         onTap: () async {
                           SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -194,15 +281,43 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
       ),
       body: Padding(
         padding: EdgeInsets.all(20),
-        child: Column(
+        child: Container(
+          height: MediaQuery.of(context).size.height-6,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
           children: [
             Container(
-              width: 200,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Allowing Orders',),
+                  Text('Allowing Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                  Platform.isIOS ?
                   CupertinoSwitch(
+                    activeColor: Colors.orange,
+                    value: _allowing,
+                    onChanged: (bool newValue) async {
+                      if (location_id != null) {
+                        bool result = await setAcceptingStatus(value: newValue, location_id: location_id);
+                        setState(()  {
+                          _allowing = result;
+                        });
+                        if (!_allowing) {
+                          scaffoldKey.currentState.showSnackBar(
+                              SnackBar(
+                                content: Text('You are no longer accepting orders'),
+                              )
+                          );
+                        } else {
+                          scaffoldKey.currentState.showSnackBar(
+                              SnackBar(
+                                content: Text('You are now accepting orders'),
+                              )
+                          );
+                        }
+                      }
+                    },
+                  ) :
+                  Switch(
                     activeColor: Colors.orange,
                     value: _allowing,
                     onChanged: (bool newValue) async {
@@ -282,25 +397,32 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
               ],
             ),
             SizedBox(height: 20,),
-            Container(
-              height: MediaQuery.of(context).size.height-267,
+            Expanded(
+              child:   Container(
+              height: MediaQuery.of(context).size.height,
               child: TabBarView(
                 children: [
                   new_orders.isNotEmpty ? Container(
-                      height: 400,
+                      height: 500,
                       child: new_orders.isNotEmpty ?
                           ListView.separated(
                               itemBuilder: (context, index) {
                             final item = new_orders[index];
                             return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                               Container(
-                                 height: 200,
-                                 child:  Column(
-                                   children: [
-                                     Container(
-                                       height: 100,
-                                       child: ListView.separated(
+                                Text('${DateFormat.yMMMMEEEEd().format(new_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(new_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                Text('Ordered by: ${new_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                Container(
+                                    height: 400,
+                                    child:  Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
+                                        SizedBox(height: 10),
+                                        Container(
+                                          height: 300,
+                                          child: ListView.separated(
                                            physics: NeverScrollableScrollPhysics(),
                                            itemBuilder: (context, subIndex) {
                                              final item = new_orders[index].items[subIndex];
@@ -308,27 +430,66 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                  width: MediaQuery.of(context).size.width,
                                                  child: SingleChildScrollView(
                                                    scrollDirection: Axis.horizontal,
-                                                   child: Row(
-
-                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                     children: [
-                                                       Text('(${item.quantity})'),
-                                                       Text(item.name + '          '),
-                                                       Text('\$${item.quantity*item.flat_price}'),
-                                                     ],
-                                                   ),
-                                                 )
+                                                   child: Column(
+                                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            children: [
+                                                              Text('${item.quantity}'),
+                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
+                                                              Text(item.name + '          '),
+                                                            ],
+                                                          ),
+                                                          item.quantity != null && item.flat_price != null ?
+                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}') : 
+                                                          item.flat_price != null ?
+                                                          Text('\$${(item.flat_price).toStringAsFixed(2)}')  : 
+                                                          Text('${item.name}')
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: 10),
+                                                      ...(item.lists.map((e) {
+                                                        return Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                                                            ...( e.items.map((e) {
+                                                              if (e.quantity != null && e.quantity != 0) {
+                                                                  if (e.price != null && e.price != 0) {
+                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}');
+                                                                  } else {
+                                                                    return Text('${e.quantity} x ${e.name}');
+                                                                  }
+                                                              } else {
+                                                                if (e.price != null && e.price != 0) {
+                                                                    return Text('${e.name} = \$${e.price}');
+                                                                  } else {
+                                                                    return Text('${e.name}');
+                                                                  }
+                                                              }
+                                                              }).toList()),
+                                                              SizedBox(height: 50)
+                                                            ],
+                                                        );
+                                                      }).toList())                               
+                                                      ],
+                                                   )
+                                                )
                                              );
                                            }, separatorBuilder: (context, subIndex) {
                                          return Divider();
                                        }, itemCount: new_orders[index].items.length),
                                      ),
-
+                                  
                                      Row(
                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                        children: [
-                                         Text('ORDER TOTAL', style: TextStyle(fontWeight: FontWeight.bold),),
-                                         Text('\$${item.food_total}', style: TextStyle(fontWeight: FontWeight.bold),),
+                                         Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold),),
+                                         Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
                                        ],
                                      ),
                                      SizedBox(height: 10),
@@ -337,7 +498,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                          Expanded(
                                            child: GestureDetector(
                                              onTap: () async {
-                                               await acceptOrder(order_id: item.id);
+                                               await acceptOrder(order: item);
                                              },
                                              child: Container(
                                                height: 40,
@@ -450,37 +611,90 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                           : SizedBox()
                   ) :  SizedBox(),
                   current_orders.isNotEmpty ? Container(
-                      height: 400,
+                      height: 500,
                       child: current_orders.isNotEmpty ?
                       ListView.separated(itemBuilder: (context, index) {
                         final item = current_orders[index];
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text('${DateFormat.yMMMMEEEEd().format(current_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(current_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                            Text('Ordered by: ${current_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+
+                            SizedBox(height: 20,),
                             Container(
-                                height: 200,
+                                height: 400,
                                 child:  Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
+                                    SizedBox(height: 10),
                                     Container(
-                                      height: 100,
+                                      height: 300,
                                       child: ListView.separated(
                                           physics: NeverScrollableScrollPhysics(),
                                           itemBuilder: (context, subIndex) {
-                                            final item = current_orders[index].items[subIndex];
+                                            final item = current_orders[index].items[subIndex];//
                                             return Container(
                                                 width: MediaQuery.of(context).size.width,
-                                                child: SingleChildScrollView(
-                                                  scrollDirection: Axis.horizontal,
-                                                  child: Row(
+                                                child:SingleChildScrollView(
+                                                   scrollDirection: Axis.horizontal,
+                                                   child: Column(
+                                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Row(
 
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    children: [
-                                                      Text('(${item.quantity}) '),
-                                                      Text(item.name + '          '),
-                                                      Text('\$${item.quantity*item.flat_price}'),
-                                                    ],
-                                                  ),
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            children: [
+                                                              Text('${item.quantity}'),
+                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
+                                                              Text(item.name + '          '),
+                                                            ],
+                                                          ),
+                                                          item.quantity != null && item.flat_price != null ?
+                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}') : 
+                                                          item.flat_price != null ?
+                                                          Text('\$${(item.flat_price).toStringAsFixed(2)}')  : 
+                                                          Text('${item.name}')
+
+                                                           
+                                                          
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: 10),
+                                                        ...(item.lists.map((e) {
+                                                      return Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                                                           ...( e.items.map((e) {
+                                                             if (e.quantity != null && e.quantity != 0) {
+                                                                if (e.price != null && e.price != 0) {
+                                                                  return Text('${e.quantity} x ${e.name} = \$${e.price}');
+                                                                } else {
+                                                                  return Text('${e.quantity} x ${e.name}');
+                                                                }
+                                                             } else {
+                                                               if (e.price != null && e.price != 0) {
+                                                                  return Text('${e.name} = \$${e.price}');
+                                                                } else {
+                                                                  return Text('${e.name}');
+                                                                }
+                                                             }
+                                                            }).toList()),
+                                                            SizedBox(height: 50)
+                                                          ],
+                                                      );
+                                                    }).toList())
+                                                                                                                
+                                                      ],
+                                                   )
                                                 )
-                                            );
+                                           );
                                           }, separatorBuilder: (context, subIndex) {
                                         return Divider();
                                       }, itemCount: current_orders[index].items.length),
@@ -489,8 +703,8 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('ORDER TOTAL', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        Text('\$${item.food_total}', style: TextStyle(fontWeight: FontWeight.bold),),
+                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold),),
+                                        Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
                                       ],
                                     ),
                                     SizedBox(height: 10),
@@ -505,7 +719,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                               child: Container(
                                                 height: 45,
                                                 child: Center(
-                                                  child: Text('Mark as ready for pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                  child: Text('Ready for Pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                 ),
                                                 decoration: BoxDecoration(
                                                     color: Color(0xF1F1F1F1),
@@ -517,6 +731,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                              onTap: () {
                                                 showCupertinoModalPopup(context: context, builder: (context) {
                                                   return Scaffold(
+                                                    backgroundColor: Colors.white,
                                                     body: SafeArea(
                                                       child: Padding(
                                                         padding: EdgeInsets.all(20),
@@ -539,6 +754,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                            ),
                                                             Container(
                                                               width: MediaQuery.of(context).size.width,
+                                                              color: Colors.white,
                                                               child: Column(
                                                                 crossAxisAlignment: CrossAxisAlignment.center,
                                                                 children: [
@@ -551,14 +767,24 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                                                height: 300,
                                                                child:  Stack(
                                                                  children: [
-                                                                   QrImage(
-                                                                     data: item.id,
-                                                                     version: QrVersions.auto,
-                                                                     size: 300.0,
+                                                                   Container(
+                                                                     child: QrImage(
+                                                                       data: item.id,
+                                                                       foregroundColor: Colors.white,
+                                                                       version: QrVersions.auto,
+                                                                       size: 300.0,
+                                                                     ),
+                                                                     decoration: BoxDecoration(
+                                                                        color: Colors.orange,
+                                                                       borderRadius: BorderRadius.circular(30),
+                                                                     ),
                                                                    ),
                                                                    Align(
                                                                      alignment: Alignment.center,
-                                                                     child: Image.asset('assets/images/logo.png', height: 20, width: 20,),
+                                                                     child: ClipRRect(
+                                                                       child: Image.asset('assets/images/qr-logo.png', height: 50, width: 50,),
+                                                                       borderRadius: BorderRadius.circular(10),
+                                                                     )
                                                                    )
                                                                  ],
                                                                )
@@ -600,38 +826,87 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                           : SizedBox()
                   ) :  SizedBox(),
                   past_orders.isNotEmpty ? Container(
-                      height: 350,
+                      height: 500,
                       child: past_orders.isNotEmpty ?
                       ListView.separated(
                           itemBuilder: (context, index) {
                         final item = past_orders[index];
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text('${DateFormat.yMMMMEEEEd().format(past_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(past_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                            Text('Ordered by: ${past_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                             Container(
-                                height: 150,
+                                height: 400,
                                 child:  Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
+                                    SizedBox(height: 10),
                                     Container(
-                                      height: 100,
+                                      height: 300,
                                       child: ListView.separated(
                                           physics: NeverScrollableScrollPhysics(),
                                           itemBuilder: (context, subIndex) {
                                             final item = past_orders[index].items[subIndex];
                                             return Container(
                                               width: MediaQuery.of(context).size.width,
-                                              child: SingleChildScrollView(
-                                                scrollDirection: Axis.horizontal,
-                                                child: Row(
+                                              child:SingleChildScrollView(
+                                                   scrollDirection: Axis.horizontal,
+                                                   child: Column(
+                                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Row(
 
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                  children: [
-                                                    Text('(${item.quantity}) '),
-                                                    Text(item.name + '          '),
-                                                    Text('\$${item.quantity*item.flat_price}'),
-                                                  ],
-                                                ),
-                                              )
-                                            );
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            children: [
+                                                              Text('${item.quantity}'),
+                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
+                                                              Text(item.name + '          '),
+                                                            ],
+                                                          ),
+                                                          item.quantity != null && item.flat_price != null ?
+                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}') : 
+                                                          item.flat_price != null ?
+                                                          Text('\$${(item.flat_price).toStringAsFixed(2)}')  : 
+                                                          Text('${item.name}')           
+                                                          
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: 10),
+                                                 ...(item.lists.map((e) {
+                                                      return Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                                                           ...( e.items.map((e) {
+                                                             if (e.quantity != null && e.quantity != 0) {
+                                                                if (e.price != null && e.price != 0) {
+                                                                  return Text('${e.quantity} x ${e.name} = \$${e.price}');
+                                                                } else {
+                                                                  return Text('${e.quantity} x ${e.name}');
+                                                                }
+                                                             } else {
+                                                               if (e.price != null && e.price != 0) {
+                                                                  return Text('${e.name} = \$${e.price}');
+                                                                } else {
+                                                                  return Text('${e.name}');
+                                                                }
+                                                             }
+                                                            }).toList()),
+                                                            SizedBox(height: 50)
+                                                          ],
+                                                      );
+                                                    }).toList())
+                                                                                                    
+                                                      ],
+                                                   )
+                                                )
+                                         );
                                           }, separatorBuilder: (context, subIndex) {
                                         return Divider();
                                       }, itemCount: past_orders[index].items.length),
@@ -640,8 +915,8 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('ORDER TOTAL', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        Text('\$${item.food_total}', style: TextStyle(fontWeight: FontWeight.bold),),
+                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold),),
+                                        Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
                                       ],
                                     ),
                                     SizedBox(height: 10),
@@ -659,11 +934,16 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
                 ],
               ),
             )
-          ],
+       
+            )
+         ],
         )
-      )
+  
+        )    )
     )
-      );
+      )
+ 
+    );
   }
 
 
@@ -729,19 +1009,41 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
 
     });
   }
-  acceptOrder({String order_id}) async {
+  acceptOrder({Order order}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
         headers: {
           'Content-Type': 'application/json',
 
         },
     body: json.encode({
-      'order_id': order_id,
+      'order_id': order.id,
       'location_id': location_id
     }));
     scaffoldKey.currentState.showSnackBar(SnackBar(
       content: Text('You accepted this order'),
     ));
+
+ 
+   await initializePrinter(printIpAddress);
+     final ByteData data = await rootBundle.load('assets/images/qr-logo.png');
+  final Uint8List imgBytes = data.buffer.asUint8List();
+  final img.Image image = img.decodeImage(imgBytes);
+  // printer.image(image);
+    printer.text('ORDERLIVERY ORDER #${order.id.toLowerCase()}', styles: PosStyles(align: PosAlign.center, bold: true));
+   printer.text('Ordered by: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
+    printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
+    
+  printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
+  var count = 1;
+   order.items.forEach((element) {
+     printItem(element, count);
+     count += 1;
+   });
+      printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}');
+      printer.feed(2);
+  printer.cut();
+  printer.disconnect();
+ 
     if (location_id != null) {
       getOrders(location_id: location_id);
     }
@@ -814,16 +1116,95 @@ static AudioPlayer audioPlugin = AudioPlayer();
   }
 }
 
+class OrderListItem {
 
+  int id;
+
+  // backend
+  String backend_id;
+
+  // ref
+  int list_id;
+
+  // from backend
+  String name;
+
+  // from backend
+  double price;
+
+  // user-defined
+  int quantity;
+
+  OrderListItem({
+    this.id,
+    this.backend_id,
+    this.list_id,
+    this.name,
+    this.price,
+    this.quantity
+  });
+
+  factory OrderListItem.fromJson(Map<String, dynamic> json) {
+    double price  = json['price'].runtimeType == int ? json['price'].toDouble() : json['price'] as double;
+    return OrderListItem(
+      id: json['id'] as int,
+      backend_id: json['backend_id'] as String,
+      list_id: json['list_id'] as int,
+      name: json['name'] as String,
+      price: price,
+      quantity: json['quantity'] as int
+    );
+  }
+
+}
+
+class OrderList {
+  // from backend
+  String backend_id;
+   int id;
+  int item_id;
+  String name;
+  List<OrderListItem> items;
+
+
+ OrderList({
+    this.id,
+    this.backend_id,
+    this.name,
+    this.item_id,
+    this.items
+  });
+
+  factory OrderList.fromJson(Map<String, dynamic> json) {
+    Iterable items = json['items'];
+    return OrderList(
+      id: json['id'] as int,
+      backend_id: json['backend_id'] as String,
+      name: json['name'] as String,
+      item_id: json['item_id'] as int,
+      items: items.map((e) => OrderListItem.fromJson(e)).toList()
+    );
+  }
+
+}
 class OrderItem {
   String name;
   int quantity;
   double flat_price;
   String special_instructions;
-  OrderItem({this.name, this.quantity, this.flat_price, this.special_instructions});
+  List<OrderList> lists;
+
+
+  OrderItem({
+    this.name, this.quantity, 
+    this.flat_price, this.special_instructions,
+    this.lists
+    });
 
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+
+    Iterable lists = json['lists'];
     double convertToDouble(dynamic value) {
       if (value is int) {
         return value.toDouble();
@@ -836,7 +1217,8 @@ class OrderItem {
         name: json['name'] as String,
         quantity: json['quantity'] as int,
         flat_price: convertToDouble(json['flat_price']),
-        special_instructions: json['special_instructions'] as String
+        special_instructions: json['special_instructions'] as String,
+        lists: lists.map((e) => OrderList.fromJson(e)).toList()
     );
   }
 }
@@ -863,9 +1245,13 @@ class Order {
   double discount_amount;
   PaymentMethod paymentMethod;
   DateTime createdAt;
+  String customer_name;
+  DateTime orderedAt;
 
 
   Order({
+    this.orderedAt,
+    this.customer_name,
     this.restaurant_name,
     this.restaurant_location_id,
     this.picked_up_at,
@@ -902,11 +1288,13 @@ class Order {
     DateTime getDartDateFromNetUTC(String netUtcDate) {
       var dateParts = netUtcDate.split(".");
       var actualDate = DateTime.parse(dateParts[0] + "Z");
-      return actualDate;
+      return actualDate.toLocal();
     }
     DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
     Iterable _items = json['items'];
     return Order(
+      orderedAt: json['createdAt'] != null ? getDartDateFromNetUTC(json['createdAt'] as String) : null,
+      customer_name: json['customer_name'] as String,
       restaurant_name: json['restaurant_name'] as String,
       restaurant_location_id: json['restaurant_location_id'] as String,
       picked_up_at: json['picked_up_at'] != null ? getDartDateFromNetUTC(
