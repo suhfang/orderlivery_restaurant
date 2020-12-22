@@ -31,13 +31,11 @@ class MyApp extends StatelessWidget {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   void firebaseCloudMessaging_Listeners() {
-    if (Platform.isIOS) iOS_Permission();
-    if (Platform.isAndroid) Android_Permission();
-}
-
-
-
-
+    if (Platform.isIOS) 
+        iOS_Permission();
+    if (Platform.isAndroid)
+       Android_Permission();
+  }
 
 void iOS_Permission() async {
     _firebaseMessaging.requestNotificationPermissions(
@@ -45,13 +43,11 @@ void iOS_Permission() async {
     _firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
-//        _getCurrentLocation();
     });
 
   }
 
   void Android_Permission() async {
-//      _getCurrentLocation();
   }
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");

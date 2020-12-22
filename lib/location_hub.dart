@@ -14,8 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screen/screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Restaurant/constants.dart' as Constants;
 import 'package:http/http.dart' as http;
@@ -55,7 +57,10 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   List<Order> current_orders = [];
   String order_id;
   double order_total;
+
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+
 
   @override
   void dispose() {
@@ -119,35 +124,6 @@ void printItem(OrderItem item, int count) async {
 }
 
 
-
-// void testReceipt(NetworkPrinter printer) {
-//   printer.text(
-//         'Regular: aA bB cC dD eE fF gG hH iI jJ kK lL mM nN oO pP qQ rR sS tT uU vV wW xX yY zZ');
-//   printer.text('Special 1: àÀ èÈ éÉ ûÛ üÜ çÇ ôÔ',
-//       styles: PosStyles(codeTable: 'CP1252'));
-//   printer.text('Special 2: blåbærgrød',
-//       styles: PosStyles(codeTable: 'CP1252'));
-
-//   printer.text('Bold text', styles: PosStyles(bold: true));
-//   printer.text('Reverse text', styles: PosStyles(reverse: true));
-//   printer.text('Underlined text',
-//       styles: PosStyles(underline: true), linesAfter: 1);
-//   printer.text('Align left', styles: PosStyles(align: PosAlign.left));
-//   printer.text('Align center', styles: PosStyles(align: PosAlign.center));
-//   printer.text('Align right',
-//       styles: PosStyles(align: PosAlign.right), linesAfter: 1);
-
-//   printer.text('Text size 200%',
-//       styles: PosStyles(
-//         height: PosTextSize.size2,
-//         width: PosTextSize.size2,
-//       ));
-
-//   printer.feed(2);
-//   printer.cut();
-// }
-
-
   @override
   void initState() {
     super.initState();
@@ -159,17 +135,7 @@ void printItem(OrderItem item, int count) async {
 
 
   Wakelock.enable();
-   //  Constants.isOnOrdersPage = true;
-   // if (widget.notificationData != null) {
-   //   Iterable items = json.decode(widget.notificationData['gcm.notification.additional_data'])['items'];
-   //   order_id = json.decode(widget.notificationData['gcm.notification.additional_data'])['order_id'] as String;
-   //   order_total = json.decode(widget.notificationData['gcm.notification.additional_data'])['amount'];
-   //   items_to_buy = items.map((e) => CartItem.fromJson(e)).toList();
-  
-
      getLocationId();
-    // setToken();
-   // }
   }
 
   bool _allowing = false;
@@ -229,7 +195,18 @@ void printItem(OrderItem item, int count) async {
       }
    });
 
+
+      WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
+    }
+
+ initPlatformState() async {
+   Future.delayed(Duration(seconds: 1), () {
+       
+      Screen.setBrightness(100000.0);
+      Screen.keepOn(true);
+   });
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -240,13 +217,12 @@ void printItem(OrderItem item, int count) async {
         key: scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Orders', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+        title: Text('INCOMING ORDERS', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
         centerTitle: true,
         shadowColor: Colors.transparent,
         backgroundColor: Colors.white,
       ),
       drawer: Drawer(
-        
         child: SafeArea(
           child: Container(
             child: Stack(
@@ -290,7 +266,7 @@ void printItem(OrderItem item, int count) async {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Allowing Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                  Text('Accepting Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                   Platform.isIOS ?
                   CupertinoSwitch(
                     activeColor: Colors.orange,
@@ -361,13 +337,20 @@ void printItem(OrderItem item, int count) async {
 
                   child:  new_orders.isNotEmpty ?
                   Badge(
-                      child: Container(
-                        width: 150,
-                        child: Text('New', textAlign: TextAlign.center,),
-                      )
-                  ) :  Container(
+                    badgeContent: Text('${new_orders.length}', style: TextStyle(color: Colors.white)),
+                    child: Row(
+                      children: [
+                          Expanded(
+                            child: BlinkingButton(
+                              child: Text('NEW ORDERS', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                            )
+                        )
+                      ],
+                    ) 
+                  )
+                  :  Container(
                     width: 150,
-                    child: Text('New', textAlign: TextAlign.center,),
+                    child: Text('NEW ORDERS', textAlign: TextAlign.center,),
                   )
                 ),
                 Tab(
@@ -375,11 +358,11 @@ void printItem(OrderItem item, int count) async {
                   Badge(
                       child: Container(
                         width: 150,
-                        child: Text('In-progress', textAlign: TextAlign.center,),
+                        child: Text('IN-PROGRESS ORDERS', textAlign: TextAlign.center,),
                       )
                   ) : Container(
                     width: 150,
-                    child: Text('In-progress', textAlign: TextAlign.center,),
+                    child: Text('IN-PROGRESS ORDERS', textAlign: TextAlign.center,),
                   )
                 ),
                 Tab(
@@ -387,11 +370,11 @@ void printItem(OrderItem item, int count) async {
                   Badge(
                       child: Container(
                         width: 150,
-                        child: Text('Past', textAlign: TextAlign.center,),
+                        child: Text('PAST ORDERS', textAlign: TextAlign.center,),
                       )
                   ) : Container(
                     width: 150,
-                    child: Text('Past', textAlign: TextAlign.center,),
+                    child: Text('PAST ORDERS', textAlign: TextAlign.center,),
                   )
                 ),
               ],
@@ -412,7 +395,7 @@ void printItem(OrderItem item, int count) async {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('${DateFormat.yMMMMEEEEd().format(new_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(new_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                Text('Ordered by: ${new_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                Text('Customer\'s name: ${new_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                 Container(
                                     height: 400,
                                     child:  Column(
@@ -421,7 +404,7 @@ void printItem(OrderItem item, int count) async {
                                         Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
                                         SizedBox(height: 10),
                                         Container(
-                                          height: 300,
+                                          height: 298,
                                           child: ListView.separated(
                                            physics: NeverScrollableScrollPhysics(),
                                            itemBuilder: (context, subIndex) {
@@ -439,19 +422,17 @@ void printItem(OrderItem item, int count) async {
                                                           Row(
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                             children: [
-                                                              Text('${item.quantity}'),
-                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
-                                                              Text(item.name + '          '),
+                                                              Text('${item.quantity}', style: TextStyle(fontSize: 20),),
+                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20)),
+                                                              Text(item.name + '          ', style: TextStyle(fontSize: 20))
                                                             ],
                                                           ),
                                                           item.quantity != null && item.flat_price != null ?
-                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}') : 
-                                                          item.flat_price != null ?
-                                                          Text('\$${(item.flat_price).toStringAsFixed(2)}')  : 
-                                                          Text('${item.name}')
+                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20),) : 
+                                                          item.flat_price != null ? Text('\$${(item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20)) :  Text('${item.name}', style: TextStyle(fontSize: 20)),
                                                         ],
                                                       ),
-                                                      SizedBox(height: 10),
+                                                      SizedBox(height: 40),
                                                       ...(item.lists.map((e) {
                                                         return Column(
                                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,19 +441,19 @@ void printItem(OrderItem item, int count) async {
                                                             ...( e.items.map((e) {
                                                               if (e.quantity != null && e.quantity != 0) {
                                                                   if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}');
+                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
                                                                   } else {
-                                                                    return Text('${e.quantity} x ${e.name}');
+                                                                    return Text('${e.quantity} x ${e.name}', style: TextStyle(fontSize: 20));
                                                                   }
                                                               } else {
                                                                 if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.name} = \$${e.price}');
+                                                                    return Text('${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
                                                                   } else {
-                                                                    return Text('${e.name}');
+                                                                    return Text('${e.name}', style: TextStyle(fontSize: 20));
                                                                   }
                                                               }
                                                               }).toList()),
-                                                              SizedBox(height: 50)
+                                                              SizedBox(height: 30)
                                                             ],
                                                         );
                                                       }).toList())                               
@@ -488,8 +469,8 @@ void printItem(OrderItem item, int count) async {
                                      Row(
                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                        children: [
-                                         Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold),),
-                                         Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
+                                         Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                         Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                        ],
                                      ),
                                      SizedBox(height: 10),
@@ -503,7 +484,7 @@ void printItem(OrderItem item, int count) async {
                                              child: Container(
                                                height: 40,
                                                child: Center(
-                                                 child: Text('Accept', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                 child: Text('ACCEPT', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 18)),
                                                ),
                                                decoration: BoxDecoration(
                                                  color: Colors.orange,
@@ -589,10 +570,10 @@ void printItem(OrderItem item, int count) async {
                                              child:  Container(
                                                height: 40,
                                                child: Center(
-                                                 child: Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                 child: Text('DECLINE', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),),
                                                ),
                                                decoration: BoxDecoration(
-                                                   color: Color(0xF1F1F1F1),
+                                                   color: Colors.red,
                                                    borderRadius: BorderRadius.circular(30)
                                                ),
                                              ),
@@ -606,7 +587,7 @@ void printItem(OrderItem item, int count) async {
                               ],
                             );
                           }, separatorBuilder: (context, index) {
-                            return Divider();
+                            return Divider(height: 50,);
                           }, itemCount: new_orders.length)
                           : SizedBox()
                   ) :  SizedBox(),
@@ -619,81 +600,74 @@ void printItem(OrderItem item, int count) async {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('${DateFormat.yMMMMEEEEd().format(current_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(current_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                            Text('Ordered by: ${current_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                            Text('Customer\'s name: ${current_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
 
                             SizedBox(height: 20,),
                             Container(
-                                height: 400,
+                                height: 600,
                                 child:  Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
                                     SizedBox(height: 10),
                                     Container(
-                                      height: 300,
+                                      height: 293,
                                       child: ListView.separated(
                                           physics: NeverScrollableScrollPhysics(),
                                           itemBuilder: (context, subIndex) {
                                             final item = current_orders[index].items[subIndex];//
                                             return Container(
                                                 width: MediaQuery.of(context).size.width,
-                                                child:SingleChildScrollView(
+                                                child:  SingleChildScrollView(
                                                    scrollDirection: Axis.horizontal,
                                                    child: Column(
                                                      crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
                                                         Row(
-
                                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
-
                                                           Row(
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                             children: [
-                                                              Text('${item.quantity}'),
-                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
-                                                              Text(item.name + '          '),
+                                                              Text('${item.quantity}', style: TextStyle(fontSize: 20),),
+                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20)),
+                                                              Text(item.name + '          ', style: TextStyle(fontSize: 20))
                                                             ],
                                                           ),
                                                           item.quantity != null && item.flat_price != null ?
-                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}') : 
-                                                          item.flat_price != null ?
-                                                          Text('\$${(item.flat_price).toStringAsFixed(2)}')  : 
-                                                          Text('${item.name}')
-
-                                                           
-                                                          
+                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20),) : 
+                                                          item.flat_price != null ? Text('\$${(item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20)) :  Text('${item.name}', style: TextStyle(fontSize: 20)),
                                                         ],
                                                       ),
                                                       SizedBox(height: 10),
-                                                        ...(item.lists.map((e) {
-                                                      return Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                                                           ...( e.items.map((e) {
-                                                             if (e.quantity != null && e.quantity != 0) {
+                                                      ...(item.lists.map((e) {
+                                                        return Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(e.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                                            ...( e.items.map((e) {
+                                                              if (e.quantity != null && e.quantity != 0) {
+                                                                  if (e.price != null && e.price != 0) {
+                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
+                                                                  } else {
+                                                                    return Text('${e.quantity} x ${e.name}', style: TextStyle(fontSize: 20));
+                                                                  }
+                                                              } else {
                                                                 if (e.price != null && e.price != 0) {
-                                                                  return Text('${e.quantity} x ${e.name} = \$${e.price}');
-                                                                } else {
-                                                                  return Text('${e.quantity} x ${e.name}');
-                                                                }
-                                                             } else {
-                                                               if (e.price != null && e.price != 0) {
-                                                                  return Text('${e.name} = \$${e.price}');
-                                                                } else {
-                                                                  return Text('${e.name}');
-                                                                }
-                                                             }
-                                                            }).toList()),
-                                                            SizedBox(height: 50)
-                                                          ],
-                                                      );
-                                                    }).toList())
-                                                                                                                
+                                                                    return Text('${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
+                                                                  } else {
+                                                                    return Text('${e.name}', style: TextStyle(fontSize: 20));
+                                                                  }
+                                                              }
+                                                              }).toList()),
+                                                              SizedBox(height: 30)
+                                                            ],
+                                                        );
+                                                      }).toList())                               
                                                       ],
                                                    )
                                                 )
+                                      
                                            );
                                           }, separatorBuilder: (context, subIndex) {
                                         return Divider();
@@ -703,7 +677,7 @@ void printItem(OrderItem item, int count) async {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold),),
+                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                         Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
                                       ],
                                     ),
@@ -719,10 +693,10 @@ void printItem(OrderItem item, int count) async {
                                               child: Container(
                                                 height: 45,
                                                 child: Center(
-                                                  child: Text('Ready for Pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                  child: Text('MARK AS READY FOR PICKUP', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
                                                 ),
                                                 decoration: BoxDecoration(
-                                                    color: Color(0xF1F1F1F1),
+                                                    color: Colors.brown,
                                                     borderRadius: BorderRadius.circular(30)
                                                 ),
                                               ),
@@ -746,8 +720,8 @@ void printItem(OrderItem item, int count) async {
                                                                    Navigator.pop(context);
                                                                  },
                                                                  child: Padding(
-                                                                   padding: EdgeInsets.all(20),
-                                                                   child: Icon(LineIcons.close),
+                                                                   padding: EdgeInsets.all(50),
+                                                                   child: Icon(LineIcons.close, size: 20),
                                                                  ),
                                                                ),
                                                              ],
@@ -803,10 +777,10 @@ void printItem(OrderItem item, int count) async {
 
                                                height: 45,
                                                child: Center(
-                                                 child: Text('Hand to Driver', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                 child: Text('HAND TO ENVOY', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
                                                decoration: BoxDecoration(
-                                                   color: Color(0xF1F1F1F1),
+                                                   color: Colors.orange,
                                                    borderRadius: BorderRadius.circular(30)
                                                ),
                                              ),
@@ -821,7 +795,7 @@ void printItem(OrderItem item, int count) async {
                           ],
                         );
                       }, separatorBuilder: (context, index) {
-                        return Divider();
+                        return Divider(height: 50,);
                       }, itemCount: current_orders.length)
                           : SizedBox()
                   ) :  SizedBox(),
@@ -835,7 +809,7 @@ void printItem(OrderItem item, int count) async {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('${DateFormat.yMMMMEEEEd().format(past_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(past_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                            Text('Ordered by: ${past_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                            Text('Customer\'s name: ${past_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                             Container(
                                 height: 400,
                                 child:  Column(
@@ -851,62 +825,56 @@ void printItem(OrderItem item, int count) async {
                                             final item = past_orders[index].items[subIndex];
                                             return Container(
                                               width: MediaQuery.of(context).size.width,
-                                              child:SingleChildScrollView(
+                                              child: SingleChildScrollView(
                                                    scrollDirection: Axis.horizontal,
                                                    child: Column(
                                                      crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
                                                         Row(
-
                                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
-
                                                           Row(
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                             children: [
-                                                              Text('${item.quantity}'),
-                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
-                                                              Text(item.name + '          '),
+                                                              Text('${item.quantity}', style: TextStyle(fontSize: 20),),
+                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20)),
+                                                              Text(item.name + '          ', style: TextStyle(fontSize: 20))
                                                             ],
                                                           ),
                                                           item.quantity != null && item.flat_price != null ?
-                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}') : 
-                                                          item.flat_price != null ?
-                                                          Text('\$${(item.flat_price).toStringAsFixed(2)}')  : 
-                                                          Text('${item.name}')           
-                                                          
+                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20),) : 
+                                                          item.flat_price != null ? Text('\$${(item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20)) :  Text('${item.name}', style: TextStyle(fontSize: 20)),
                                                         ],
                                                       ),
-                                                      SizedBox(height: 10),
-                                                 ...(item.lists.map((e) {
-                                                      return Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                                                           ...( e.items.map((e) {
-                                                             if (e.quantity != null && e.quantity != 0) {
+                                                      SizedBox(height: 40),
+                                                      ...(item.lists.map((e) {
+                                                        return Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                                                            ...( e.items.map((e) {
+                                                              if (e.quantity != null && e.quantity != 0) {
+                                                                  if (e.price != null && e.price != 0) {
+                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
+                                                                  } else {
+                                                                    return Text('${e.quantity} x ${e.name}', style: TextStyle(fontSize: 20));
+                                                                  }
+                                                              } else {
                                                                 if (e.price != null && e.price != 0) {
-                                                                  return Text('${e.quantity} x ${e.name} = \$${e.price}');
-                                                                } else {
-                                                                  return Text('${e.quantity} x ${e.name}');
-                                                                }
-                                                             } else {
-                                                               if (e.price != null && e.price != 0) {
-                                                                  return Text('${e.name} = \$${e.price}');
-                                                                } else {
-                                                                  return Text('${e.name}');
-                                                                }
-                                                             }
-                                                            }).toList()),
-                                                            SizedBox(height: 50)
-                                                          ],
-                                                      );
-                                                    }).toList())
-                                                                                                    
+                                                                    return Text('${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
+                                                                  } else {
+                                                                    return Text('${e.name}', style: TextStyle(fontSize: 20));
+                                                                  }
+                                                              }
+                                                              }).toList()),
+                                                              SizedBox(height: 30)
+                                                            ],
+                                                        );
+                                                      }).toList())                               
                                                       ],
                                                    )
                                                 )
-                                         );
+                                                                   );
                                           }, separatorBuilder: (context, subIndex) {
                                         return Divider();
                                       }, itemCount: past_orders[index].items.length),
@@ -915,8 +883,8 @@ void printItem(OrderItem item, int count) async {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
+                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                        Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                       ],
                                     ),
                                     SizedBox(height: 10),
@@ -927,7 +895,7 @@ void printItem(OrderItem item, int count) async {
                           ],
                         );
                       }, separatorBuilder: (context, index) {
-                        return Divider();
+                        return Divider(height: 50);
                       }, itemCount: past_orders.length)
                           : SizedBox()
                   ) :  SizedBox(),
@@ -985,6 +953,18 @@ void printItem(OrderItem item, int count) async {
   }
 
   getOrders({String location_id}) async {
+        showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [SpinKitThreeBounce(color: Colors.white,)],
+              ));
+        });
 
     print(location_id);
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-orders', headers: {
@@ -998,16 +978,17 @@ void printItem(OrderItem item, int count) async {
     print(_orders.length);
 
       var all = _orders.map((e) => Order.fromJson(e)).toList();
-    // all.sort((a,b) {
-    //   return b.createdAt.compareTo(a.createdAt);
-    // });
-    //   print(all);
-      new_orders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
-      current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
+    all.sort((a,b) {
+      return a.createdAt.compareTo(b.createdAt);
+    });
+    
+    new_orders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
+    current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
     past_orders = all.where((e) => e.picked_up_at != null || e.delivered_at != null || e.declined_at != null).toList();
-      // print(new_orders);
+      
 
     });
+    Navigator.pop(context);
   }
   acceptOrder({Order order}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
@@ -1025,12 +1006,12 @@ void printItem(OrderItem item, int count) async {
 
  
    await initializePrinter(printIpAddress);
-     final ByteData data = await rootBundle.load('assets/images/qr-logo.png');
+  final ByteData data = await rootBundle.load('assets/images/qr-logo.png');
   final Uint8List imgBytes = data.buffer.asUint8List();
   final img.Image image = img.decodeImage(imgBytes);
   // printer.image(image);
     printer.text('ORDERLIVERY ORDER #${order.id.toLowerCase()}', styles: PosStyles(align: PosAlign.center, bold: true));
-   printer.text('Ordered by: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
+   printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
     printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
     
   printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
@@ -1478,3 +1459,50 @@ class PaymentMethod {
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
+
+ class BlinkingButton extends StatefulWidget {
+
+   final Widget child;
+   final double width;
+   BlinkingButton({this.child, this.width});
+
+    @override
+    _BlinkingButtonState createState() => _BlinkingButtonState();
+  }
+
+  class _BlinkingButtonState extends State<BlinkingButton> with SingleTickerProviderStateMixin {
+    AnimationController _animationController;
+    @override
+    void initState() {
+      _animationController =
+          new AnimationController(vsync: this, duration: Duration(milliseconds: 100));
+      _animationController.repeat(reverse: true);
+    }
+  
+
+    @override
+    Widget build(BuildContext context) {
+      return Container(
+        height: 40,
+        child: FadeTransition(
+            opacity: _animationController,
+            child: Container(
+                
+                child: Center(
+                  child: widget.child,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.orange,
+                ),
+              )
+          )
+      );
+    }
+
+    @override
+    void dispose() {
+      _animationController.dispose();
+      super.dispose();
+    }
+  }
