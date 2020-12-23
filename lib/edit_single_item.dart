@@ -1063,7 +1063,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
         ),
         body: SafeArea(
             child: Padding(
-                padding: EdgeInsets.only(left: 50),
+                padding: EdgeInsets.only(left: 75),
                 child: Stepper(
                   currentStep: currentStep,
                   onStepContinue: next,

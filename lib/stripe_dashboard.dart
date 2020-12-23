@@ -37,6 +37,7 @@ class _StripeDashboardPageState extends State<StripeDashboardPage> {
         appBar: AppBar(
             centerTitle: true,
             backgroundColor: Colors.white,
+            shadowColor: Colors.transparent,
             title: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

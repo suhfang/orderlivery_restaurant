@@ -103,7 +103,10 @@ class _HomePageState extends State<HomePage> {
               _locations.isNotEmpty ?
               Padding(
                 padding: EdgeInsets.all(20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ),
-                child: ListView.builder(
+                child: ListView.separated(
+                  separatorBuilder: (context, index) {
+                    return Divider();
+                  },
                     itemCount: _locations.length,
                     itemBuilder: (context, index) {
                       final item = _locations[index];
@@ -127,7 +130,6 @@ class _HomePageState extends State<HomePage> {
                                   title: Text(_restaurantName + ' at'),
                                   subtitle: Text(item.address.name),
                                 ),
-                                Divider()
                               ],
                             ),
                           )

@@ -32,6 +32,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
         appBar: AppBar(
+          shadowColor: Colors.transparent,
           title: Column(
             children: [
               Text('Payments', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -49,7 +50,12 @@ class _PaymentsPageState extends State<PaymentsPage> {
                children: [
                  Expanded(
 
-                   child:  new DropdownButton<RestaurantLocation>(
+                   child:  Container(
+                     height: 50,
+                     child: ButtonTheme(
+                     alignedDropdown: true,
+                     child: DropdownButton<RestaurantLocation>(
+                      
                      isExpanded: true,
                      items: _locations.map((RestaurantLocation value) {
                        return new DropdownMenuItem<RestaurantLocation>(
@@ -65,7 +71,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
                      },
                      hint: Text('Select a location to view its payments'),
                      value: selectedLocation != null ? selectedLocation :  null,
-                   ),
+                   ) ,
+                   )
+                   )
 
                  )
                ]

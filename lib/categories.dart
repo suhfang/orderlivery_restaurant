@@ -199,7 +199,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       appBar: AppBar(
         shadowColor: Colors.transparent,
         centerTitle: true,
-        title: Text('Categories', style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text('CATEGORIES', style: TextStyle(fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
@@ -213,7 +213,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   style: TextStyle(fontWeight: FontWeight.bold),),
                   Padding(
                     padding: EdgeInsets.only(left: 0, right: 0, top: 70,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ),
-                    child:  ListView.builder(
+                    child:  Container(
+                      height: MediaQuery.of(context).size.height-300,
+                      child: ListView.separated(
+                      separatorBuilder: (context, index) {
+                        return Divider();
+                      },
                           itemCount: _categories.length,
                           itemBuilder: (context, index) {
                             final item = _categories[index];
@@ -235,19 +240,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                   child:  Column(
                                     children: [
                                       ListTile(
-                                        title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold),),
+                                        title: Text(item.name, style: TextStyle(),),
                                       ),
-                                      Divider(color: Colors.black,)
                                     ],
                                   ),
                                 )
                             );
                           }
                       )
+     
+                    )
                   ),
                   Align(
                       alignment: Alignment.bottomCenter,
-                      child: InkWell(
+                      child: GestureDetector(
                         onTap: () async {
                           final result =  await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CreateCategoryPage()));
                           if (result == 'added') {
@@ -257,6 +263,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           }
                         },
                         child: Container(
+                          padding: EdgeInsets.only(top: 20, bottom: 20),
+                          child: Container(
                           height: 50,
                           decoration: BoxDecoration(
                               color: Colors.orange,
@@ -266,6 +274,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             child: Text('Create New Category', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                           ),
                         ),
+                        )
                       )
                   )
                 ]

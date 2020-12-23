@@ -58,9 +58,11 @@ class Item {
   int cookingTime;
   List<ItemList> lists;
   List<String> individualItemIds;
+  DateTime createdAt;
 
   Item({
     this.id,
+    this.createdAt,
     this.name,
     this.description,
     this.flatPrice,
@@ -98,7 +100,9 @@ class Item {
         description: json['description'] as String,
         individualItemIds: json['individual_items'].cast<String>(),
         flatPrice: json['flat_price'] != null ? json['flat_price'].toDouble() ?? json['flat_price'] as int : null,
-        quantitiesAndPrices: qps
+        quantitiesAndPrices: qps,
+        createdAt: DateTime.parse(json['createdAt'] as String).toLocal()
+
     );
   }
 }
@@ -144,7 +148,9 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
         }));
     Iterable items = json .decode(response.body)['menus'];
 
-    return items.map((e) => Item.fromJson(e)).toList();
+    var res =  items.map((e) => Item.fromJson(e)).toList();
+    res.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return res;
   }
 
   Future<void> getCategories() async {
@@ -314,7 +320,7 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
 
     return Scaffold(
         appBar: AppBar(
-          title: Text('Menu Items', style: TextStyle(fontWeight: FontWeight.bold),),
+          title: Text('MENU ITEMS', style: TextStyle(fontWeight: FontWeight.bold),),
           backgroundColor: Colors.white,
           shadowColor: Colors.transparent,
         ),
@@ -372,40 +378,36 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                   ...(_categories
                   .map((category) {
                     if (category.items != null) {
-                      return ListView(
-                        children: [
-                          ...category.items.map((item) {
-                            return GestureDetector(
-                              onTap: () {
-                                if (item.individualItemIds.isEmpty) {
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (BuildContext context) => EditSingleItemPage(id: item.id)
-                                  ));
-                                } else {
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (BuildContext context) => EditComboItemPage(id: item.id)
-                                  ));
-                                }
+                      return ListView.separated(
+                        separatorBuilder: (context, index) {
+                          return Divider();
+                        },
+                        itemCount: category.items.length,
+                        itemBuilder: (context, index) {
+                          final item = category.items[index];
+                          return ListTile(
+                            onTap: () {
+                              if (item.individualItemIds.isEmpty) {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (BuildContext context) => EditSingleItemPage(id: item.id)
+                                    ));
+                                  } else {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (BuildContext context) => EditComboItemPage(id: item.id)
+                                    ));
+                                  }
                               },
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                    trailing: GestureDetector(
-                                      onTap: () {
-                                        deleteItem(item.id);
-                                      },
-                                      child: Icon(CupertinoIcons.trash, color: Colors.black,),
-                                    ),
-                                    title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold),),
-                                    subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black), ) :
-                                    Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
-                                  ),
-                                  Divider()
-                                ],
-                              ),
-                            );
-                          })
-                        ],
+                            trailing: GestureDetector(
+                              onTap: () {
+                                deleteItem(item.id);
+                              },
+                              child: Icon(CupertinoIcons.trash, color: Colors.black,),
+                            ),
+                            title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold),),
+                            subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black), ) :
+                            Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                          );
+                        },
                       );
                     } else {
                       return SizedBox();

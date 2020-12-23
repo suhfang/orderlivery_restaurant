@@ -25,9 +25,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-
-
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   void firebaseCloudMessaging_Listeners() {

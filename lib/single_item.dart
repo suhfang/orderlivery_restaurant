@@ -828,20 +828,6 @@ class _SingleItemPageState extends State<SingleItemPage> {
                 if (image != null) {
                   setState(() {
                     imageFile = File(image.path);
-                  });
-//                  showDialog(
-//                      context: context,
-//                      barrierDismissible: false,
-//                      builder: (BuildContext context) {
-//                        return Dialog(
-//                            backgroundColor: Colors.transparent,
-//                            child: Column(
-//                              mainAxisAlignment: MainAxisAlignment.center,
-//                              crossAxisAlignment: CrossAxisAlignment.center,
-//                              children: [CircularProgressIndicator()],
-//                            ));
-//                      });
-                  setState(() {
                     imageUrl = image.path;
                   });
                 }
@@ -1039,7 +1025,7 @@ class _SingleItemPageState extends State<SingleItemPage> {
         ),
         body: SafeArea(
             child: Padding(
-                padding: EdgeInsets.only(left: 50),
+                padding: EdgeInsets.only(left: 75),
                 child: Stepper(
                   currentStep: currentStep,
                   onStepContinue: next,
