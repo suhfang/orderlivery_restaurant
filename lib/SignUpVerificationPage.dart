@@ -10,6 +10,8 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
@@ -262,7 +264,12 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [CircularProgressIndicator()],
+                children: [
+                  SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                ],
               ));
         });
     final response = await http.post('${Constants.apiBaseUrl}/customers/send-sms', headers: {
@@ -288,7 +295,12 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [CircularProgressIndicator()],
+                children: [
+                  SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                ],
               ));
         });
     const url = '${Constants.apiBaseUrl}/restaurants/signup';
@@ -320,13 +332,7 @@ class _SignupverificationPageState extends State<SignupverificationPage> {
         Navigator.pop(context);
         if (response.body.contains('exists')) {
           final error = json.decode(response.body);
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(
-              error['message'],
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ));
+          Fluttertoast.showToast(msg: error['message'], backgroundColor: Colors.red, textColor: Colors.white, toastLength: Toast.LENGTH_LONG);
           Future.delayed(Duration(seconds: 3), () {
             Navigator.pop(context);
           });

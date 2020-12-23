@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multiselect/flutter_multiselect.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:Restaurant/constants.dart' as Constants;
@@ -484,7 +485,12 @@ class _ComboItemPageState extends State<ComboItemPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [CircularProgressIndicator()],
+                  children: [
+                    SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                  ],
                 ));
           });
       await createMenuItem();

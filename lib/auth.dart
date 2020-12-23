@@ -13,6 +13,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 //import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -241,7 +243,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                         alignment:
                                                         Alignment.topCenter,
                                                         width: deviceWidth,
-                                                        child: _TextFormField(
+                                                        child: TTextFormField(
                                                           autofillHints: [
                                                             AutofillHints.givenName
                                                           ],
@@ -286,7 +288,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                         alignment:
                                                         Alignment.topCenter,
                                                         width: deviceWidth,
-                                                        child: _TextFormField(
+                                                        child: TTextFormField(
                                                           autofillHints: [
                                                             AutofillHints.familyName
                                                           ],
@@ -328,7 +330,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   Container(
                                                     alignment: Alignment.topCenter,
                                                     width: deviceWidth,
-                                                    child: _TextFormField(
+                                                    child: TTextFormField(
                                                       hintText: 'Email',
                                                       onChanged: (String value) {
                                                         _signUpFormKey.currentState
@@ -364,7 +366,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   Container(
                                                     alignment: Alignment.topCenter,
                                                     width: deviceWidth,
-                                                    child: _TextFormField(
+                                                    child: TTextFormField(
                                                       hintText: 'Password',
                                                       onChanged: (String value) {
                                                         _signUpFormKey.currentState
@@ -403,7 +405,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   Container(
                                                     alignment: Alignment.topCenter,
                                                     width: deviceWidth,
-                                                    child: _TextFormField(
+                                                    child: TTextFormField(
                                                       inputFormatters: [
                                                         FilteringTextInputFormatter
                                                             .allow(RegExp("[0-9]"))
@@ -576,7 +578,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   Container(
                                                     alignment: Alignment.topCenter,
                                                     width: deviceWidth,
-                                                    child: _TextFormField(
+                                                    child: TTextFormField(
                                                       hintText: 'Email',
                                                       onChanged: (String value) {
                                                         accessTokenController.text = '';
@@ -612,7 +614,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                   Container(
                                                     alignment: Alignment.topCenter,
                                                     width: deviceWidth,
-                                                    child: _TextFormField(
+                                                    child: TTextFormField(
                                                       hintText: 'Password',
                                                       onChanged: (String value) {
                                                         accessTokenController.text = '';
@@ -661,7 +663,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                             Container(
                                               alignment: Alignment.topCenter,
                                               width: deviceWidth,
-                                              child: _TextFormField(
+                                              child: TTextFormField(
                                                 isPassword: true,
                                                 hintText: 'Access Token',
                                                 onChanged: (String value) {
@@ -856,7 +858,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [CircularProgressIndicator()],
+                children: [
+                  SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                ]
               ));
         });
 
@@ -893,24 +900,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         Navigator.pop(context);
         if (response.body.toLowerCase().contains('or')) {
           final error = json.decode(response.body);
-          Scaffold.of(context).showSnackBar(SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(
-              error['message'],
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ));
-          if (response.body.toLowerCase().contains('could')) {
+          Fluttertoast.showToast(msg: error['message'], backgroundColor: Colors.red, textColor: Colors.white, toastLength: Toast.LENGTH_LONG);
+        } else if (response.body.toLowerCase().contains('could')) {
             final error = json.decode(response.body);
-            Scaffold.of(context).showSnackBar(SnackBar(
-              backgroundColor: Colors.red,
-              content: Text(
-                error['message'],
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ));
+            Fluttertoast.showToast(msg: error['message'], backgroundColor: Colors.red, textColor: Colors.white, toastLength: Toast.LENGTH_LONG);
           }
-        }
+        
       }
     });
   }
@@ -925,7 +920,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [CircularProgressIndicator()],
+                children: [
+                  SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                ],
               ));
         });
 
@@ -957,19 +957,14 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
 
       } else {
         Navigator.pop(context);
-          Scaffold.of(context).showSnackBar(SnackBar(
-            backgroundColor: Colors.red,
-            content: Text('Invalid access token',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ));
+        Fluttertoast.showToast(msg: 'Invalid access token', backgroundColor: Colors.red, textColor: Colors.white, toastLength: Toast.LENGTH_LONG);
       }
     });
   }
 
 }
 
-class _TextFormField extends StatefulWidget {
+class TTextFormField extends StatefulWidget {
 
   final String hintText;
   final Function validator;
@@ -981,7 +976,7 @@ class _TextFormField extends StatefulWidget {
   final Iterable<TextInputFormatter> inputFormatters;
   final Iterable<String> autofillHints;
 
-  _TextFormField(
+  TTextFormField(
       {this.hintText,
         this.validator,
         this.onSaved,
@@ -995,7 +990,7 @@ class _TextFormField extends StatefulWidget {
   TextFormFieldState createState() => TextFormFieldState();
 }
 
-class TextFormFieldState extends State<_TextFormField> {
+class TextFormFieldState extends State<TTextFormField> {
 
   bool passwordVisible = false;
 

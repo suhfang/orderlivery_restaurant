@@ -9,6 +9,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
 import 'package:flutter_tags/flutter_tags.dart';
@@ -741,7 +742,12 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [CircularProgressIndicator()],
+                children: [
+                  SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                ],
               ));
         });
 

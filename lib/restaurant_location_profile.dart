@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -456,7 +457,12 @@ class _RestaurantLocationProfilePageState extends State<RestaurantLocationProfil
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [CircularProgressIndicator()],
+                children: [
+                  SpinKitThreeBounce(
+                      color: Colors.white,
+                      size: 50.0,
+                  )
+                ],
               ));
         });
 

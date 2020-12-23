@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:Restaurant/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -120,9 +121,7 @@ class _MyAppState extends State<MyApp> {
   );
 
   void onError(PlacesAutocompleteResponse response) {
-    homeScaffoldKey.currentState.showSnackBar(
-      SnackBar(content: Text(response.errorMessage)),
-    );
+    Fluttertoast.showToast(msg: response.errorMessage, backgroundColor: Colors.red, textColor: Colors.white, toastLength: Toast.LENGTH_LONG);
   }
 
   Future<void> _handlePressButton() async {}
@@ -241,18 +240,12 @@ class _CustomSearchScaffoldState extends PlacesAutocompleteState {
   @override
   void onResponseError(PlacesAutocompleteResponse response) {
     super.onResponseError(response);
-//    searchScaffoldKey.currentState.showSnackBar(
-//      SnackBar(content: Text(response.errorMessage)),
-//    );
   }
 
   @override
   void onResponse(PlacesAutocompleteResponse response) {
     super.onResponse(response);
     if (response != null && response.predictions.isNotEmpty) {
-//      searchScaffoldKey.currentState.showSnackBar(
-//        SnackBar(content: Text("Got answer")),
-//      );
     }
   }
 }

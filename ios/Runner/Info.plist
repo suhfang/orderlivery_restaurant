@@ -53,6 +53,8 @@
 	<string>NSMotionUsageDescription</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>NSPhotoLibraryUsageDescription</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>NSSpeechRecognitionUsageDescription</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
@@ -80,7 +82,5 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>NSSpeechRecognitionUsageDescription</string>
 </dict>
 </plist>

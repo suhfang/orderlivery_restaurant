@@ -1,9 +1,12 @@
 
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:Restaurant/auth.dart';
+import 'package:Restaurant/connect_printer.dart';
+import 'package:Restaurant/printer_helper.dart';
 import 'package:audioplayer/audioplayer.dart';
 import 'package:badges/badges.dart';
 import 'package:commons/commons.dart';
@@ -15,6 +18,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:focus_detector/focus_detector.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen/screen.dart';
@@ -57,6 +63,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   List<Order> current_orders = [];
   String order_id;
   double order_total;
+  Timer timer;
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -66,6 +73,8 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   void dispose() {
     handleWakeLock();
     WidgetsBinding.instance.removeObserver(this);
+    timer?.cancel();
+    timer = null;
     super.dispose();
   }
   AppLifecycleState _notification;
@@ -82,7 +91,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
 String printIpAddress = '192.168.14.243';
 double port = 9100;
 NetworkPrinter printer;
-
+bool hasPrintedAlready = false;
 Future<bool> initializePrinter(String ip) async {
   const PaperSize  paper = PaperSize.mm80;
   final profile = await CapabilityProfile.load();
@@ -95,6 +104,12 @@ Future<bool> connectPrinter(String ip) async {
   final PosPrintResult res = await printer.connect(ip, port: 9100);
   bool val = res == PosPrintResult.success;
   print ('printer connected: $val');
+   if (!val) {
+    Fluttertoast.showToast(
+      backgroundColor: Colors.red,
+      msg: 'Could not connect to the printer at $ip');
+  }
+ 
   
   return res == PosPrintResult.success;
 }
@@ -123,30 +138,23 @@ void printItem(OrderItem item, int count) async {
   printer.text('------------------------------------------', linesAfter: 1, styles: PosStyles(align: PosAlign.center));
 }
 
-
-  @override
-  void initState() {
-    super.initState();
-    
-    // initializePrinter(printIpAddress);
-    
-    WidgetsBinding.instance.addObserver(this);
-
-
-
-  Wakelock.enable();
-     getLocationId();
-  }
-
-  bool _allowing = false;
-  String location_id;
-
-
-  handleWakeLock() async {
-    if (await Wakelock.enabled) {
-      Wakelock.disable();
+void blinkLights() async {
+  if (new_orders.isNotEmpty) {
+    double brightness = await Screen.brightness;
+    if (brightness == 0) {
+      Future.delayed(Duration(milliseconds: 100), () {
+        Screen.setBrightness(1.0);
+        Screen.keepOn(true);
+      });
+    } else {
+      Future.delayed(Duration(milliseconds: 100), () {
+        Screen.setBrightness(0.0);
+        Screen.keepOn(false);
+      });
     }
   }
+}
+
 
   getLocationId() async  {
     SharedPreferences prefs  = await SharedPreferences.getInstance();
@@ -161,7 +169,7 @@ void printItem(OrderItem item, int count) async {
          print(message);
          print('app onMessage');
          showNotification(title: message['title'], body: message['body']);
-         getOrders(location_id: location_id);
+        getOrders(location_id: location_id); 
        },
        onResume: (Map<String, dynamic> message) async {
          await FlutterRingtonePlayer.playNotification();
@@ -169,6 +177,7 @@ void printItem(OrderItem item, int count) async {
          print(message);
          getOrders(location_id: location_id);
          print('app onResume');
+       
        },
        onLaunch: (Map<String, dynamic> message) async {
          await FlutterRingtonePlayer.playNotification();
@@ -176,6 +185,7 @@ void printItem(OrderItem item, int count) async {
          print(message);
          getOrders(location_id: location_id);
          print('app onLaunch');
+        
        },
      );
 
@@ -199,13 +209,57 @@ void printItem(OrderItem item, int count) async {
       WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
     }
 
- initPlatformState() async {
-   Future.delayed(Duration(seconds: 1), () {
-       
-      Screen.setBrightness(100000.0);
-      Screen.keepOn(true);
-   });
+  @override
+  void initState() {
+    
+    FlutterStatusbarcolor.setStatusBarColor(Colors.orange);
+    
+    super.initState();
+    
+    // initializePrinter(printIpAddress);
+    
+    WidgetsBinding.instance.addObserver(this);
+    timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => blinkLights());
+
+
+
+  Wakelock.enable();
+     getLocationId();
+     
   }
+
+  bool _allowing = false;
+  String location_id;
+
+
+  handleWakeLock() async {
+    if (await Wakelock.enabled) {
+      Wakelock.disable();
+    }
+  }
+
+ initPlatformState() async {
+   FlutterStatusbarcolor.setNavigationBarColor(Colors.orange);
+   FlutterStatusbarcolor.setNavigationBarWhiteForeground(true);
+   await PrinterProvider.shared.open('printer.db');
+    await getDefaultPrinter();
+  }
+
+  UniqueKey focusDetectorKey = UniqueKey();
+  bool bottomContainerShows = false;
+  Printer localPrinter;
+
+
+  void getDefaultPrinter() async {
+    var k = await PrinterProvider.shared.getDefaultPrinter();
+    if (k != null) {
+      setState(() {
+        localPrinter = k;
+        print(localPrinter);
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -213,39 +267,55 @@ void printItem(OrderItem item, int count) async {
       onWillPop: () async => false,
       child:  DefaultTabController(
         length: 3,
-      child:  Scaffold(
+        child: FocusDetector(
+          key: focusDetectorKey,
+          onFocusGained: () {
+            getDefaultPrinter();
+          },
+          child: Scaffold(
         key: scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('INCOMING ORDERS', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+        title: Text('TODAY\'S INCOMING ORDERS', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
         centerTitle: true,
         shadowColor: Colors.transparent,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.orange,
       ),
       drawer: Drawer(
         child: SafeArea(
           child: Container(
+            color: Colors.orange,
             child: Stack(
               children: [
                 ListView(
                   children: [
                     ListTile(
-                      title: Text('Orders'),
-                      leading: Icon(LineIcons.newspaper_o),
+                      title: Text('ORDERS', style: TextStyle(color: Colors.white),),
+                      leading: Icon(LineIcons.newspaper_o, color: Colors.white,),
                       onTap: () {
                         Navigator.pop(context);
                       },
                     ),
+                     ListTile(
+                      title: Text('CONNECT PRINTERS', style: TextStyle(color: Colors.white),),
+                      leading: Icon(LineIcons.print, color: Colors.white,),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => ConnectPrinterPage()
+                        ));
+                      },
+                    ),
                     ListTile(
                         tileColor: Colors.orange,
-                        title: Text('Log Out',style: TextStyle(color: Colors.white),),
+                        title: Text('LOG OUT',style: TextStyle(color: Colors.white),),
                         leading: Icon(LineIcons.sign_out, color: Colors.white,),
                         onTap: () async {
                           SharedPreferences prefs = await SharedPreferences.getInstance();
-                          await prefs.setString('token', '');
-                          await prefs.setBool('is_location', null);
-                          await prefs.setBool('is_restaurant', null);
-                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AuthPage(loginTab: true,)));
+                          await prefs.remove('token');
+                          await prefs.remove('is_location');
+                          await prefs.remove('is_restaurant');
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AuthPage(loginTab: true,)));
                         }
                     ),
                   ],
@@ -266,8 +336,8 @@ void printItem(OrderItem item, int count) async {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Accepting Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                  Platform.isIOS ?
+                  Text('ACCEPTING ORDERS', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                
                   CupertinoSwitch(
                     activeColor: Colors.orange,
                     value: _allowing,
@@ -278,50 +348,24 @@ void printItem(OrderItem item, int count) async {
                           _allowing = result;
                         });
                         if (!_allowing) {
-                          scaffoldKey.currentState.showSnackBar(
-                              SnackBar(
-                                content: Text('You are no longer accepting orders'),
-                              )
-                          );
+                          Fluttertoast.showToast(
+                            msg: 'You are currently not accepting new orders!',
+                            backgroundColor: Colors.black,
+                            textColor: Colors.white,
+                            toastLength: Toast.LENGTH_LONG);
+                          await HapticFeedback.heavyImpact();
+                            
                         } else {
-                          scaffoldKey.currentState.showSnackBar(
-                              SnackBar(
-                                content: Text('You are now accepting orders'),
-                              )
-                          );
+                           Fluttertoast.showToast(
+                            msg: 'You are now accepting orders!',
+                            backgroundColor: Colors.black,
+                            textColor: Colors.white,
+                            toastLength: Toast.LENGTH_LONG);
+                          await HapticFeedback.heavyImpact();
                         }
                       }
                     },
-                  ) :
-                  Switch(
-                    activeColor: Colors.orange,
-                    value: _allowing,
-                    onChanged: (bool newValue) async {
-                      if (location_id != null) {
-                        bool result = await setAcceptingStatus(value: newValue, location_id: location_id);
-                        setState(()  {
-                          _allowing = result;
-                        });
-
-
-                        if (!_allowing) {
-                          scaffoldKey.currentState.showSnackBar(
-                              SnackBar(
-                                content: Text('You are no longer accepting orders'),
-                              )
-                          );
-                        } else {
-                          scaffoldKey.currentState.showSnackBar(
-                              SnackBar(
-                                content: Text('You are now accepting orders'),
-                              )
-                          );
-                        }
-
-
-                      }
-                    },
-                  ),
+                  ) 
                 ],
               ),
             ),
@@ -330,14 +374,19 @@ void printItem(OrderItem item, int count) async {
               unselectedLabelColor: Colors.black,
               indicatorSize: TabBarIndicatorSize.tab,
 
-              indicator: BoxDecoration(),
-              labelColor: Colors.orange,
+              // indicator: BoxDecoration(),
+              labelColor: Colors.black,
               tabs: [
                 Tab(
 
                   child:  new_orders.isNotEmpty ?
                   Badge(
-                    badgeContent: Text('${new_orders.length}', style: TextStyle(color: Colors.white)),
+                    badgeColor: Colors.brown,
+                    badgeContent: Container(
+                      height: 50, width: 50, 
+                      child: Center(
+                        child: Text(new_orders.length > 99 ? '99+' : '${new_orders.length}', style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)),),
+                      ),
                     child: Row(
                       children: [
                           Expanded(
@@ -385,119 +434,182 @@ void printItem(OrderItem item, int count) async {
               height: MediaQuery.of(context).size.height,
               child: TabBarView(
                 children: [
-                  new_orders.isNotEmpty ? Container(
-                      height: 500,
-                      child: new_orders.isNotEmpty ?
-                          ListView.separated(
-                              itemBuilder: (context, index) {
-                            final item = new_orders[index];
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${DateFormat.yMMMMEEEEd().format(new_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(new_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                Text('Customer\'s name: ${new_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                Container(
-                                    height: 400,
-                                    child:  Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
-                                        SizedBox(height: 10),
-                                        Container(
-                                          height: 298,
-                                          child: ListView.separated(
-                                           physics: NeverScrollableScrollPhysics(),
-                                           itemBuilder: (context, subIndex) {
-                                             final item = new_orders[index].items[subIndex];
-                                             return Container(
-                                                 width: MediaQuery.of(context).size.width,
-                                                 child: SingleChildScrollView(
-                                                   scrollDirection: Axis.horizontal,
-                                                   child: Column(
-                                                     crossAxisAlignment: CrossAxisAlignment.start,
+                 Container(
+                  //  color: Colors.orange,
+                    child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        final order = new_orders[index];
+                        return Container(
+                          // color: Colors.orange,
+                          child: Padding(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Order #${order.id}'),
+                                  SizedBox(height: 10,),
+                                  Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
+                                  SizedBox(height: 10,),
+                                  Text('Customer\'s name: ${order.customer_name}'),
+                                  SizedBox(height: 20,),
+                                  Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                  SizedBox(height: 20),
+                                  ...(
+                                    order.items.map((item) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Divider(),
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text('${item.quantity} x ${item.name}'),
+                                            trailing: Text('\$${item.flat_price}'),
+                                          ),
+                                          item.special_instructions != null && item.special_instructions.isNotEmpty ?
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 20),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                SizedBox(height: 10,),
+                                                Text('${item.special_instructions}'),
+                                              ],
+                                            ) 
+                                          ): SizedBox(),
+                                          ...(
+                                            item.lists.map((list) {
+                                              return Padding(
+                                                padding: EdgeInsets.only(top: 20,),
+                                                child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                                  SizedBox(height: 20,),
+                                                  ...(
+                                                    list.items.map((listItem) {
+                                                      if (listItem.quantity != 0) {
+                                                        return Text('${listItem.quantity} x ${listItem.name}');
+                                                      } else {
+                                                        return Text('${listItem.name}');
+                                                      }
+                                                    }).toList()
+                                                  )
+                                                ],
+                                              )
+                                              );
+                                            }).toList()
+                                          ),
+                                          
+                                        ],
+                                      );
+                                    }).toList()
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 20),
+                                    child: ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text('Food total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                      trailing: Text('\$${order.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                    )
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            double width = MediaQuery.of(context).size.width;
+                                           if ((await initializePrinter(localPrinter?.ip ?? printIpAddress)) == false) {
+                                              if (hasPrintedAlready == false) {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                builder: (context) {
+                                                  return Container(
+                                                    padding: EdgeInsets.all(10),
+                                                    height: 112,
+                                                    width: width,
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
                                                       children: [
+                                                        Text('Could not connect to your printer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                                        SizedBox(height: 30,),
                                                         Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Row(
-                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                            children: [
-                                                              Text('${item.quantity}', style: TextStyle(fontSize: 20),),
-                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20)),
-                                                              Text(item.name + '          ', style: TextStyle(fontSize: 20))
-                                                            ],
-                                                          ),
-                                                          item.quantity != null && item.flat_price != null ?
-                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20),) : 
-                                                          item.flat_price != null ? Text('\$${(item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20)) :  Text('${item.name}', style: TextStyle(fontSize: 20)),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: 40),
-                                                      ...(item.lists.map((e) {
-                                                        return Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: [
-                                                              Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                                                            ...( e.items.map((e) {
-                                                              if (e.quantity != null && e.quantity != 0) {
-                                                                  if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
-                                                                  } else {
-                                                                    return Text('${e.quantity} x ${e.name}', style: TextStyle(fontSize: 20));
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                 acceptOrder(order: order);
+                                                                 hasPrintedAlready = true;
+                                                              },
+                                                                child: Expanded(
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.only(left: 20, right: 20),
+                                                                height: 40,
+                                                                
+                                                                child: Center(
+                                                                  child: Text('CONTINUE WITHOUT PRINTING'),
+                                                                ),
+                                                                 decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(30),
+                                                                  color: Colors.orange,
+                                                                ),
+                                                              ),
+                                                                )
+                                                            ),
+                                                            SizedBox(width: 40,),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                hasPrintedAlready = true;
+                                                                Navigator.push(context, MaterialPageRoute(
+                                                                  builder: (context) {
+                                                                    return ConnectPrinterPage();
                                                                   }
-                                                              } else {
-                                                                if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
-                                                                  } else {
-                                                                    return Text('${e.name}', style: TextStyle(fontSize: 20));
-                                                                  }
-                                                              }
-                                                              }).toList()),
-                                                              SizedBox(height: 30)
-                                                            ],
-                                                        );
-                                                      }).toList())                               
+                                                                ));
+                                                              },
+                                                              child: Expanded(
+                                                                child: Container(
+                                                                  padding: EdgeInsets.only(left: 20, right: 20),
+                                                                height: 40,
+                                                                
+                                                                child: Center(
+                                                                  child: Text('ADD A PRINTER'),
+                                                                ),
+                                                                decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(30),
+                                                                  color: Colors.orange,
+                                                                ),
+                                                              ),
+                                                              )
+                                                            )
+                                                          ],
+                                                        )
                                                       ],
-                                                   )
-                                                )
-                                             );
-                                           }, separatorBuilder: (context, subIndex) {
-                                         return Divider();
-                                       }, itemCount: new_orders[index].items.length),
-                                     ),
-                                  
-                                     Row(
-                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                       children: [
-                                         Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                         Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                       ],
-                                     ),
-                                     SizedBox(height: 10),
-                                     Row(
-                                       children: [
-                                         Expanded(
-                                           child: GestureDetector(
-                                             onTap: () async {
-                                               await acceptOrder(order: item);
-                                             },
-                                             child: Container(
-                                               height: 40,
-                                               child: Center(
-                                                 child: Text('ACCEPT', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 18)),
-                                               ),
-                                               decoration: BoxDecoration(
-                                                 color: Colors.orange,
-                                                 borderRadius: BorderRadius.circular(30)
-                                               ),
-                                             ),
-                                           )
-                                         ),
-                                         SizedBox(width: 10,),
-                                         Expanded(
-                                           child: GestureDetector(
-                                             onTap: () {
-                                               showModalBottomSheet(context: context, builder: (context) {
+                                                    )
+                                                  );
+                                                }
+                                              );
+                                            } 
+                                           }else {
+                                              print('foof');
+                                              acceptOrder(order: order);
+                                            }
+                                          },
+                                          child: Container(
+                                          height: 50,
+                                          child: Center(
+                                            child: Text('ACCEPT ORDER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange,
+                                            borderRadius: BorderRadius.circular(30)
+                                          ),
+                                        ),
+                                        )
+                                      ),
+                                      SizedBox(width: 20,),
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                              showModalBottomSheet(context: context, builder: (context) {
                                                  return Container(
                                                    height: 150,
                                                    color: Colors.white,
@@ -509,7 +621,7 @@ void printItem(OrderItem item, int count) async {
                                                              child:  Row(
                                                                mainAxisAlignment: MainAxisAlignment.center,
                                                                children: [
-                                                                 Text('Are you sure you want to reject this order?', style: TextStyle(fontSize: 17),)
+                                                                 Text('Are you sure you want to decline this order?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),)
                                                                ],
                                                              ),
                                                            ),
@@ -519,18 +631,14 @@ void printItem(OrderItem item, int count) async {
                                                                  Expanded(
                                                                      child: GestureDetector(
                                                                        onTap: () {
-                                                                         declineOrder(order_id: item.id);
+                                                                         declineOrder(order_id: order.id);
                                                                          Navigator.pop(context);
-                                                                         scaffoldKey.currentState.showSnackBar(
-                                                                             SnackBar(
-                                                                               content: Text('You rejected this order '),
-                                                                             )
-                                                                         );
+                                                                         Fluttertoast.showToast(msg: 'You declined this order!');
                                                                        },
                                                                        child: Container(
                                                                          height: 50,
                                                                          child: Center(
-                                                                           child: Text('Yes', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                           child: Text('YES', style: TextStyle(fontWeight: FontWeight.bold),),
                                                                          ),
                                                                          decoration: BoxDecoration(
                                                                              color: Colors.orange,
@@ -539,17 +647,16 @@ void printItem(OrderItem item, int count) async {
                                                                        ),
                                                                      )
                                                                  ),
+                                                                 SizedBox(width: 20),
                                                                  Expanded(
                                                                      child: GestureDetector(
                                                                        onTap: () {
                                                                          Navigator.pop(context);
-
-
                                                                        },
                                                                        child: Container(
                                                                          height: 50,
                                                                          child: Center(
-                                                                           child: Text('No', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                           child: Text('NO', style: TextStyle(fontWeight: FontWeight.bold),),
                                                                          ),
                                                                          decoration: BoxDecoration(
                                                                              color: Color(0xF1F1F1F1),
@@ -566,134 +673,126 @@ void printItem(OrderItem item, int count) async {
                                                    ),
                                                  );
                                                });
-                                             },
-                                             child:  Container(
-                                               height: 40,
-                                               child: Center(
-                                                 child: Text('DECLINE', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),),
-                                               ),
-                                               decoration: BoxDecoration(
-                                                   color: Colors.red,
-                                                   borderRadius: BorderRadius.circular(30)
-                                               ),
-                                             ),
-                                           )
-                                         ),
-                                       ],
-                                     ),
-                                   ],
-                                 )
-                               )
-                              ],
-                            );
-                          }, separatorBuilder: (context, index) {
-                            return Divider(height: 50,);
-                          }, itemCount: new_orders.length)
-                          : SizedBox()
-                  ) :  SizedBox(),
-                  current_orders.isNotEmpty ? Container(
-                      height: 500,
-                      child: current_orders.isNotEmpty ?
-                      ListView.separated(itemBuilder: (context, index) {
-                        final item = current_orders[index];
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${DateFormat.yMMMMEEEEd().format(current_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(current_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                            Text('Customer\'s name: ${current_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                          },
+                                          child: Container(
+                                            height: 50,
+                                            child: Center(
+                                              child: Text('DECLINE ORDER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(30)
+                                            ),
+                                          ),
+                                        )
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                              padding: EdgeInsets.all(20),
+                            )
+                        );
+                      },
+                      itemCount: new_orders.length,
+                      separatorBuilder: (context, index) {
+                        return Divider(thickness: 50, color: Color(0xF1F1F1F1), height: 50,);
+                      }
+                    )
+                    
+                  ),
 
-                            SizedBox(height: 20,),
-                            Container(
-                                height: 600,
-                                child:  Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
-                                    SizedBox(height: 10),
-                                    Container(
-                                      height: 293,
-                                      child: ListView.separated(
-                                          physics: NeverScrollableScrollPhysics(),
-                                          itemBuilder: (context, subIndex) {
-                                            final item = current_orders[index].items[subIndex];//
-                                            return Container(
-                                                width: MediaQuery.of(context).size.width,
-                                                child:  SingleChildScrollView(
-                                                   scrollDirection: Axis.horizontal,
-                                                   child: Column(
-                                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Row(
-                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                            children: [
-                                                              Text('${item.quantity}', style: TextStyle(fontSize: 20),),
-                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20)),
-                                                              Text(item.name + '          ', style: TextStyle(fontSize: 20))
-                                                            ],
-                                                          ),
-                                                          item.quantity != null && item.flat_price != null ?
-                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20),) : 
-                                                          item.flat_price != null ? Text('\$${(item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20)) :  Text('${item.name}', style: TextStyle(fontSize: 20)),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: 10),
-                                                      ...(item.lists.map((e) {
-                                                        return Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: [
-                                                              Text(e.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                                            ...( e.items.map((e) {
-                                                              if (e.quantity != null && e.quantity != 0) {
-                                                                  if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
-                                                                  } else {
-                                                                    return Text('${e.quantity} x ${e.name}', style: TextStyle(fontSize: 20));
-                                                                  }
-                                                              } else {
-                                                                if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
-                                                                  } else {
-                                                                    return Text('${e.name}', style: TextStyle(fontSize: 20));
-                                                                  }
-                                                              }
-                                                              }).toList()),
-                                                              SizedBox(height: 30)
-                                                            ],
-                                                        );
-                                                      }).toList())                               
-                                                      ],
-                                                   )
-                                                )
-                                      
-                                           );
-                                          }, separatorBuilder: (context, subIndex) {
-                                        return Divider();
-                                      }, itemCount: current_orders[index].items.length),
-                                    ),
-
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                        Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold),),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
+                  Container(
+                  //  color: Colors.orange,
+                    child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        final order = current_orders[index];
+                        return Container(
+                          // color: Colors.orange,
+                          child: Padding(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Order #${order.id}'),
+                                  SizedBox(height: 10,),
+                                  Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
+                                  SizedBox(height: 10,),
+                                  Text('Customer\'s name: ${order.customer_name}'),
+                                  SizedBox(height: 20,),
+                                  Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                  SizedBox(height: 20),
+                                  ...(
+                                    order.items.map((item) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Divider(),
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text('${item.quantity} x ${item.name}'),
+                                            trailing: Text('\$${item.flat_price}'),
+                                          ),
+                                          
+                                          item.special_instructions != null && item.special_instructions.isNotEmpty ?
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 20),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                SizedBox(height: 10,),
+                                                Text('${item.special_instructions}'),
+                                              ],
+                                            ) 
+                                          ): SizedBox(),
+                                          ...(
+                                            item.lists.map((list) {
+                                              return Padding(
+                                                padding: EdgeInsets.only(top: 20,),
+                                                child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                                  SizedBox(height: 20,),
+                                                  ...(
+                                                    list.items.map((listItem) {
+                                                      if (listItem.quantity != 0) {
+                                                        return Text('${listItem.quantity} x ${listItem.name}');
+                                                      } else {
+                                                        return Text('${listItem.name}');
+                                                      }
+                                                    }).toList()
+                                                  )
+                                                ],
+                                              )
+                                              );
+                                            }).toList()
+                                          ),
+                                          
+                                        ],
+                                      );
+                                    }).toList()
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 20),
+                                    child: ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text('Food total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                      trailing: Text('\$${order.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                    )
+                                  ),
+                                 Row(
                                       children: [
                                         Expanded(
-                                            child: item.approved_at != null && item.cooked_at == null ?
+                                            child: order.approved_at != null && order.cooked_at == null ?
                                             GestureDetector(
                                               onTap: () async {
-                                                await finishOrder(order_id: item.id);
+                                                await finishOrder(order_id: order.id);
                                               },
                                               child: Container(
                                                 height: 45,
                                                 child: Center(
-                                                  child: Text('MARK AS READY FOR PICKUP', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
+                                                  child: Text('MARK AS READY FOR PICKUP', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                                                 ),
                                                 decoration: BoxDecoration(
                                                     color: Colors.brown,
@@ -703,6 +802,7 @@ void printItem(OrderItem item, int count) async {
                                             ) :
                                            GestureDetector(
                                              onTap: () {
+                                               bottomContainerShows = true;
                                                 showCupertinoModalPopup(context: context, builder: (context) {
                                                   return Scaffold(
                                                     backgroundColor: Colors.white,
@@ -721,7 +821,7 @@ void printItem(OrderItem item, int count) async {
                                                                  },
                                                                  child: Padding(
                                                                    padding: EdgeInsets.all(50),
-                                                                   child: Icon(LineIcons.close, size: 20),
+                                                                   child: Icon(LineIcons.close, size: 50),
                                                                  ),
                                                                ),
                                                              ],
@@ -743,7 +843,7 @@ void printItem(OrderItem item, int count) async {
                                                                  children: [
                                                                    Container(
                                                                      child: QrImage(
-                                                                       data: item.id,
+                                                                       data: order.id,
                                                                        foregroundColor: Colors.white,
                                                                        version: QrVersions.auto,
                                                                        size: 300.0,
@@ -788,117 +888,111 @@ void printItem(OrderItem item, int count) async {
                                         ),
 
                                       ],
+                                    )  ],
+                              ),
+                              padding: EdgeInsets.all(20),
+                            )
+                        );
+                      },
+                      itemCount: current_orders.length,
+                      separatorBuilder: (context, index) {
+                        return Divider(thickness: 50, color: Color(0xF1F1F1F1), height: 50,);
+                      }
+                    )
+                    
+                  ),
+            
+                 Container(
+                  //  color: Colors.orange,
+                    child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        final order = past_orders[index];
+                        return Container(
+                          // color: Colors.orange,
+                          child: Padding(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Order #${order.id}'),
+                                  SizedBox(height: 10,),
+                                  Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
+                                  SizedBox(height: 10,),
+                                  Text('Customer\'s name: ${order.customer_name}'),
+                                  SizedBox(height: 20,),
+                                  Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                  SizedBox(height: 20),
+                                  ...(
+                                    order.items.map((item) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Divider(),
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text('${item.quantity} x ${item.name}'),
+                                            trailing: Text('\$${item.flat_price}'),
+                                          ),
+                                          item.special_instructions != null && item.special_instructions.isNotEmpty ?
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 20),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                SizedBox(height: 10,),
+                                                Text('${item.special_instructions}'),
+                                              ],
+                                            ) 
+                                          ): SizedBox(),
+                                          ...(
+                                            item.lists.map((list) {
+                                              return Padding(
+                                                padding: EdgeInsets.only(top: 20,),
+                                                child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                                  SizedBox(height: 20,),
+                                                  ...(
+                                                    list.items.map((listItem) {
+                                                      if (listItem.quantity != 0) {
+                                                        return Text('${listItem.quantity} x ${listItem.name}');
+                                                      } else {
+                                                        return Text('${listItem.name}');
+                                                      }
+                                                    }).toList()
+                                                  )
+                                                ],
+                                              )
+                                              );
+                                            }).toList()
+                                          ),
+                                          
+                                        ],
+                                      );
+                                    }).toList()
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 20),
+                                    child: ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text('Food total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                      trailing: Text('\$${order.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                     )
-                                  ],
-                                )
+                                  ), 
+                                ],
+                              ),
+                              padding: EdgeInsets.all(20),
                             )
-                          ],
                         );
-                      }, separatorBuilder: (context, index) {
-                        return Divider(height: 50,);
-                      }, itemCount: current_orders.length)
-                          : SizedBox()
-                  ) :  SizedBox(),
-                  past_orders.isNotEmpty ? Container(
-                      height: 500,
-                      child: past_orders.isNotEmpty ?
-                      ListView.separated(
-                          itemBuilder: (context, index) {
-                        final item = past_orders[index];
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${DateFormat.yMMMMEEEEd().format(past_orders[index].orderedAt)} at ${DateFormat('kk:mm a').format(past_orders[index].orderedAt)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                            Text('Customer\'s name: ${past_orders[index].customer_name}\n', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                            Container(
-                                height: 400,
-                                child:  Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
-                                    SizedBox(height: 10),
-                                    Container(
-                                      height: 300,
-                                      child: ListView.separated(
-                                          physics: NeverScrollableScrollPhysics(),
-                                          itemBuilder: (context, subIndex) {
-                                            final item = past_orders[index].items[subIndex];
-                                            return Container(
-                                              width: MediaQuery.of(context).size.width,
-                                              child: SingleChildScrollView(
-                                                   scrollDirection: Axis.horizontal,
-                                                   child: Column(
-                                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Row(
-                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                            children: [
-                                                              Text('${item.quantity}', style: TextStyle(fontSize: 20),),
-                                                              Text(' x ', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20)),
-                                                              Text(item.name + '          ', style: TextStyle(fontSize: 20))
-                                                            ],
-                                                          ),
-                                                          item.quantity != null && item.flat_price != null ?
-                                                          Text('\$${(item.quantity*item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20),) : 
-                                                          item.flat_price != null ? Text('\$${(item.flat_price).toStringAsFixed(2)}', style: TextStyle(fontSize: 20)) :  Text('${item.name}', style: TextStyle(fontSize: 20)),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: 40),
-                                                      ...(item.lists.map((e) {
-                                                        return Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: [
-                                                              Text(e.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                                                            ...( e.items.map((e) {
-                                                              if (e.quantity != null && e.quantity != 0) {
-                                                                  if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.quantity} x ${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
-                                                                  } else {
-                                                                    return Text('${e.quantity} x ${e.name}', style: TextStyle(fontSize: 20));
-                                                                  }
-                                                              } else {
-                                                                if (e.price != null && e.price != 0) {
-                                                                    return Text('${e.name} = \$${e.price}', style: TextStyle(fontSize: 20));
-                                                                  } else {
-                                                                    return Text('${e.name}', style: TextStyle(fontSize: 20));
-                                                                  }
-                                                              }
-                                                              }).toList()),
-                                                              SizedBox(height: 30)
-                                                            ],
-                                                        );
-                                                      }).toList())                               
-                                                      ],
-                                                   )
-                                                )
-                                                                   );
-                                          }, separatorBuilder: (context, subIndex) {
-                                        return Divider();
-                                      }, itemCount: past_orders[index].items.length),
-                                    ),
-
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text('Food Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                        Text('\$${item.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10),
-
-                                  ],
-                                )
-                            )
-                          ],
-                        );
-                      }, separatorBuilder: (context, index) {
-                        return Divider(height: 50);
-                      }, itemCount: past_orders.length)
-                          : SizedBox()
-                  ) :  SizedBox(),
+                      },
+                      itemCount: past_orders.length,
+                      separatorBuilder: (context, index) {
+                        return Divider(thickness: 50, color: Color(0xF1F1F1F1), height: 50,);
+                      }
+                    )
+                    
+                  ),
                 ],
               ),
             )
@@ -908,10 +1002,10 @@ void printItem(OrderItem item, int count) async {
         )
   
         )    )
-    )
-      )
  
-    );
+        )   
+      )
+    ));
   }
 
 
@@ -953,18 +1047,7 @@ void printItem(OrderItem item, int count) async {
   }
 
   getOrders({String location_id}) async {
-        showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [SpinKitThreeBounce(color: Colors.white,)],
-              ));
-        });
+
 
     print(location_id);
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-orders', headers: {
@@ -988,9 +1071,10 @@ void printItem(OrderItem item, int count) async {
       
 
     });
-    Navigator.pop(context);
+    
   }
   acceptOrder({Order order}) async {
+    
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
         headers: {
           'Content-Type': 'application/json',
@@ -1000,35 +1084,36 @@ void printItem(OrderItem item, int count) async {
       'order_id': order.id,
       'location_id': location_id
     }));
-    scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text('You accepted this order'),
-    ));
-
- 
-   await initializePrinter(printIpAddress);
-  final ByteData data = await rootBundle.load('assets/images/qr-logo.png');
-  final Uint8List imgBytes = data.buffer.asUint8List();
-  final img.Image image = img.decodeImage(imgBytes);
-  // printer.image(image);
-    printer.text('ORDERLIVERY ORDER #${order.id.toLowerCase()}', styles: PosStyles(align: PosAlign.center, bold: true));
-   printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
-    printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
-    
-  printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
-  var count = 1;
-   order.items.forEach((element) {
-     printItem(element, count);
-     count += 1;
-   });
-      printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}');
-      printer.feed(2);
-  printer.cut();
-  printer.disconnect();
- 
-    if (location_id != null) {
+   Fluttertoast.showToast(msg: 'You accepted this order');
+  if (location_id != null) {
       getOrders(location_id: location_id);
     }
+ 
+  //  var initialized = await initializePrinter(localPrinter?.ip ??  printIpAddress);
+  // if (initialized) {
+    final ByteData data = await rootBundle.load('assets/images/qr-logo.png');
+    final Uint8List imgBytes = data.buffer.asUint8List();
+    final img.Image image = img.decodeImage(imgBytes);
+    // printer.image(image);
+      printer.text('ORDERLIVERY ORDER #${order.id.toLowerCase()}', styles: PosStyles(align: PosAlign.center, bold: true));
+    printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
+      printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
+      
+    printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
+    var count = 1;
+    order.items.forEach((element) {
+      printItem(element, count);
+      count += 1;
+    });
+        printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}');
+        printer.feed(2);
+    printer.cut();
+    printer.disconnect();
   }
+  // print('initialized');
+ 
+  
+  // }
 
   finishOrder({String order_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',
@@ -1040,9 +1125,7 @@ void printItem(OrderItem item, int count) async {
           'order_id': order_id,
           'location_id': location_id
         }));
-    scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text('You marked this order as ready for pickup'),
-    ));
+    Fluttertoast.showToast(msg: 'You marked this order as ready for pickup');
     if (location_id != null) {
       await getOrders(location_id: location_id);
     }
@@ -1057,9 +1140,7 @@ void printItem(OrderItem item, int count) async {
           'order_id': order_id,
           'location_id': location_id
         }));
-    scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text('You declined this order'),
-    ));
+    Fluttertoast.showToast(msg: 'You declined this order');
     if (location_id != null) {
       getOrders(location_id: location_id);
     }
@@ -1474,6 +1555,7 @@ FlutterLocalNotificationsPlugin();
     AnimationController _animationController;
     @override
     void initState() {
+      
       _animationController =
           new AnimationController(vsync: this, duration: Duration(milliseconds: 100));
       _animationController.repeat(reverse: true);
@@ -1503,6 +1585,7 @@ FlutterLocalNotificationsPlugin();
     @override
     void dispose() {
       _animationController.dispose();
+      
       super.dispose();
     }
   }
