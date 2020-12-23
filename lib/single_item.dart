@@ -1020,8 +1020,21 @@ class _SingleItemPageState extends State<SingleItemPage> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.white,
-          title: Text('New La Carte Item', textAlign: TextAlign.center,),
+          title: Text('New A La Carte Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
+          actions: [
+            GestureDetector(
+              onTap: () {
+                if (_character != null) {
+                  createMenuItem();
+                }
+              },
+              child: Padding(
+                child: Text('Save', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),),
+                padding: EdgeInsets.all(20),
+              )
+            )
+          ],
         ),
         body: SafeArea(
             child: Padding(

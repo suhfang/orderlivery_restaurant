@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:Restaurant/constants.dart' as Constants;
@@ -171,7 +172,9 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
           'Content-Type': 'application/json'
         },
         body: json.encode(_json));
-    print(response.body);
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(msg: 'Item was updated!');
+    }
   }
 
   bool validatePricesAndQuantities() {
@@ -1060,6 +1063,17 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
           backgroundColor: Colors.white,
           title: Text('Edit A La Carte Item', textAlign: TextAlign.center,),
           shadowColor: Colors.transparent,
+          actions: [
+            GestureDetector(
+              onTap: () {
+                updateFlatPriceMenu();
+              },
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Text('Save', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),)
+              ),
+            )
+          ],
         ),
         body: SafeArea(
             child: Padding(
