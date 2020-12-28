@@ -269,7 +269,8 @@ void blinkLights() async {
         length: 3,
         child: FocusDetector(
           key: focusDetectorKey,
-          onFocusGained: () {
+          onFocusGained: () async {
+            await getLocationId();
             getDefaultPrinter();
           },
           child: Scaffold(
