@@ -28,126 +28,126 @@ class Category {
 
 class _CreateCategoryPageState extends State<CreateCategoryPage> {
 
-  TextEditingController controller = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-  @override
-  Widget build(BuildContext context) {
+    TextEditingController controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    @override
+    Widget build(BuildContext context) {
 
 
 
-    final formController = TextEditingController();
-    // TODO: implement build
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        shadowColor: Colors.transparent,
-        centerTitle: true,
-        title: Text('ADD CATEGORY'),
+      final formController = TextEditingController();
+      // TODO: implement build
+      return Scaffold(
         backgroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(30),
-          child:  Container(
-              height: MediaQuery.of(context).size.height-20,
-              width: MediaQuery.of(context).size.width,
-              child: Stack(
-                children: [
-
-                  Text('Enter the name of the category', style: TextStyle(color: Colors.black),),
-
-                 Padding(
-                   padding: EdgeInsets.only(top: 20),
-                   child:  Form(
-                     key: formKey,
-                     child: Column(
-                       children: [
-                         _TextFormField(
-
-                           hintText: 'For example Appetizers, or Entrees',
-                           onChanged:
-                               (String value) {
-                             formKey
-                                 .currentState
-                                 .validate();
-                           },
-                           controller: controller,
-                           validator:
-                               (String value) {
-                             if (value.length < 2) {
-                               return 'Enter category name';
-                             }
-                             return null;
-                           },
-                           onSaved: (String value) {
-//                                                  model.lastName = value;
-                           },
-                         ),
-                       ],
-                     ),
-                   ),
-                 ),
-
-                  Stack(
-                    children: [
-                      Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child:  GestureDetector(
-                                onTap: () async {
-                                  createCategory();
-//                        String added = await Navigator.push(context, MaterialPageRoute(
-//                            builder: (BuildContext context) =>
-////                                AddLocationPage()));
-//                        print(added);
-//                        if (added == 'added') {
-//                          setState(() {
-////                            getLocations();
-//                          });
-//                        }
-                                },
-
-                                child: Container(
-                                  height: 70,
-                                  child: Column(
-                                    children: [
-
-                                      SizedBox(height: 10,),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.orange,
-                                            borderRadius: BorderRadius.circular(10)
-                                        ),
-                                        height: 50,
-
-                                        width: MediaQuery
-                                            .of(context)
-                                            .size
-                                            .width - 50,
-                                        child: Center(
-                                          child: Text('SAVE CATEGORY', style: TextStyle(
-
-//                                        fontWeight: FontWeight.bold,
-                                              color: Colors.white),),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  )
-                ],
-              )
-          ),
+        appBar: AppBar(
+          shadowColor: Colors.transparent,
+          centerTitle: true,
+          title: Text('ADD CATEGORY'),
+          backgroundColor: Colors.white,
         ),
-      )
-    );
-  }
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(30),
+            child:  Container(
+                height: MediaQuery.of(context).size.height-20,
+                width: MediaQuery.of(context).size.width,
+                child: Stack(
+                  children: [
+
+                    Text('Enter the name of the category', style: TextStyle(color: Colors.black),),
+
+                  Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child:  Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          TTextFormField(
+
+                            hintText: 'For example Appetizers, or Entrees',
+                            onChanged:
+                                (String value) {
+                              formKey
+                                  .currentState
+                                  .validate();
+                            },
+                            controller: controller,
+                            validator:
+                                (String value) {
+                              if (value.length < 2) {
+                                return 'Enter category name';
+                              }
+                              return null;
+                            },
+                            onSaved: (String value) {
+  //                                                  model.lastName = value;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                    Stack(
+                      children: [
+                        Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child:  GestureDetector(
+                                  onTap: () async {
+                                    createCategory();
+  //                        String added = await Navigator.push(context, MaterialPageRoute(
+  //                            builder: (BuildContext context) =>
+  ////                                AddLocationPage()));
+  //                        print(added);
+  //                        if (added == 'added') {
+  //                          setState(() {
+  ////                            getLocations();
+  //                          });
+  //                        }
+                                  },
+
+                                  child: Container(
+                                    height: 70,
+                                    child: Column(
+                                      children: [
+
+                                        SizedBox(height: 10,),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.orange,
+                                              borderRadius: BorderRadius.circular(10)
+                                          ),
+                                          height: 50,
+
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width - 50,
+                                          child: Center(
+                                            child: Text('SAVE CATEGORY', style: TextStyle(
+
+  //                                        fontWeight: FontWeight.bold,
+                                                color: Colors.white),),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                              ),
+                            )
+                          ],
+                        )
+                      ],
+                    )
+                  ],
+                )
+            ),
+          ),
+        )
+      );
+    }
 
   void createCategory() async {
     if (controller.text.trim().isNotEmpty) {
@@ -165,7 +165,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
   }
 }
 
-class _TextFormField extends StatelessWidget {
+class TTextFormField extends StatelessWidget {
 
   final String hintText;
   final Function validator;
@@ -177,7 +177,7 @@ class _TextFormField extends StatelessWidget {
   final Function onChanged;
   final Iterable<TextInputFormatter> inputFormatters;
 
-  _TextFormField(
+  TTextFormField(
       {this.hintText,
         this.validator,
         this.onSaved,

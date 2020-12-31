@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:Restaurant/add_list.dart';
 import 'package:Restaurant/create_category.dart';
+import 'package:Restaurant/rename_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
@@ -199,7 +200,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       appBar: AppBar(
         shadowColor: Colors.transparent,
         centerTitle: true,
-        title: Text('CATEGORIES', style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text('Categories', style: TextStyle(fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
@@ -211,8 +212,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 children: [
                   Text('Please note: This will be the order the categories will appear in the app. We recommend starting with Appetizers at the top of the list, and desserts last. But it\'s up to you!',
                   style: TextStyle(fontWeight: FontWeight.bold),),
+                  
                   Padding(
-                    padding: EdgeInsets.only(left: 0, right: 0, top: 70,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ),
+                    padding: EdgeInsets.only(left: 0, right: 0, top:90, bottom: 70,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ),
                     child:  Container(
                       height: MediaQuery.of(context).size.height-300,
                       child: ListView.separated(
@@ -222,30 +224,108 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           itemCount: _categories.length,
                           itemBuilder: (context, index) {
                             final item = _categories[index];
-                            return Dismissible(
-                                background: stackBehindDismiss(),
-                                direction: DismissDirection.endToStart,
-                                key: Key(item.id),
-                                onDismissed: (DismissDirection direction) {
-                                  _categories.removeAt(index);
+                            return  ListTile(
+                              title: Text(item.name, style: TextStyle(),),
+                              trailing: GestureDetector(
+                                onTap: () async {
+                                  await showModalBottomSheet(context: context, builder: (context) {
+                                    return Container(
+                                      padding: EdgeInsets.all(20),
+                                      height: 200,
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Icon(LineIcons.close, color: Colors.white,),
+                                              Text('What would you like to do?'),
+                                              GestureDetector(
+                                                onTap: () => Navigator.pop(context),
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Icon(LineIcons.close)
+                                                )
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(height: 10,),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                Navigator.pop(context);
+                                                final data = await Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                                  return RenameCategoryPage(category: _categories[index]);
+                                                }));
+                                                if (data != null) {
+                                                    getAppetizers();
+                                                } 
+                                              },
+                                              child: Container(
+                                              child: Center(
+                                                child: Text('Rename', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange,
+                                                borderRadius: BorderRadius.circular(30)
+                                              ),
+                                            ),
+                                            )
+                                          ),
+                                          SizedBox(height: 20),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                deleteCategory(context, _categories[index], index);
+                                              },
+                                              child: Container(
+                                             child: Center(
+                                                child: Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius: BorderRadius.circular(30)
+                                              ),
+                                            ),
+                                            )
+                                          ),
+                                          
+                                        ],
+                                      )
+                                    );
+                                  });
                                 },
-                                confirmDismiss: (DismissDirection direction) {
-                                  return deleteCategory(context, _categories[index], index);
-                                },
-                                child: GestureDetector(
-                                  onTap: () {
-//                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationMenuPage(addressName: item.address.name, addressId: item.id,)));
-
-                                  },
-                                  child:  Column(
-                                    children: [
-                                      ListTile(
-                                        title: Text(item.name, style: TextStyle(),),
-                                      ),
-                                    ],
-                                  ),
-                                )
+                                child:  Container(
+                                padding: EdgeInsets.all(10),
+                                // color: Colors.orange,
+                                child: Icon(LineIcons.ellipsis_v),
+                              )
+                              )
                             );
+//                             return Dismissible(
+//                                 background: stackBehindDismiss(),
+//                                 direction: DismissDirection.endToStart,
+//                                 key: Key(item.id),
+//                                 onDismissed: (DismissDirection direction) {
+//                                   _categories.removeAt(index);
+//                                 },
+//                                 confirmDismiss: (DismissDirection direction) {
+//                                   return deleteCategory(context, _categories[index], index);
+//                                 },
+//                                 child: GestureDetector(
+//                                   onTap: () {
+// //                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => LocationMenuPage(addressName: item.address.name, addressId: item.id,)));
+
+//                                   },
+//                                   child:  Column(
+//                                     children: [
+//                                       ListTile(
+//                                         title: Text(item.name, style: TextStyle(),),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 )
+//                             );
                           }
                       )
      
@@ -263,7 +343,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           }
                         },
                         child: Container(
-                          padding: EdgeInsets.only(top: 20, bottom: 20),
+                          padding: EdgeInsets.only(top: 20, bottom: 10),
                           child: Container(
                           height: 50,
                           decoration: BoxDecoration(

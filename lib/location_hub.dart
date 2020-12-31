@@ -88,7 +88,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   
   }
 
-String printIpAddress = '192.168.14.243';
+String printIpAddress = '10.108.2.56';
 double port = 9100;
 NetworkPrinter printer;
 bool hasPrintedAlready = false;
@@ -518,81 +518,7 @@ void blinkLights() async {
                                       Expanded(
                                         child: GestureDetector(
                                           onTap: () async {
-                                            double width = MediaQuery.of(context).size.width;
-                                           if ((await initializePrinter(localPrinter?.ip ?? printIpAddress)) == false) {
-                                              if (hasPrintedAlready == false) {
-                                              showModalBottomSheet(
-                                                context: context,
-                                                builder: (context) {
-                                                  return Container(
-                                                    padding: EdgeInsets.all(10),
-                                                    height: 112,
-                                                    width: width,
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      children: [
-                                                        Text('Could not connect to your printer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                                        SizedBox(height: 30,),
-                                                        Row(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          children: [
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                 acceptOrder(order: order);
-                                                                 hasPrintedAlready = true;
-                                                              },
-                                                                child: Expanded(
-                                                                  child: Container(
-                                                                    padding: EdgeInsets.only(left: 20, right: 20),
-                                                                height: 40,
-                                                                
-                                                                child: Center(
-                                                                  child: Text('CONTINUE WITHOUT PRINTING'),
-                                                                ),
-                                                                 decoration: BoxDecoration(
-                                                                  borderRadius: BorderRadius.circular(30),
-                                                                  color: Colors.orange,
-                                                                ),
-                                                              ),
-                                                                )
-                                                            ),
-                                                            SizedBox(width: 40,),
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                hasPrintedAlready = true;
-                                                                Navigator.push(context, MaterialPageRoute(
-                                                                  builder: (context) {
-                                                                    return ConnectPrinterPage();
-                                                                  }
-                                                                ));
-                                                              },
-                                                              child: Expanded(
-                                                                child: Container(
-                                                                  padding: EdgeInsets.only(left: 20, right: 20),
-                                                                height: 40,
-                                                                
-                                                                child: Center(
-                                                                  child: Text('ADD A PRINTER'),
-                                                                ),
-                                                                decoration: BoxDecoration(
-                                                                  borderRadius: BorderRadius.circular(30),
-                                                                  color: Colors.orange,
-                                                                ),
-                                                              ),
-                                                              )
-                                                            )
-                                                          ],
-                                                        )
-                                                      ],
-                                                    )
-                                                  );
-                                                }
-                                              );
-                                            } 
-                                           }else {
-                                              print('foof');
-                                              acceptOrder(order: order);
-                                            }
+                                            acceptOrder(order: order);
                                           },
                                           child: Container(
                                           height: 50,
@@ -802,9 +728,9 @@ void blinkLights() async {
                                               ),
                                             ) :
                                            GestureDetector(
-                                             onTap: () {
+                                             onTap: () async {
                                                bottomContainerShows = true;
-                                                showCupertinoModalPopup(context: context, builder: (context) {
+                                                await showCupertinoModalPopup(context: context, builder: (context) {
                                                   return Scaffold(
                                                     backgroundColor: Colors.white,
                                                     body: SafeArea(
@@ -873,6 +799,12 @@ void blinkLights() async {
                                                     )
                                                   );
                                                 });
+                                                if (location_id == null) {
+                                                  await getLocationId();
+                                                  getOrders(location_id: location_id);
+                                                } else {
+                                                  getOrders(location_id: location_id);
+                                                }
                                              },
                                              child:  Container(
 
@@ -1075,7 +1007,7 @@ void blinkLights() async {
     
   }
   acceptOrder({Order order}) async {
-    
+    Screen.setBrightness(1);
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
         headers: {
           'Content-Type': 'application/json',
