@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         iOS_Permission();
     if (Platform.isAndroid)
        Android_Permission();
+       
   }
 
 void iOS_Permission() async {

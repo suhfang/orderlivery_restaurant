@@ -33,7 +33,15 @@ import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
+import 'dart:convert' show utf8, base64;
 
+String encryptString(String id) {
+  return  base64.encode(utf8.encode(id));
+}
+
+String decryptString(String encoded) {
+  return utf8.decode(base64.decode(encoded));
+}
 class LocationHubPage extends StatefulWidget {
 
   Map<String, dynamic> notificationData;
@@ -88,7 +96,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   
   }
 
-String printIpAddress = '10.108.2.56';
+String printIpAddress = '192.168.14.243';
 double port = 9100;
 NetworkPrinter printer;
 bool hasPrintedAlready = false;
@@ -96,7 +104,7 @@ Future<bool> initializePrinter(String ip) async {
   const PaperSize  paper = PaperSize.mm80;
   final profile = await CapabilityProfile.load();
   printer = NetworkPrinter(paper, profile);
-  var res = await connectPrinter(printIpAddress);
+  var res = await connectPrinter(ip);
   return res;
 } 
 
@@ -451,20 +459,17 @@ void blinkLights() async {
                                   Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
                                   SizedBox(height: 10,),
                                   Text('Customer\'s name: ${order.customer_name}'),
+                                  SizedBox(height: 10,),
+                                  Text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}',),
                                   SizedBox(height: 20,),
-                                  Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                  Text('Ordered items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                   SizedBox(height: 20),
                                   ...(
                                     order.items.map((item) {
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Divider(),
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text('${item.quantity} x ${item.name}'),
-                                            trailing: Text('\$${item.flat_price}'),
-                                          ),
+                                          Divider(color: Colors.black,),
                                           item.special_instructions != null && item.special_instructions.isNotEmpty ?
                                           Padding(
                                             padding: EdgeInsets.only(top: 20),
@@ -477,6 +482,15 @@ void blinkLights() async {
                                               ],
                                             ) 
                                           ): SizedBox(),
+                                          SizedBox(height: 10),
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text('${item.quantity} x ${item.name}'),
+                                            trailing: item.flat_price != null ?
+                                            Text('\$${item.flat_price.toStringAsFixed(2)}') :
+                                            Text('')
+                                          ),
+                                          
                                           ...(
                                             item.lists.map((list) {
                                               return Padding(
@@ -640,26 +654,22 @@ void blinkLights() async {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Order #${order.id}'),
+                                    Text('Order #${order.id}'),
                                   SizedBox(height: 10,),
                                   Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
                                   SizedBox(height: 10,),
                                   Text('Customer\'s name: ${order.customer_name}'),
+                                  SizedBox(height: 10,),
+                                  Text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}',),
                                   SizedBox(height: 20,),
-                                  Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                  Text('Ordered items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                   SizedBox(height: 20),
                                   ...(
                                     order.items.map((item) {
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Divider(),
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text('${item.quantity} x ${item.name}'),
-                                            trailing: Text('\$${item.flat_price}'),
-                                          ),
-                                          
+                                          Divider(color: Colors.black,),
                                           item.special_instructions != null && item.special_instructions.isNotEmpty ?
                                           Padding(
                                             padding: EdgeInsets.only(top: 20),
@@ -672,6 +682,14 @@ void blinkLights() async {
                                               ],
                                             ) 
                                           ): SizedBox(),
+                                          SizedBox(height: 10),
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text('${item.quantity} x ${item.name}'),
+                                            trailing: item.flat_price != null ?
+                                            Text('\$${item.flat_price.toStringAsFixed(2)}') :
+                                            Text('')
+                                          ),
                                           ...(
                                             item.lists.map((list) {
                                               return Padding(
@@ -770,23 +788,23 @@ void blinkLights() async {
                                                                  children: [
                                                                    Container(
                                                                      child: QrImage(
-                                                                       data: order.id,
-                                                                       foregroundColor: Colors.white,
+                                                                       data: encryptString(order.id),
+                                                                       foregroundColor: Colors.black,
                                                                        version: QrVersions.auto,
                                                                        size: 300.0,
                                                                      ),
                                                                      decoration: BoxDecoration(
-                                                                        color: Colors.orange,
-                                                                       borderRadius: BorderRadius.circular(30),
+                                                                        // color: Colors.orange,
+                                                                      //  borderRadius: BorderRadius.circular(30),
                                                                      ),
                                                                    ),
-                                                                   Align(
-                                                                     alignment: Alignment.center,
-                                                                     child: ClipRRect(
-                                                                       child: Image.asset('assets/images/qr-logo.png', height: 50, width: 50,),
-                                                                       borderRadius: BorderRadius.circular(10),
-                                                                     )
-                                                                   )
+                                                                  //  Align(
+                                                                  //    alignment: Alignment.center,
+                                                                  //    child: ClipRRect(
+                                                                  //      child: Image.asset('assets/images/qr-logo.png', height: 50, width: 50,),
+                                                                  //      borderRadius: BorderRadius.circular(10),
+                                                                  //    )
+                                                                  //  )
                                                                  ],
                                                                )
                                                              )
@@ -820,8 +838,30 @@ void blinkLights() async {
                                            )
                                         ),
 
+                                     
+
                                       ],
-                                    )  ],
+                                       
+                                    ) ,
+                                    SizedBox(height: 10,),
+                                      GestureDetector(
+                                        onTap: () {
+                                          printOrder(order: order);
+                                        },
+                                        child: Container(
+                                          height: 40,
+                                          width: MediaQuery.of(context).size.width-80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange,
+                                            borderRadius: BorderRadius.circular(30),
+                                          ),
+                                          child: Center(
+                                            child: Text('PRINT THIS ORDER', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)
+                                          ),
+                                        )
+                                      )
+                                     ],
+
                               ),
                               padding: EdgeInsets.all(20),
                             )
@@ -851,20 +891,17 @@ void blinkLights() async {
                                   Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
                                   SizedBox(height: 10,),
                                   Text('Customer\'s name: ${order.customer_name}'),
+                                  SizedBox(height: 10,),
+                                  Text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}',),
                                   SizedBox(height: 20,),
-                                  Text('Items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                  Text('Ordered items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                   SizedBox(height: 20),
                                   ...(
                                     order.items.map((item) {
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Divider(),
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text('${item.quantity} x ${item.name}'),
-                                            trailing: Text('\$${item.flat_price}'),
-                                          ),
+                                          Divider(color: Colors.black,),
                                           item.special_instructions != null && item.special_instructions.isNotEmpty ?
                                           Padding(
                                             padding: EdgeInsets.only(top: 20),
@@ -877,6 +914,14 @@ void blinkLights() async {
                                               ],
                                             ) 
                                           ): SizedBox(),
+                                          SizedBox(height: 10),
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Text('${item.quantity} x ${item.name}'),
+                                            trailing: item.flat_price != null ?
+                                            Text('\$${item.flat_price.toStringAsFixed(2)}') :
+                                            Text('')
+                                          ),
                                           ...(
                                             item.lists.map((list) {
                                               return Padding(
@@ -900,7 +945,23 @@ void blinkLights() async {
                                               );
                                             }).toList()
                                           ),
-                                          
+                                            SizedBox(height: 10,),
+                                      GestureDetector(
+                                        onTap: () {
+                                          printOrder(order: order);
+                                        },
+                                        child: Container(
+                                          height: 40,
+                                          width: MediaQuery.of(context).size.width-80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange,
+                                            borderRadius: BorderRadius.circular(30),
+                                          ),
+                                          child: Center(
+                                            child: Text('PRINT THIS ORDER', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)
+                                          ),
+                                        )
+                                      )
                                         ],
                                       );
                                     }).toList()
@@ -940,6 +1001,8 @@ void blinkLights() async {
       )
     ));
   }
+
+
 
 
   void showNotification({
@@ -1007,7 +1070,7 @@ void blinkLights() async {
     
   }
   acceptOrder({Order order}) async {
-    Screen.setBrightness(1);
+
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
         headers: {
           'Content-Type': 'application/json',
@@ -1021,17 +1084,28 @@ void blinkLights() async {
   if (location_id != null) {
       getOrders(location_id: location_id);
     }
- 
-  //  var initialized = await initializePrinter(localPrinter?.ip ??  printIpAddress);
-  // if (initialized) {
-    final ByteData data = await rootBundle.load('assets/images/qr-logo.png');
+    Screen.setBrightness(1);
+    printOrder(order: order);
+  }
+
+  printOrder({Order order}) async {
+     
+   var defaultPrinter = await PrinterProvider.shared.getDefaultPrinter();
+   print(defaultPrinter.ip);
+   print('default printer: $defaultPrinter');
+  if (defaultPrinter != null) {
+    var initialized = await initializePrinter(defaultPrinter.ip);
+  if (initialized) {
+    final ByteData data = await rootBundle.load('assets/images/thermal-logo.png');
     final Uint8List imgBytes = data.buffer.asUint8List();
     final img.Image image = img.decodeImage(imgBytes);
-    // printer.image(image);
-      printer.text('ORDERLIVERY ORDER #${order.id.toLowerCase()}', styles: PosStyles(align: PosAlign.center, bold: true));
+    printer.image(image, align: PosAlign.center);
+    printer.disconnect();
+   await initializePrinter(defaultPrinter.ip);
+    printer.text('ORDERLIVERY ORDER',      styles: PosStyles(align: PosAlign.center, bold: true,), linesAfter: 1);
+    printer.text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}', linesAfter: 1, styles: PosStyles(bold: true));
     printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
-      printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
-      
+    printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
     printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
     var count = 1;
     order.items.forEach((element) {
@@ -1043,10 +1117,9 @@ void blinkLights() async {
     printer.cut();
     printer.disconnect();
   }
-  // print('initialized');
  
-  
-  // }
+  }
+  }
 
   finishOrder({String order_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',

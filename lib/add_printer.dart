@@ -46,7 +46,7 @@ class AddPrinterPageState extends State<AddPrinterPage> {
               SizedBox(height: 10,),
               TTextFormField(
                 controller: ipController,
-               hintText: 'Enter Printer IP',
+               hintText: 'Enter Printer IP. Ex 192.168.1.2',
               ),
               SizedBox(
                 height: 40
@@ -56,15 +56,18 @@ class AddPrinterPageState extends State<AddPrinterPage> {
                   var name = nameController.text.trim();
                   var ip = ipController.text.trim();
                   RegExp regexp = new RegExp(r"^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$", caseSensitive: false, multiLine: false);
-                  
+                   var printers = await PrinterProvider.shared.getAllPrinters();
+                   
                   if (name.isNotEmpty && ip.isNotEmpty  && regexp.hasMatch(ip)) {
+                  //  print(printers[1].isDefault);
+                  //  print(printers[0].isDefault);
                     var printer = Printer(
                       name: name,
                       ip: ip,
-                      isDefault: 0
+                      isDefault: printers.length == 0 ? 1 : 0
                     );
-                    await PrinterProvider.shared.addPrinter(printer);
-                    print('printer was added');
+                    PrinterProvider.shared.addPrinter(printer);
+                    // // print('printer was added');
                     Navigator.pop(context);
                   }
                 },

@@ -73,14 +73,16 @@ class PrinterProvider {
       tablePrinter, 
       printer.toMap()
     );
+    
     return printer;
   }
 
   Future<int> updatePrinter(Printer printer) async {
-    int updated = await db.update(
-        tablePrinter, printer.toMap()
-    );
+    int updated = await db.update(tablePrinter, printer.toMap(),
+         where: '$columnSqliteId = ?', 
+      whereArgs: [printer.id]);
     return updated;
+    
   }
 
   Future<int> deletePrinter(int id) async {

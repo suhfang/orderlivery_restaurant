@@ -118,7 +118,7 @@ class ConnectPrinterState extends State<ConnectPrinterPage> {
                         id = value;
                       });            
                       await PrinterProvider.shared.setAsDefaultPrinter(printer);
-                      Fluttertoast.showToast(msg: '${printer.id} is now your default printer');
+                      Fluttertoast.showToast(msg: '${printer.name} is now your default printer');
                     },
                     
                   ),
