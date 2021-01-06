@@ -96,7 +96,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   
   }
 
-String printIpAddress = '192.168.14.243';
+
 double port = 9100;
 NetworkPrinter printer;
 bool hasPrintedAlready = false;
@@ -148,18 +148,20 @@ void printItem(OrderItem item, int count) async {
 
 void blinkLights() async {
   if (new_orders.isNotEmpty) {
-    double brightness = await Screen.brightness;
-    if (brightness == 0) {
-      Future.delayed(Duration(milliseconds: 100), () {
-        Screen.setBrightness(1.0);
-        Screen.keepOn(true);
-      });
-    } else {
-      Future.delayed(Duration(milliseconds: 100), () {
-        Screen.setBrightness(0.0);
-        Screen.keepOn(false);
-      });
-    }
+    await FlutterRingtonePlayer.playNotification();
+    // double brightness = await Screen.brightness;
+    // if (brightness == 0) {
+    //   Future.delayed(Duration(milliseconds: 100), () {
+    //     Screen.setBrightness(1.0);
+    //     Screen.keepOn(true);
+    //   });
+    // } else {
+    //   Future.delayed(Duration(milliseconds: 100), () {
+    //     Screen.setBrightness(0.0);
+    //     Screen.keepOn(false);
+    //   });
+    // }
+
   }
 }
 
@@ -170,7 +172,10 @@ void blinkLights() async {
     print('soup');
     final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
    _firebaseMessaging.getToken().then((value) async {
-     location_id = json.decode(response.body)['location_id'] as String;
+     
+     setState(() {
+       location_id = json.decode(response.body)['location_id'] as String;
+     });
      _firebaseMessaging.configure(
        onMessage: (Map<String, dynamic> message) async {
          await FlutterRingtonePlayer.playNotification();
@@ -227,7 +232,7 @@ void blinkLights() async {
     // initializePrinter(printIpAddress);
     
     WidgetsBinding.instance.addObserver(this);
-    timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => blinkLights());
+    timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
 
 
 
@@ -571,10 +576,14 @@ void blinkLights() async {
                                                                children: [
                                                                  Expanded(
                                                                      child: GestureDetector(
-                                                                       onTap: () {
-                                                                         declineOrder(order_id: order.id);
+                                                                       onTap: () async {
+                                                                          declineOrder(order_id: order.id);
+                                                                         
+                                                                         await getLocationId();
                                                                          Navigator.pop(context);
+
                                                                          Fluttertoast.showToast(msg: 'You declined this order!');
+                                                                         
                                                                        },
                                                                        child: Container(
                                                                          height: 50,
@@ -1084,7 +1093,7 @@ void blinkLights() async {
   if (location_id != null) {
       getOrders(location_id: location_id);
     }
-    Screen.setBrightness(1);
+    // Screen.setBrightness(1);
     printOrder(order: order);
   }
 
@@ -1146,10 +1155,7 @@ void blinkLights() async {
           'order_id': order_id,
           'location_id': location_id
         }));
-    Fluttertoast.showToast(msg: 'You declined this order');
-    if (location_id != null) {
-      getOrders(location_id: location_id);
-    }
+
   }
   setAcceptingStatus({bool value, String location_id}) async {
 
