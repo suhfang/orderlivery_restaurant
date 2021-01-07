@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:Restaurant/auth.dart';
 import 'package:Restaurant/connect_printer.dart';
@@ -1108,6 +1109,9 @@ void blinkLights() async {
     final ByteData data = await rootBundle.load('assets/images/thermal-logo.png');
     final Uint8List imgBytes = data.buffer.asUint8List();
     final img.Image image = img.decodeImage(imgBytes);
+    var bytes = await toQrImageData(encryptString(order.id));
+    final img.Image bytesImage = img.decodeImage(bytes);
+
     printer.image(image, align: PosAlign.center);
     printer.disconnect();
    await initializePrinter(defaultPrinter.ip);
@@ -1121,14 +1125,35 @@ void blinkLights() async {
       printItem(element, count);
       count += 1;
     });
-        printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}');
-        printer.feed(2);
+    printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}', linesAfter: 2);
+
+    printer.disconnect();
+    await initializePrinter(defaultPrinter.ip);
+    printer.image(bytesImage, align: PosAlign.center,);
+    printer.feed(2);
     printer.cut();
     printer.disconnect();
   }
  
   }
   }
+
+
+Future<Uint8List> toQrImageData(String text) async {
+try {
+    final image = await QrPainter(
+      data: text,
+      version: QrVersions.auto,
+      gapless: false,
+      color: Colors.black,
+      emptyColor: Colors.white,
+    ).toImage(300);
+    final a = await image.toByteData(format: ImageByteFormat.png);
+    return a.buffer.asUint8List();
+  } catch (e) {
+    throw e;
+  }
+}
 
   finishOrder({String order_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',
