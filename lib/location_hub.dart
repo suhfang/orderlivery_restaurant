@@ -70,6 +70,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   List<Order> new_orders = [];
   List<Order> past_orders = [];
   List<Order> current_orders = [];
+  List<Order> orders = [];
   String order_id;
   double order_total;
   Timer timer;
@@ -295,6 +296,7 @@ void blinkLights() async {
         centerTitle: true,
         shadowColor: Colors.transparent,
         backgroundColor: Colors.orange,
+     
       ),
       drawer: Drawer(
         child: SafeArea(
@@ -352,7 +354,7 @@ void blinkLights() async {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('ACCEPTING ORDERS', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                
+                 
                   CupertinoSwitch(
                     activeColor: Colors.orange,
                     value: _allowing,
@@ -385,6 +387,18 @@ void blinkLights() async {
               ),
             ),
             SizedBox(height: 20,),
+            Text('Total Gross earnings for the day'),
+            Text(
+                  orders.isNotEmpty ?
+                  '\$${orders.where((a) => a.approved_at != null).map((e) => e.food_total).toList().reduce((a, b) => (a + b)).toStringAsFixed(2)}' : 
+                  '\$0.00',
+
+                  style: TextStyle(
+                    fontSize: 50,
+                    fontWeight: FontWeight.bold
+                  ),),
+
+            SizedBox(height: 40,),
             TabBar(
               unselectedLabelColor: Colors.black,
               indicatorSize: TabBarIndicatorSize.tab,
@@ -1070,7 +1084,7 @@ void blinkLights() async {
     all.sort((a,b) {
       return a.createdAt.compareTo(b.createdAt);
     });
-    
+    orders = all;
     new_orders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
     current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
     past_orders = all.where((e) => e.picked_up_at != null || e.delivered_at != null || e.declined_at != null).toList();
