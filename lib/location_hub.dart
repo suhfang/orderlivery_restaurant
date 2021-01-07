@@ -465,7 +465,17 @@ void blinkLights() async {
                 children: [
                  Container(
                   //  color: Colors.orange,
-                    child: ListView.separated(
+                    child: new_orders.isEmpty ?
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LineIcons.frown_o, size: 50),
+                          SizedBox(height: 15),
+                          Text('No new orders were found', style: TextStyle(fontSize: 18)),
+                        ],
+                      )
+                    ) : ListView.separated(
                       itemBuilder: (context, index) {
                         final order = new_orders[index];
                         return Container(
@@ -669,7 +679,18 @@ void blinkLights() async {
 
                   Container(
                   //  color: Colors.orange,
-                    child: ListView.separated(
+                    child: current_orders.isEmpty ?
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LineIcons.frown_o, size: 50),
+                          SizedBox(height: 15),
+                          Text('No current orders were found', style: TextStyle(fontSize: 18)),
+                        ],
+                      )
+                    ) :
+                    ListView.separated(
                       itemBuilder: (context, index) {
                         final order = current_orders[index];
                         return Container(
@@ -901,7 +922,18 @@ void blinkLights() async {
             
                  Container(
                   //  color: Colors.orange,
-                    child: ListView.separated(
+                    child: past_orders.isEmpty ?
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LineIcons.frown_o, size: 50),
+                          SizedBox(height: 15),
+                          Text('No past orders were found', style: TextStyle(fontSize: 18)),
+                        ],
+                      )
+                    ) : 
+                    ListView.separated(
                       itemBuilder: (context, index) {
                         final order = past_orders[index];
                         return Container(
