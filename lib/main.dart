@@ -5,6 +5,7 @@ import 'package:Restaurant/auth.dart';
 import 'package:Restaurant/home.dart';
 import 'package:Restaurant/init.dart';
 import 'package:Restaurant/location_hub.dart';
+import 'package:Restaurant/printer_helper.dart';
 import 'package:Restaurant/profile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -12,12 +13,15 @@ import 'package:Restaurant/constants.dart' as Constants;
 import 'package:flutter/services.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
+  
   WidgetsFlutterBinding.ensureInitialized();
+  PrinterProvider.shared.open('printer.db');
   if (Platform.isAndroid) {
     FlutterStatusbarcolor.setStatusBarColor(Colors.white);
   }
@@ -64,7 +68,7 @@ void iOS_Permission() async {
             systemNavigationBarDividerColor: Colors.white,
             systemNavigationBarIconBrightness: Brightness.dark
         ),
-        child: MaterialApp(
+        child: GetMaterialApp(
           // navigatorKey: navigatorKey,
             title: 'Restaurant',
             debugShowCheckedModeBanner: false,

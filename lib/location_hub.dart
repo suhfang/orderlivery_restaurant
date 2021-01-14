@@ -35,6 +35,8 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'dart:convert' show utf8, base64;
+import 'package:get/instance_manager.dart';
+import 'package:get/route_manager.dart';
 
 String encryptString(String id) {
   return  base64.encode(utf8.encode(id));
@@ -178,31 +180,7 @@ void blinkLights() async {
      setState(() {
        location_id = json.decode(response.body)['location_id'] as String;
      });
-     _firebaseMessaging.configure(
-       onMessage: (Map<String, dynamic> message) async {
-         await FlutterRingtonePlayer.playNotification();
-         print(message);
-         print('app onMessage');
-         showNotification(title: message['title'], body: message['body']);
-        getOrders(location_id: location_id); 
-       },
-       onResume: (Map<String, dynamic> message) async {
-         await FlutterRingtonePlayer.playNotification();
-         showNotification(title: message['title'], body: message['body']);
-         print(message);
-         getOrders(location_id: location_id);
-         print('app onResume');
-       
-       },
-       onLaunch: (Map<String, dynamic> message) async {
-         await FlutterRingtonePlayer.playNotification();
-         showNotification(title: message['title'], body: message['body']);
-         print(message);
-         getOrders(location_id: location_id);
-         print('app onLaunch');
-        
-       },
-     );
+    
 
      getAcceptanceStatus(location_id: location_id);
      getOrders(location_id: location_id);
@@ -237,16 +215,64 @@ void blinkLights() async {
     timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
 
 
-
+  handleNotifications();
   Wakelock.enable();
      getLocationId();
      
   }
 
+  void handleNotifications() async {
+     _firebaseMessaging.configure(
+       onMessage: (Map<String, dynamic> message) async {
+         String title = message['notification']['title'];
+         String body = message['notification']['body'];
+         
+         if (body.contains('Respond now')) {
+           await FlutterRingtonePlayer.playNotification();
+          Get.snackbar("$title", "$body", backgroundColor: Colors.black, colorText: Colors.white);
+         } else {
+            Get.snackbar("$title", "$body", backgroundColor: Colors.black, colorText: Colors.white);
+         }
+         if (body.contains('was picked up')) {
+           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage()));
+         }
+         
+         print(message);
+         print('app onMessage');
+         showNotification(title: message['title'], body: message['body']);
+        getOrders(location_id: location_id); 
+       },
+       onResume: (Map<String, dynamic> message) async {
+        //  await FlutterRingtonePlayer.playNotification();
+        //  showNotification(title: message['title'], body: message['body']);
+        //  print(message);
+        //  getOrders(location_id: location_id);
+        //  print('app onResume');
+       
+       },
+       onLaunch: (Map<String, dynamic> message) async {
+        //  await FlutterRingtonePlayer.playNotification();
+        //  showNotification(title: message['title'], body: message['body']);
+        //  print(message);
+        //  getOrders(location_id: location_id);
+        //  print('app onLaunch');
+        
+       },
+     );
+  }
+
   bool _allowing = false;
   String location_id;
+  String gross_earnings = 0.toDouble().toStringAsFixed(2);
 
-
+  setEarnings() {
+    setState(() {
+      if (orders.isNotEmpty) {
+        gross_earnings = orders.where((a) => a.approved_at != null).map((e) => e.food_total).toList().reduce((a, b) => (a + b)).toStringAsFixed(2);
+      }
+      
+    });
+  }
   handleWakeLock() async {
     if (await Wakelock.enabled) {
       Wakelock.disable();
@@ -257,7 +283,7 @@ void blinkLights() async {
    FlutterStatusbarcolor.setNavigationBarColor(Colors.orange);
    FlutterStatusbarcolor.setNavigationBarWhiteForeground(true);
    await PrinterProvider.shared.open('printer.db');
-    await getDefaultPrinter();
+    getDefaultPrinter();
   }
 
   UniqueKey focusDetectorKey = UniqueKey();
@@ -390,7 +416,7 @@ void blinkLights() async {
             Text('Total Gross earnings for the day'),
             Text(
                   orders.isNotEmpty ?
-                  '\$${orders.where((a) => a.approved_at != null).map((e) => e.food_total).toList().reduce((a, b) => (a + b)).toStringAsFixed(2)}' : 
+                  '\$$gross_earnings' : 
                   '\$0.00',
 
                   style: TextStyle(
@@ -1100,13 +1126,25 @@ void blinkLights() async {
 
   getOrders({String location_id}) async {
 
+    var date = DateTime.now();
+    int today = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      0,
+      0,
+      0
+    ).toUtc().millisecondsSinceEpoch;
+    
 
     print(location_id);
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-orders', headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+
     },
     body: json.encode({
-      'location_id': location_id
+      'location_id': location_id,
+      'start_date': today
     }));
     Iterable _orders = json.decode(response.body);
     setState(() {
@@ -1123,6 +1161,7 @@ void blinkLights() async {
       
 
     });
+    setEarnings();
     
   }
   acceptOrder({Order order}) async {
@@ -1134,13 +1173,15 @@ void blinkLights() async {
         },
     body: json.encode({
       'order_id': order.id,
-      'location_id': location_id
+      'location_id': location_id,
+
     }));
    Fluttertoast.showToast(msg: 'You accepted this order');
   if (location_id != null) {
       getOrders(location_id: location_id);
     }
     // Screen.setBrightness(1);
+    
     printOrder(order: order);
   }
 
@@ -1226,6 +1267,7 @@ try {
           'order_id': order_id,
           'location_id': location_id
         }));
+        
 
   }
   setAcceptingStatus({bool value, String location_id}) async {
