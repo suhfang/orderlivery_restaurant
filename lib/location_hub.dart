@@ -818,7 +818,8 @@ void blinkLights() async {
                                             ) :
                                            GestureDetector(
                                              onTap: () async {
-                                               bottomContainerShows = true;
+                                               if (order.order_type == 'delivery') {
+                                                 bottomContainerShows = true;
                                                 await showCupertinoModalPopup(context: context, builder: (context) {
                                                   return Scaffold(
                                                     backgroundColor: Colors.white,
@@ -894,12 +895,15 @@ void blinkLights() async {
                                                 } else {
                                                   getOrders(location_id: location_id);
                                                 }
+                                               } else {
+                                                await confirmPickup(order_id: order.id);
+                                               }
                                              },
                                              child:  Container(
 
                                                height: 45,
                                                child: Center(
-                                                 child: Text('HAND TO ENVOY', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                 child: Text(order.order_type == 'delivery' ? 'HAND TO ENVOY' : 'HAND TO CUSTOMER', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
                                                decoration: BoxDecoration(
                                                    color: Colors.orange,
@@ -1159,6 +1163,7 @@ void blinkLights() async {
     current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
     past_orders = all.where((e) => e.picked_up_at != null || e.delivered_at != null || e.declined_at != null).toList();
       
+      
 
     });
     setEarnings();
@@ -1241,6 +1246,22 @@ try {
     throw e;
   }
 }
+
+ confirmPickup({String order_id}) async {
+    final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/confirm-customer-pickup',
+        headers: {
+          'Content-Type': 'application/json',
+
+        },
+        body: json.encode({
+          'order_id': order_id,
+          'location_id': location_id
+        }));
+    Fluttertoast.showToast(msg: 'You marked this order as picked up by the customer');
+    if (location_id != null) {
+      await getOrders(location_id: location_id);
+    }
+  }
 
   finishOrder({String order_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',
@@ -1477,7 +1498,6 @@ class Order {
       var actualDate = DateTime.parse(dateParts[0] + "Z");
       return actualDate.toLocal();
     }
-    DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
     Iterable _items = json['items'];
     return Order(
       orderedAt: json['createdAt'] != null ? getDartDateFromNetUTC(json['createdAt'] as String) : null,

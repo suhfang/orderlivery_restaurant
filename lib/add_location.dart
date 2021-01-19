@@ -166,7 +166,7 @@ Future<Null> displayPrediction(Prediction p, ScaffoldState scaffold) async {
           'Content-Type': 'application/json'
         },
         body: json.encode({
-          'name': p.description,
+          'name': detail.result.formattedAddress,
           'lat': '${lat}',
           'lon': '${lng}'
         }));
