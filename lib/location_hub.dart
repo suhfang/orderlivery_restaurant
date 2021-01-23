@@ -913,10 +913,12 @@ void blinkLights() async {
                                            )
                                         ),
 
+                                        
+
                                      
 
                                       ],
-                                       
+                                     
                                     ) ,
                                     SizedBox(height: 10,),
                                       GestureDetector(
@@ -934,7 +936,78 @@ void blinkLights() async {
                                             child: Text('PRINT THIS ORDER', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)
                                           ),
                                         )
-                                      )
+                                      ),
+
+                                      SizedBox(height: 10,),
+
+                                      order.cooked_at == null ?
+                                        GestureDetector(
+                                        onTap: () {
+                                          showModalBottomSheet(context: context, builder: (context) {
+                                            return Container(
+                                              padding: EdgeInsets.only(top: 20, bottom: 20),
+                                              height: 150,
+                                              child: Column(
+                                                children: [
+                                                  Text('Are you sure want to cancel this order because you were out of stock of an item?'),
+                                                  SizedBox(height: 20,),
+                                                  Row(
+                                                    children: [
+                                                     Expanded(
+                                                       child:  GestureDetector(
+                                                         onTap: () {
+                                                           outOfStock(order: order);
+                                                         },
+                                                         child: Container(
+                                                        height: 40,
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.orange,
+                                                          borderRadius: BorderRadius.circular(30)
+                                                        ),
+                                                        child: Center(
+                                                          child: Text('Yes')
+                                                        )
+                                                      ),
+                                                       )
+                                                     ),
+                                                      SizedBox(width: 20),
+                                                      Expanded(
+                                                       child:  GestureDetector(
+                                                         onTap: () {
+                                                           Navigator.pop(context);
+                                                         },
+                                                         child: Container(
+                                                        height: 40,
+                                                        decoration: BoxDecoration(
+                                                          color: Color(0xF1F1F1F1),
+                                                          borderRadius: BorderRadius.circular(30)
+                                                        ),
+                                                        child: Center(
+                                                          child: Text('No')
+                                                        )
+                                                      ),
+                                                       )
+                                                     ),
+                                                    ],
+                                                  )
+                                                ],
+                                              )
+                                            );
+                                          });
+                                        },
+                                        child: Container(
+                                          height: 40,
+                                          width: MediaQuery.of(context).size.width-80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(30),
+                                          ),
+                                          child: Center(
+                                            child: Text('CANCEL ORDER DUE TO OUT OF STOCK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
+                                          ),
+                                        )
+                                      ) : SizedBox()
+                                    
                                      ],
 
                               ),
@@ -1089,7 +1162,18 @@ void blinkLights() async {
   }
 
 
-
+outOfStock({Order order}) async {
+  final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/out-of-stock', 
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: json.encode({
+    'order_id': order.id
+  }));
+  print('response body: ${response.body}');
+  Navigator.pop(context);
+  getOrders(location_id: location_id);
+}
 
   void showNotification({
     String title,
