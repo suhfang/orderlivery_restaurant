@@ -1321,13 +1321,13 @@ outOfStock({Order order}) async {
   if (initialized) {
     final ByteData data = await rootBundle.load('assets/images/thermal-logo.png');
     final Uint8List imgBytes = data.buffer.asUint8List();
-    final img.Image image = img.decodeImage(imgBytes);
-    var bytes = await toQrImageData(encryptString(order.id));
-    final img.Image bytesImage = img.decodeImage(bytes);
+    // final img.Image image = img.decodeImage(imgBytes);
+    // var bytes = await toQrImageData(encryptString(order.id));
+    // final img.Image bytesImage = img.decodeImage(bytes);
 
-    printer.image(image, align: PosAlign.center);
-    printer.disconnect();
-   await initializePrinter(defaultPrinter.ip);
+  //   printer.image(image, align: PosAlign.center);
+  //   printer.disconnect();
+  //  await initializePrinter(defaultPrinter.ip);
     printer.text('ORDERLIVERY ORDER',      styles: PosStyles(align: PosAlign.center, bold: true,), linesAfter: 1);
     printer.text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}', linesAfter: 1, styles: PosStyles(bold: true));
     printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
@@ -1340,9 +1340,9 @@ outOfStock({Order order}) async {
     });
     printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}', linesAfter: 2);
 
-    printer.disconnect();
-    await initializePrinter(defaultPrinter.ip);
-    printer.image(bytesImage, align: PosAlign.center,);
+    // printer.disconnect();
+    // await initializePrinter(defaultPrinter.ip);
+    // printer.image(bytesImage, align: PosAlign.center,);
     printer.feed(2);
     printer.cut();
     printer.disconnect();
