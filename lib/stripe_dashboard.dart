@@ -80,7 +80,7 @@ class _StripeDashboardPageState extends State<StripeDashboardPage> {
               });
             },
           ),
-          isLoading ? Center( child: SpinKitThreeBounce(color: Colors.orange,),)
+          isLoading ? Center( child: SpinKitRing(color: Colors.orange, lineWidth: 2,),)
               : Stack(),
         ],
       ),

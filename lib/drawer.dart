@@ -112,9 +112,9 @@ class DrawerScaffold extends StatelessWidget {
                           leading: Icon(LineIcons.sign_out, color: Colors.black,),
                           onTap: () async {
                             SharedPreferences prefs = await SharedPreferences.getInstance();
-                            await prefs.setString('token', '');
-                            await prefs.setBool('is_location', null);
-                            await prefs.setBool('is_restaurant', null);
+                            await prefs.remove('token');
+                            await prefs.remove('is_location');
+                            await prefs.remove('is_restaurant');
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AuthPage(loginTab: true,)));
                           }
                       ),

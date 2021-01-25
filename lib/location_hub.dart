@@ -354,7 +354,44 @@ void blinkLights() async {
                         title: Text('LOG OUT',style: TextStyle(color: Colors.white),),
                         leading: Icon(LineIcons.sign_out, color: Colors.white,),
                         onTap: () async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          Navigator.pop(context);
+                           showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SpinKitRing(
+                                      color: Colors.white,
+                                      size: 50.0,
+                                      lineWidth: 2,
+                                  )
+                                  ],
+                                ));
+                          });
+                          
+                          SharedPreferences prefs  = await SharedPreferences.getInstance();
+                          final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+                          String location_id = json.decode(response.body)['location_id'] as String;
+                          print(location_id);
+                          
+                              var url = Constants.apiBaseUrl + '/restaurant_locations/unregister-messaging-token';
+                            
+                            String device_id = await _getId();
+                            final r = await http.post(url,
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: json.encode({
+                              'device_id': device_id,
+                              'location_id': location_id
+                            }));
+                            print(r.body);
+                            Navigator.pop(context);
                           await prefs.remove('token');
                           await prefs.remove('is_location');
                           await prefs.remove('is_restaurant');

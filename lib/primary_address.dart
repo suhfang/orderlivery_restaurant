@@ -25,7 +25,8 @@ class _PrimaryAddressPageState extends State<PrimaryAddressPage> {
               GestureDetector(
                 onTap: () async {
                   SharedPreferences prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('token', '');
+                  await prefs.remove('token');
+                  
                   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AuthPage(loginTab: true,)));
                 },
                 child: ListTile(tileColor: Colors.black, title: Text('LOG OUT', style: TextStyle(color: Colors.white),),),

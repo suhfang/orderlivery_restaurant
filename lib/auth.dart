@@ -14,7 +14,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 //import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -180,6 +182,24 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                   child: SafeArea(
                     child: Stack(
                       children: [
+                        Align(
+                          alignment: Alignment.topLeft,
+                        
+                          // alignmemt: Alignment.center,
+                          child:  Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+
+                            FloatingActionButton(
+                              onPressed: () {},
+
+                              backgroundColor: Colors.white,
+                              child: SvgPicture.asset('assets/images/logo.svg', height: 45, width: 45),
+                            ),
+                          ]
+                        )
+                      ),
+
                         Padding(
                             padding: EdgeInsets.only(top: 10, left: 0),
                             child: SingleChildScrollView(
@@ -198,34 +218,35 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                   children: [
                                     Column(
                                       children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 20,
-                                              top: 0,
-                                              bottom: 10,
-                                              right: 10),
-                                          child: Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Sign Up',
-                                                    style: TextStyle(
-                                                        fontSize: 40,
-                                                        fontWeight: FontWeight.bold),
-                                                  ),
-//                                                Padding(
-//                                                  padding: EdgeInsets.only(right: 10),
-//                                                  child: Image.asset(
-//                                                    'assets/images/logo.png',
-//                                                    height: 50,
-//                                                    width: 50,
-//                                                  ),
-//                                                )
-                                                ],
-                                              )),
-                                        ),
+                                        SizedBox(height: 30),
+//                                         Padding(
+//                                           padding: EdgeInsets.only(
+//                                               left: 20,
+//                                               top: 0,
+//                                               bottom: 10,
+//                                               right: 10),
+//                                           child: Container(
+//                                               child: Row(
+//                                                 mainAxisAlignment:
+//                                                 MainAxisAlignment.spaceBetween,
+//                                                 children: [
+//                                                   Text(
+//                                                     'Sign Up',
+//                                                     style: TextStyle(
+//                                                         fontSize: 40,
+//                                                         fontWeight: FontWeight.bold),
+//                                                   ),
+// //                                                Padding(
+// //                                                  padding: EdgeInsets.only(right: 10),
+// //                                                  child: Image.asset(
+// //                                                    'assets/images/logo.png',
+// //                                                    height: 50,
+// //                                                    width: 50,
+// //                                                  ),
+// //                                                )
+//                                                 ],
+//                                               )),
+//                                         ),
                                         Form(
                                           key: _signUpFormKey,
                                           child: Column(
@@ -427,9 +448,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                         }
                                                         return null;
                                                       },
+                                                      
                                                       onSaved: (String value) {
 //                                                  model.lastName = value;
                                                       },
+                                                      onSubmitted: (s) => signup(context),
+                                                      
                                                     ),
                                                   )
                                                 ],
@@ -534,36 +558,37 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                     ),
                                     Column(
                                       children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 20,
-                                              top: 0,
-                                              bottom: 10,
-                                              right: 10),
-                                          child: Container(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Log In',
-                                                    style: TextStyle(
-                                                        fontSize: 40,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Colors.black
-                                                    ),
-                                                  ),
-//                                                Padding(
-//                                                  padding: EdgeInsets.only(right: 10),
-//                                                  child: Image.asset(
-//                                                    'assets/images/logo.png',
-//                                                    height: 50,
-//                                                    width: 50,
-//                                                  ),
-//                                                )
-                                                ],
-                                              )),
-                                        ),
+                                        SizedBox(height: 30,) ,
+//                                         Padding(
+//                                           padding: EdgeInsets.only(
+//                                               left: 20,
+//                                               top: 0,
+//                                               bottom: 10,
+//                                               right: 10),
+//                                           child: Container(
+//                                               child: Row(
+//                                                 mainAxisAlignment:
+//                                                 MainAxisAlignment.spaceBetween,
+//                                                 children: [
+//                                                   Text(
+//                                                     'Log In',
+//                                                     style: TextStyle(
+//                                                         fontSize: 40,
+//                                                         fontWeight: FontWeight.bold,
+//                                                         color: Colors.black
+//                                                     ),
+//                                                   ),
+// //                                                Padding(
+// //                                                  padding: EdgeInsets.only(right: 10),
+// //                                                  child: Image.asset(
+// //                                                    'assets/images/logo.png',
+// //                                                    height: 50,
+// //                                                    width: 50,
+// //                                                  ),
+// //                                                )
+//                                                 ],
+//                                               )),
+//                                         ),
                                         Form(
                                           key: _loginFormKey,
                                           child: Column(
@@ -636,6 +661,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                       onSaved: (String value) {
 //                                                  model.lastName = value;
                                                       },
+                                                      onSubmitted: (s) => login(context),
                                                     ),
                                                   )
                                                 ],
@@ -687,6 +713,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                                 onSaved: (String value) {
 //                                                  model.lastName = value;
                                                 },
+                                                onSubmitted: (s) => login(context),
                                               ),
                                             )
                                           ],
@@ -859,9 +886,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SpinKitThreeBounce(
+                  SpinKitRing(
                       color: Colors.white,
                       size: 50.0,
+                      lineWidth: 2,
                   )
                 ]
               ));
@@ -921,9 +949,10 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SpinKitThreeBounce(
+                  SpinKitRing(
                       color: Colors.white,
                       size: 50.0,
+                      lineWidth: 2,
                   )
                 ],
               ));
@@ -973,6 +1002,7 @@ class TTextFormField extends StatefulWidget {
   final bool isEmail;
   final TextEditingController controller;
   final Function onChanged;
+  final Function onSubmitted;
   final Iterable<TextInputFormatter> inputFormatters;
   final Iterable<String> autofillHints;
 
@@ -985,7 +1015,8 @@ class TTextFormField extends StatefulWidget {
         this.controller,
         this.onChanged,
         this.inputFormatters,
-        this.autofillHints,});
+        this.autofillHints,
+        this.onSubmitted});
 
   TextFormFieldState createState() => TextFormFieldState();
 }
@@ -1036,6 +1067,7 @@ class TextFormFieldState extends State<TTextFormField> {
             obscureText: !passwordVisible && widget.isPassword,
             keyboardType:
             widget.isEmail ? TextInputType.emailAddress : TextInputType.text,
+            onFieldSubmitted: widget.onSubmitted,
 
           ),
         ));

@@ -514,9 +514,10 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SpinKitThreeBounce(
+                    SpinKitRing(
                       color: Colors.white,
                       size: 50.0,
+                      lineWidth: 2,
                   )
                   ],
                 ));
