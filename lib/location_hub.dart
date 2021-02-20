@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:Restaurant/auth.dart';
@@ -169,6 +170,14 @@ void blinkLights() async {
   }
 }
 
+FlutterLocalNotificationsPlugin fltrNotification;
+
+  Future _showNotification({String title, String body}) async {
+    var androidDetails = new AndroidNotificationDetails("orderlivery_channel_id", "orderlivery_channel_name", "Orderlivery channel description", importance: Importance.max);
+    var iOSDetails = new IOSNotificationDetails();
+    var generalNotificationDetails = new NotificationDetails(android: androidDetails, iOS: iOSDetails);
+    await fltrNotification.show((new Random()).nextInt(100), title, body, generalNotificationDetails);
+  }
 
   getLocationId() async  {
     SharedPreferences prefs  = await SharedPreferences.getInstance();
@@ -218,6 +227,14 @@ void blinkLights() async {
   handleNotifications();
   Wakelock.enable();
      getLocationId();
+
+         var androidInitialize = new AndroidInitializationSettings('app_icon');
+    var iOSInitialize = new IOSInitializationSettings();
+    var initializationSetings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
+    fltrNotification = new FlutterLocalNotificationsPlugin();
+     fltrNotification.initialize(initializationSetings, onSelectNotification:  (String f) async {
+        print(f);
+      });
      
   }
 
@@ -229,9 +246,10 @@ void blinkLights() async {
          
          if (body.contains('Respond now')) {
            await FlutterRingtonePlayer.playNotification();
-          Get.snackbar("$title", "$body", backgroundColor: Colors.black, colorText: Colors.white);
+           _showNotification(title: '$title', body: '$body');
+          
          } else {
-            Get.snackbar("$title", "$body", backgroundColor: Colors.black, colorText: Colors.white);
+            _showNotification(title: '$title', body: '$body');
          }
          if (body.contains('was picked up')) {
            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage()));
