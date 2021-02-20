@@ -173,7 +173,7 @@ void blinkLights() async {
 FlutterLocalNotificationsPlugin fltrNotification;
 
   Future _showNotification({String title, String body}) async {
-    var androidDetails = new AndroidNotificationDetails("orderlivery_channel_id", "orderlivery_channel_name", "Orderlivery channel description", importance: Importance.max);
+    var androidDetails = new AndroidNotificationDetails("orderlivery_restaurant_channel_id", "orderlivery_restaurant_channel_name", "Orderlivery restaurant channel description", importance: Importance.max);
     var iOSDetails = new IOSNotificationDetails();
     var generalNotificationDetails = new NotificationDetails(android: androidDetails, iOS: iOSDetails);
     await fltrNotification.show((new Random()).nextInt(100), title, body, generalNotificationDetails);
