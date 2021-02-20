@@ -228,7 +228,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
   Wakelock.enable();
      getLocationId();
 
-         var androidInitialize = new AndroidInitializationSettings('app_icon');
+         var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
     var iOSInitialize = new IOSInitializationSettings();
     var initializationSetings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
     fltrNotification = new FlutterLocalNotificationsPlugin();
