@@ -8,6 +8,7 @@ import 'package:Restaurant/forgot_password.dart';
 import 'package:Restaurant/home.dart';
 import 'package:Restaurant/init.dart';
 import 'package:Restaurant/location_hub.dart';
+import 'package:Restaurant/notification.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -849,6 +850,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _controller = TabController(length: 1, vsync: this);
+    
   }
 
   @override

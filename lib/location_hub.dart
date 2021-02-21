@@ -249,12 +249,12 @@ FlutterLocalNotificationsPlugin fltrNotification;
          if (body.contains('was picked up')) {
            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage()));
          } else {
-            await LocalNotification.shared.showNotification(title: title, body: body);
+             LocalNotification.shared.showNotification(title: title, body: body);
          }
          
          print(message);
          print('app onMessage');
-         showNotification(title: message['title'], body: message['body']);
+        //  showNotification(title: message['title'], body: message['body']);
         getOrders(location_id: location_id); 
        },
        onResume: (Map<String, dynamic> message) async {
