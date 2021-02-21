@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:Restaurant/auth.dart';
 import 'package:Restaurant/connect_printer.dart';
+import 'package:Restaurant/notification.dart';
 import 'package:Restaurant/printer_helper.dart';
 import 'package:audioplayer/audioplayer.dart';
 import 'package:badges/badges.dart';
@@ -241,18 +242,14 @@ FlutterLocalNotificationsPlugin fltrNotification;
   void handleNotifications() async {
      _firebaseMessaging.configure(
        onMessage: (Map<String, dynamic> message) async {
-         String title = message['notification']['title'];
-         String body = message['notification']['body'];
+         String title = '${message['notification']['title']}';
+         String body = '${message['notification']['body']}';
          
-         if (body.contains('Respond now')) {
-           await FlutterRingtonePlayer.playNotification();
-           _showNotification(title: '$title', body: '$body');
-          
-         } else {
-            _showNotification(title: '$title', body: '$body');
-         }
+
          if (body.contains('was picked up')) {
            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage()));
+         } else {
+            await LocalNotification.shared.showNotification(title: title, body: body);
          }
          
          print(message);
