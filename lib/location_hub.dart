@@ -39,6 +39,8 @@ import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'dart:convert' show utf8, base64;
 import 'package:get/instance_manager.dart';
 import 'package:get/route_manager.dart';
+import 'package:socket_io/socket_io.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 String encryptString(String id) {
   return  base64.encode(utf8.encode(id));
@@ -236,7 +238,30 @@ FlutterLocalNotificationsPlugin fltrNotification;
      fltrNotification.initialize(initializationSetings, onSelectNotification:  (String f) async {
         print(f);
       });
+
+      connect();
      
+  }
+
+  connect() async {
+    var io = new Server();
+    var nsp = io.of('/restaurant_locations');
+      nsp.on('connection', (client) {
+      print('connection /some');
+      client.on('msg', (data) {
+        print('data from /some => $data');
+        client.emit('fromServer', "ok 2");
+      });
+    });
+    io.on('connection', (client) {
+      print('connection default namespace');
+      client.on('msg', (data) {
+        print('data from default => $data');
+        client.emit('fromServer', "ok");
+      });
+    });
+    io.listen(3000);
+
   }
 
   void handleNotifications() async {
