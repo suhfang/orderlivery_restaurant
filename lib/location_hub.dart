@@ -250,24 +250,61 @@ FlutterLocalNotificationsPlugin fltrNotification;
   // socket.on('disconnect', function(){console.log('disconnect')});
   // socket.on('fromServer', function(e){console.log(e)});
   
+  void initSocket() {
+   try {
+      //Connect the client to the socket
+      var socket = IO.io('${Constants.apiBaseUrl}',
+         <String, dynamic>{
+            'transports': ['websocket'],
+      });
+      //Join the user with username to the room with roomId
+      // socket.emit("joinRoom", [widget.roomId, widget.username]);
+      //Listen to the sendMessage events emitted from the socket
+      // socket.on("sendMessage", (res) {
+         //If a message comes, add it to a List<Message> to
+         //display as a ListView in the UI
+      //    Message msg = Message(message: res[0], username: res[1]);
+      //    setState(() {
+      //       messages.add(msg);
+      //    });
+      //  });
+   } catch (e) {
+       print(e);
+   }
+}
+
+
   connect() async {
-    var io = new Server();
-    var nsp = io.of('/restaurant_locations');
-      nsp.on('connection', (client) {
-      print('connection /some');
-      client.on('msg', (data) {
-        print('data from /some => $data');
-        client.emit('fromServer', "ok 2");
-      });
+    // var io = new Server();
+    // var nsp = io.of('/restaurant_locations');
+    //   nsp.on('connection', (client) {
+    //   print('connection /some');
+    //   client.on('msg', (data) {
+    //     print('data from /some => $data');
+    //     client.emit('fromServer', "ok 2");
+    //   });
+    // });
+    // io.on('connection', (client) {
+    //   print('connection default namespace');
+    //   client.on('msg', (data) {
+    //     print('data from default => $data');
+    //     client.emit('fromServer', "ok");
+    //   });
+    // });
+    // io.listen(3000);
+
+    IO.Socket socket = IO.io('${Constants.apiBaseUrl}');
+    socket.on('connection', (client) {
+      print('connect $client');
+      socket.emit('msg', 'test');
     });
-    io.on('connection', (client) {
-      print('connection default namespace');
-      client.on('msg', (data) {
-        print('data from default => $data');
-        client.emit('fromServer', "ok");
-      });
-    });
-    io.listen(3000);
+    socket.onConnect((data) => print('onConnect: $data'));
+    
+
+    socket.connect();
+    print('connected!');
+    // socket.on('event', (data) => print(data));
+    // socket.on('fromServer', (_) => print(_));
 
   }
 
