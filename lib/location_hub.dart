@@ -243,6 +243,13 @@ FlutterLocalNotificationsPlugin fltrNotification;
      
   }
 
+  // JS client
+  // var socket = io('http://localhost:3000');
+  // socket.on('connect', function(){console.log('connect')});
+  // socket.on('event', function(data){console.log(data)});
+  // socket.on('disconnect', function(){console.log('disconnect')});
+  // socket.on('fromServer', function(e){console.log(e)});
+  
   connect() async {
     var io = new Server();
     var nsp = io.of('/restaurant_locations');
