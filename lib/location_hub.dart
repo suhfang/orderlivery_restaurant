@@ -278,14 +278,16 @@ connect();
   // socket.on('fromServer', function(e){console.log(e)});
   
   IO.Socket socket;
-  void initSocket() {
+  void initSocket() async {
+     String id = await getLocationAndSendData();
+            print('location id: ${id}');
+        print('is accepting initial orders: ${_allowing}');
    try {
       //Connect the client to the socket
       print('http://192.168.1.43:4000');
        socket = IO.io('http://3.23.171.169:8080',
          <String, dynamic>{
             'transports': ['websocket'],
-            // 'autoConnect': false,
        }
       );
       socket.onConnectError((_) => setState(() {
@@ -297,23 +299,22 @@ connect();
         })
       });
       socket.onConnect( (data) async {
-        
         setState(() {
           connected = false;
           print('connected');
-          getLocationAndSendData();
         });
+        socket.emit('/restaurant_location_connected', id);
       });
-      socket.connect();
-      
-
+      if (_allowing == true) {
+        socket.connect();
+      }
    } catch (e) {
        print('error socket');
    }
    
 }
 
-getLocationAndSendData() async  {
+Future<String> getLocationAndSendData() async  {
    SharedPreferences prefs  = await SharedPreferences.getInstance();
     print(prefs.getString('token'));
     print('soup');
@@ -325,9 +326,7 @@ getLocationAndSendData() async  {
      
   if (id != null) {
     await getAcceptanceStatus(location_id: id);
-    print('location id: ${id}');
-    print('is accepting initial orders: ${_allowing}');
-    socket.emit('/restaurant_location_connected', id);
+    return id;
   }
 }
   connect()  {
@@ -348,7 +347,9 @@ getLocationAndSendData() async  {
          } else {
              LocalNotification.shared.showNotification(title: title, body: body);
          }
-         
+         print(message);
+        print(body);
+
          print(message);
          print('app onMessage');
         //  showNotification(title: message['title'], body: message['body']);
@@ -1535,7 +1536,11 @@ try {
     }));
     print(response.body);
     bool result = json.decode(response.body)['result'] as bool;
-    print(result);
+    if (result == true) {
+      socket.connect();
+    } else {
+      socket.disconnect();
+    }
     return result;
   }
 
