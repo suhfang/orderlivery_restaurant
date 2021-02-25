@@ -82,7 +82,7 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   Timer timer;
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
+  bool connected = false;
 
 
   @override
@@ -100,8 +100,34 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
     setState(() {
       _notification = state;
     });
-    if (_notification.index == 0) getOrders(location_id: location_id);
+    if (_notification.index == 0) {
+      
+        reconnect();
+    }
+    if (_notification.index == 1) {
+      print('inactive');
+      socket.disconnect();
+    
+    }
   
+  }
+
+  void reconnect() async {
+          socket.connect();
+      SharedPreferences prefs  = await SharedPreferences.getInstance();
+    print(prefs.getString('token'));
+    print('soup');
+    final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+   
+     
+     
+       String id = json.decode(response.body)['location_id'] as String;
+       print('is accepting orders: ${_allowing}');
+      socket.emit('/restaurant_location_connected', id);
+      if (socket != null) {
+        // print('socket status: ${socket.}')
+      }
+      getOrders(location_id: location_id);
   }
 
 
@@ -216,6 +242,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
 
   @override
   void initState() {
+    getLocationId();
     
     FlutterStatusbarcolor.setStatusBarColor(Colors.orange);
     
@@ -229,7 +256,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
 
   handleNotifications();
   Wakelock.enable();
-     getLocationId();
+     
 
          var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
     var iOSInitialize = new IOSInitializationSettings();
@@ -238,8 +265,8 @@ FlutterLocalNotificationsPlugin fltrNotification;
      fltrNotification.initialize(initializationSetings, onSelectNotification:  (String f) async {
         print(f);
       });
-
-      connect();
+connect();
+      
      
   }
 
@@ -250,61 +277,61 @@ FlutterLocalNotificationsPlugin fltrNotification;
   // socket.on('disconnect', function(){console.log('disconnect')});
   // socket.on('fromServer', function(e){console.log(e)});
   
+  IO.Socket socket;
   void initSocket() {
    try {
       //Connect the client to the socket
-      var socket = IO.io('${Constants.apiBaseUrl}',
+      print('http://192.168.1.43:4000');
+       socket = IO.io('http://3.23.171.169:8080',
          <String, dynamic>{
             'transports': ['websocket'],
+            // 'autoConnect': false,
+       }
+      );
+      socket.onConnectError((_) => setState(() {
+        connected = false;
+      }));
+      socket.onDisconnect((data) => {
+        setState(() {
+          connected = false;
+        })
       });
-      //Join the user with username to the room with roomId
-      // socket.emit("joinRoom", [widget.roomId, widget.username]);
-      //Listen to the sendMessage events emitted from the socket
-      // socket.on("sendMessage", (res) {
-         //If a message comes, add it to a List<Message> to
-         //display as a ListView in the UI
-      //    Message msg = Message(message: res[0], username: res[1]);
-      //    setState(() {
-      //       messages.add(msg);
-      //    });
-      //  });
+      socket.onConnect( (data) async {
+        
+        setState(() {
+          connected = false;
+          print('connected');
+        });
+      });
+      socket.connect();
+      getLocationAndSendData();
+
    } catch (e) {
-       print(e);
+       print('error socket');
    }
+   
 }
 
-
-  connect() async {
-    // var io = new Server();
-    // var nsp = io.of('/restaurant_locations');
-    //   nsp.on('connection', (client) {
-    //   print('connection /some');
-    //   client.on('msg', (data) {
-    //     print('data from /some => $data');
-    //     client.emit('fromServer', "ok 2");
-    //   });
-    // });
-    // io.on('connection', (client) {
-    //   print('connection default namespace');
-    //   client.on('msg', (data) {
-    //     print('data from default => $data');
-    //     client.emit('fromServer', "ok");
-    //   });
-    // });
-    // io.listen(3000);
-
-    IO.Socket socket = IO.io('${Constants.apiBaseUrl}');
-    socket.on('connection', (client) {
-      print('connect $client');
-      socket.emit('msg', 'test');
-    });
-    socket.onConnect((data) => print('onConnect: $data'));
+getLocationAndSendData() async  {
+   SharedPreferences prefs  = await SharedPreferences.getInstance();
+    print(prefs.getString('token'));
+    print('soup');
+    final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+   
+     
+     
+       String id = json.decode(response.body)['location_id'] as String;
+     
+  if (id != null) {
+    await getAcceptanceStatus(location_id: id);
+    print('location id: ${id}');
+    print('is accepting initial orders: ${_allowing}');
+    socket.emit('/restaurant_location_connected', id);
+  }
+}
+  connect()  {
     
-
-    socket.connect();
-    print('connected!');
-    // socket.on('event', (data) => print(data));
-    // socket.on('fromServer', (_) => print(_));
+   initSocket();
 
   }
 
@@ -1512,7 +1539,7 @@ try {
   }
 
 static AudioPlayer audioPlugin = AudioPlayer();
-  getAcceptanceStatus({String location_id}) async {
+  Future<void> getAcceptanceStatus({String location_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-status', headers: {
       'Content-Type': 'application/json'
     },
