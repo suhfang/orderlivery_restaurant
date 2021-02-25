@@ -282,8 +282,7 @@ connect();
         print('is accepting initial orders: ${_allowing}');
    try {
       //Connect the client to the socket
-      print('http://192.168.1.43:4000');
-       socket = IO.io('http://3.23.171.169:8080',
+       socket = IO.io('${Constants.apiBaseUrl}',
          <String, dynamic>{
             'transports': ['websocket'],
        }
@@ -291,10 +290,13 @@ connect();
       socket.onConnectError((_) => setState(() {
         connected = false;
       }));
-      socket.onDisconnect((data) => {
+      socket.onDisconnect((data)  {
         setState(() {
           connected = false;
-        })
+          _allowing = false;
+        });
+        LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+      
       });
       socket.onConnect( (data) async {
         setState(() {
