@@ -101,32 +101,30 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
       _notification = state;
     });
     if (_notification.index == 0) {
-      LocalNotification.shared.showNotification(title: 'Online notice', body: 'Customers can now place orders to your store');
+      
         reconnect();
     }
     if (_notification.index == 1) {
-      
       socket.disconnect();
-    
     }
   
   }
 
   void reconnect() async {
-          socket.connect();
+    
+          
       SharedPreferences prefs  = await SharedPreferences.getInstance();
     print(prefs.getString('token'));
     print('soup');
     final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
-   
-     
-     
        String id = json.decode(response.body)['location_id'] as String;
+       await getAcceptanceStatus(location_id: id);
+       if (_allowing == true) {
+         socket.connect();
+       } else {
+         LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+       }
        print('is accepting orders: ${_allowing}');
-      socket.emit('/restaurant_location_connected', id);
-      if (socket != null) {
-        // print('socket status: ${socket.}')
-      }
       getOrders(location_id: location_id);
   }
 
@@ -303,7 +301,10 @@ connect();
           connected = false;
           print('connected');
         });
-        socket.emit('/restaurant_location_connected', id);
+        socket.emit('/restaurant_location_connected', json.encode({
+        'id': id,
+        'user_type': 'restaurant_location'
+      }));
       });
       if (_allowing == true) {
         socket.connect();
