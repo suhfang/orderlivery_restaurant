@@ -101,11 +101,11 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
       _notification = state;
     });
     if (_notification.index == 0) {
-      
+      LocalNotification.shared.showNotification(title: 'Online notice', body: 'Customers can now place orders to your store');
         reconnect();
     }
     if (_notification.index == 1) {
-      print('inactive');
+      
       socket.disconnect();
     
     }
@@ -301,10 +301,11 @@ connect();
         setState(() {
           connected = false;
           print('connected');
+          getLocationAndSendData();
         });
       });
       socket.connect();
-      getLocationAndSendData();
+      
 
    } catch (e) {
        print('error socket');
