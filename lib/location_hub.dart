@@ -122,7 +122,9 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
        if (_allowing == true) {
          socket.connect();
        } else {
-         LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+         Future.delayed(Duration(milliseconds: 500), () {
+          LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+         });
        }
        print('is accepting orders: ${_allowing}');
       getOrders(location_id: location_id);
@@ -304,7 +306,9 @@ connect();
           setAcceptingStatus(value: false, location_id: location_id);
         }
         
-        LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+        Future.delayed(Duration(milliseconds: 500), () {
+          LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+        });
       
       });
       socket.onConnect( (data) async {
