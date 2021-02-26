@@ -294,8 +294,6 @@ connect();
 
         setState(() {
           connected = false;
-          _allowing = false;
-
           
         });
         
