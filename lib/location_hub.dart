@@ -296,7 +296,7 @@ connect();
 
         setState(() {
           connected = false;
-          
+          _allowing = false;
         });
         
         if (location_id != null) {
