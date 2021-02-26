@@ -119,7 +119,6 @@ void resume() async {
     if(_updateInfo?.updateAvailable == true) {
       await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
     }
-    
 }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
