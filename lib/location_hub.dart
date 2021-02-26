@@ -111,6 +111,9 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
     timer?.cancel();
     timer = null;
 
+    updateTimer?.cancel();
+    updateTimer = null;
+
     super.dispose();
   }
   AppLifecycleState _notification;
@@ -251,7 +254,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
       WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
     }
 
-
+  Timer updateTimer;
   @override
   void initState() {
     getLocationId();
@@ -259,7 +262,8 @@ FlutterLocalNotificationsPlugin fltrNotification;
     super.initState();
     // initializePrinter(printIpAddress);
     WidgetsBinding.instance.addObserver(this);
-    timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
+     timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
+     updateTimer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => fetchUpdates());
     handleNotifications();
     Wakelock.enable();
     var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -270,8 +274,13 @@ FlutterLocalNotificationsPlugin fltrNotification;
         print(f);
       });
     connect();
-  
-   
+  }
+
+  fetchUpdates() async {
+    await checkForUpdate();
+    if(_updateInfo?.updateAvailable == true) {
+      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+    }
   }
 
   runReconnectLoop() async {
@@ -318,7 +327,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
           connected = false;
           _allowing = false;
         });
-          runReconnectLoop();
+        runReconnectLoop();
         Fluttertoast.showToast(msg: 'Please toggle the switch to start accepting orders or Contact Support');
         if (location_id != null) {
           setAcceptingStatus(value: false, location_id: location_id);
