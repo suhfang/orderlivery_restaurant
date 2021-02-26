@@ -324,16 +324,18 @@ FlutterLocalNotificationsPlugin fltrNotification;
           _allowing = false;
         });
         
+         
+        Future.delayed(Duration(milliseconds: 500), () {
+          LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
+        });
+        
         if (location_id != null) {
           setAcceptingStatus(value: false, location_id: location_id);
         } else {
           await getLocationId();
           setAcceptingStatus(value: false, location_id: location_id);
         }
-        
-        Future.delayed(Duration(milliseconds: 500), () {
-          LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
-        });
+       
       
       });
       socket.onConnect( (data) async {
@@ -467,7 +469,7 @@ Future<String> getLocationAndSendData() async  {
           onFocusGained: () async {
             await getLocationId();
             getDefaultPrinter();
-             await checkForUpdate();
+            await checkForUpdate();
             if(_updateInfo?.updateAvailable == true) {
               await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
             }
@@ -480,7 +482,6 @@ Future<String> getLocationAndSendData() async  {
         centerTitle: true,
         shadowColor: Colors.transparent,
         backgroundColor: Colors.orange,
-     
       ),
       drawer: Drawer(
         child: SafeArea(

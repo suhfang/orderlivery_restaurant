@@ -48,7 +48,11 @@ class _InitPageState extends State<InitPage> {
 
   doInit() async {
 
-  
+    await checkForUpdate();
+
+    if(_updateInfo?.updateAvailable == true) {
+      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+    }
 
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
