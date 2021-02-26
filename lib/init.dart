@@ -7,6 +7,7 @@ import 'package:Restaurant/primary_address.dart';
 import 'package:Restaurant/profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:Restaurant/constants.dart' as Constants;
@@ -18,13 +19,40 @@ class InitPage extends StatefulWidget {
 
 class _InitPageState extends State<InitPage> {
 
+
+  AppUpdateInfo _updateInfo;
+   bool _flexibleUpdateAvailable = false;
+   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+   
   @override
   void initState() {
     super.initState();
     doInit();
   }
 
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> checkForUpdate() async {
+    InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        _updateInfo = info;
+        print('found an update here it is: ${_updateInfo}');
+      });
+    }).catchError((e) => _showError(e));
+  }
+
+  void _showError(dynamic exception) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(exception.toString())));
+  }
+
+
   doInit() async {
+
+    await checkForUpdate();
+
+    if(_updateInfo?.updateAvailable == true) {
+      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+    }
+
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 

@@ -258,14 +258,14 @@ FlutterLocalNotificationsPlugin fltrNotification;
   Wakelock.enable();
      
 
-         var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
+    var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
     var iOSInitialize = new IOSInitializationSettings();
     var initializationSetings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
     fltrNotification = new FlutterLocalNotificationsPlugin();
      fltrNotification.initialize(initializationSetings, onSelectNotification:  (String f) async {
         print(f);
       });
-connect();
+    connect();
       
      
   }
