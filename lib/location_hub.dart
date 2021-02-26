@@ -290,11 +290,22 @@ connect();
       socket.onConnectError((_) => setState(() {
         connected = false;
       }));
-      socket.onDisconnect((data)  {
+      socket.onDisconnect((data) async {
+
         setState(() {
           connected = false;
           _allowing = false;
+
+          
         });
+        
+        if (location_id != null) {
+          setAcceptingStatus(value: false, location_id: location_id);
+        } else {
+          await getLocationId();
+          setAcceptingStatus(value: false, location_id: location_id);
+        }
+        
         LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
       
       });
