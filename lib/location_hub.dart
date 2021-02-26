@@ -107,8 +107,10 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   void dispose() {
     handleWakeLock();
     WidgetsBinding.instance.removeObserver(this);
+
     timer?.cancel();
     timer = null;
+
     super.dispose();
   }
   AppLifecycleState _notification;
@@ -249,6 +251,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
       WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
     }
 
+
   @override
   void initState() {
     getLocationId();
@@ -267,8 +270,29 @@ FlutterLocalNotificationsPlugin fltrNotification;
         print(f);
       });
     connect();
+  
+   
   }
 
+  runReconnectLoop() async {
+    socketTimer = Timer.periodic(Duration(seconds: 1), (Timer t) async {
+      if (connected == false) {
+        bool allowing;
+        if (location_id == null)
+          await getLocationId();
+         allowing = await getAcceptanceStatus(location_id: location_id);
+        if (allowing == true && connected == false) {
+          socket.connect();
+        } 
+      }
+    });
+  }
+
+
+
+
+
+  Timer socketTimer;
   // JS client
   // var socket = io('http://localhost:3000');
   // socket.on('connect', function(){console.log('connect')});
@@ -294,9 +318,8 @@ FlutterLocalNotificationsPlugin fltrNotification;
           connected = false;
           _allowing = false;
         });
-        Future.delayed(Duration(milliseconds: 500), () {
-          LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
-        });
+          runReconnectLoop();
+        Fluttertoast.showToast(msg: 'Please toggle the switch to start accepting orders or Contact Support');
         if (location_id != null) {
           setAcceptingStatus(value: false, location_id: location_id);
         } else {
@@ -308,6 +331,8 @@ FlutterLocalNotificationsPlugin fltrNotification;
         setState(() {
           connected = false;
           print('connected');
+          timer?.cancel();
+          timer = null;
         });
         socket.emit('/restaurant_location_connected', json.encode({
         'id': id,
@@ -416,6 +441,8 @@ Future<String> getLocationAndSendData() async  {
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -490,6 +517,8 @@ Future<String> getLocationAndSendData() async  {
                                   ],
                                 ));
                           });
+
+
                           
                           SharedPreferences prefs  = await SharedPreferences.getInstance();
                           final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
@@ -509,6 +538,13 @@ Future<String> getLocationAndSendData() async  {
                             }));
                             print(r.body);
                             Navigator.pop(context);
+                         if (location_id == null) {
+                           await getLocationId();
+                           await setAcceptingStatus(value: false, location_id: location_id);
+                         } else {
+                            await setAcceptingStatus(value: false, location_id: location_id);
+                         }
+                         
                           await prefs.remove('token');
                           await prefs.remove('is_location');
                           await prefs.remove('is_restaurant');
@@ -1549,7 +1585,7 @@ try {
   }
 
 static AudioPlayer audioPlugin = AudioPlayer();
-  Future<void> getAcceptanceStatus({String location_id}) async {
+  Future<bool> getAcceptanceStatus({String location_id}) async {
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-status', headers: {
       'Content-Type': 'application/json'
     },
@@ -1563,7 +1599,9 @@ static AudioPlayer audioPlugin = AudioPlayer();
    setState(() {
      _allowing = result;
    });
+   return result;
   }
+  
 }
 
 class OrderListItem {
@@ -1972,7 +2010,7 @@ FlutterLocalNotificationsPlugin();
     @override
     void dispose() {
       _animationController.dispose();
-      
+  
       super.dispose();
     }
   }
