@@ -7,6 +7,7 @@ import 'package:Restaurant/primary_address.dart';
 import 'package:Restaurant/profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -41,17 +42,13 @@ class _InitPageState extends State<InitPage> {
   }
 
   void _showError(dynamic exception) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(exception.toString())));
+    Fluttertoast.showToast(msg: exception.toString(), backgroundColor: Colors.red, textColor: Colors.white);
   }
 
 
   doInit() async {
 
-    await checkForUpdate();
-
-    if(_updateInfo?.updateAvailable == true) {
-      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
-    }
+  
 
 
     SharedPreferences prefs = await SharedPreferences.getInstance();

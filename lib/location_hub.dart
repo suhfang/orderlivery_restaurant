@@ -24,6 +24,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:focus_detector/focus_detector.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen/screen.dart';
@@ -80,9 +81,26 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   String order_id;
   double order_total;
   Timer timer;
+  AppUpdateInfo _updateInfo;
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   bool connected = false;
+  bool _flexibleUpdateAvailable = false;
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+
+  Future<void> checkForUpdate() async {
+    InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        _updateInfo = info;
+        print('found an update here it is: ${_updateInfo}');
+      });
+    }).catchError((e) => _showError(e));
+  }
+
+  void _showError(dynamic exception) {
+    Fluttertoast.showToast(msg: exception.toString(), backgroundColor: Colors.red, textColor: Colors.white);
+  }
 
 
   @override
@@ -95,18 +113,26 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   }
   AppLifecycleState _notification;
 
+void resume() async {
+    reconnect();
+     await checkForUpdate();
+    if(_updateInfo?.updateAvailable == true) {
+      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+    }
+    
+}
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
       _notification = state;
     });
-    if (_notification.index == 0) {
-      
-        reconnect();
-    }
-    if (_notification.index == 1) {
+    if (_notification == AppLifecycleState.resumed) {
+     resume();
+    } else {
       socket.disconnect();
     }
+
+    
   
   }
 
@@ -442,6 +468,10 @@ Future<String> getLocationAndSendData() async  {
           onFocusGained: () async {
             await getLocationId();
             getDefaultPrinter();
+             await checkForUpdate();
+            if(_updateInfo?.updateAvailable == true) {
+              await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+            }
           },
           child: Scaffold(
         key: scaffoldKey,
