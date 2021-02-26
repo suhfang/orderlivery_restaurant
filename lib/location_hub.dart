@@ -130,15 +130,10 @@ void resume() async {
     } else {
       socket.disconnect();
     }
-
-    
-  
   }
 
-  void reconnect() async {
-    
-          
-      SharedPreferences prefs  = await SharedPreferences.getInstance();
+  void reconnect() async {   
+    SharedPreferences prefs  = await SharedPreferences.getInstance();
     print(prefs.getString('token'));
     print('soup');
     final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
@@ -154,7 +149,6 @@ void resume() async {
        print('is accepting orders: ${_allowing}');
       getOrders(location_id: location_id);
   }
-
 
 double port = 9100;
 NetworkPrinter printer;
@@ -176,14 +170,10 @@ Future<bool> connectPrinter(String ip) async {
       backgroundColor: Colors.red,
       msg: 'Could not connect to the printer at $ip');
   }
- 
-  
   return res == PosPrintResult.success;
 }
 
 void printItem(OrderItem item, int count) async {
- 
- 
   printer.text('${item.quantity} x ${item.name}', linesAfter: 1, styles: PosStyles(codeTable: 'CP1252', align: PosAlign.center), containsChinese: true,);
   if (item.special_instructions != null && item.special_instructions.isNotEmpty) {
     printer.feed(1);
@@ -225,7 +215,6 @@ void blinkLights() async {
 }
 
 FlutterLocalNotificationsPlugin fltrNotification;
-
   Future _showNotification({String title, String body}) async {
     var androidDetails = new AndroidNotificationDetails("orderlivery_restaurant_channel_id", "orderlivery_restaurant_channel_name", "Orderlivery restaurant channel description", importance: Importance.max);
     var iOSDetails = new IOSNotificationDetails();
@@ -239,12 +228,9 @@ FlutterLocalNotificationsPlugin fltrNotification;
     print('soup');
     final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
    _firebaseMessaging.getToken().then((value) async {
-     
      setState(() {
        location_id = json.decode(response.body)['location_id'] as String;
      });
-    
-
      getAcceptanceStatus(location_id: location_id);
      getOrders(location_id: location_id);
       if (location_id != null) {
@@ -259,30 +245,20 @@ FlutterLocalNotificationsPlugin fltrNotification;
             }));
         print(_response.body);
       }
-   });
-
-
+     });
       WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
     }
 
   @override
   void initState() {
     getLocationId();
-    
     FlutterStatusbarcolor.setStatusBarColor(Colors.orange);
-    
     super.initState();
-    
     // initializePrinter(printIpAddress);
-    
     WidgetsBinding.instance.addObserver(this);
     timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
-
-
-  handleNotifications();
-  Wakelock.enable();
-     
-
+    handleNotifications();
+    Wakelock.enable();
     var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
     var iOSInitialize = new IOSInitializationSettings();
     var initializationSetings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
@@ -291,8 +267,6 @@ FlutterLocalNotificationsPlugin fltrNotification;
         print(f);
       });
     connect();
-      
-     
   }
 
   // JS client
@@ -305,38 +279,30 @@ FlutterLocalNotificationsPlugin fltrNotification;
   IO.Socket socket;
   void initSocket() async {
      String id = await getLocationAndSendData();
-            print('location id: ${id}');
-        print('is accepting initial orders: ${_allowing}');
+     print('location id: ${id}');
+     print('is accepting initial orders: ${_allowing}');
    try {
       //Connect the client to the socket
        socket = IO.io('${Constants.apiBaseUrl}',
-         <String, dynamic>{
-            'transports': ['websocket'],
-       }
+         <String, dynamic>{'transports': ['websocket']}
       );
       socket.onConnectError((_) => setState(() {
         connected = false;
       }));
       socket.onDisconnect((data) async {
-
         setState(() {
           connected = false;
           _allowing = false;
         });
-        
-         
         Future.delayed(Duration(milliseconds: 500), () {
           LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
         });
-        
         if (location_id != null) {
           setAcceptingStatus(value: false, location_id: location_id);
         } else {
           await getLocationId();
           setAcceptingStatus(value: false, location_id: location_id);
         }
-       
-      
       });
       socket.onConnect( (data) async {
         setState(() {
@@ -362,20 +328,14 @@ Future<String> getLocationAndSendData() async  {
     print(prefs.getString('token'));
     print('soup');
     final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
-   
-     
-     
-       String id = json.decode(response.body)['location_id'] as String;
-     
-  if (id != null) {
-    await getAcceptanceStatus(location_id: id);
-    return id;
-  }
+    String id = json.decode(response.body)['location_id'] as String;
+    if (id != null) {
+      await getAcceptanceStatus(location_id: id);
+      return id;
+    }
 }
   connect()  {
-    
    initSocket();
-
   }
 
   void handleNotifications() async {
@@ -383,8 +343,6 @@ Future<String> getLocationAndSendData() async  {
        onMessage: (Map<String, dynamic> message) async {
          String title = '${message['notification']['title']}';
          String body = '${message['notification']['body']}';
-         
-
          if (body.contains('was picked up')) {
            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage()));
          } else {

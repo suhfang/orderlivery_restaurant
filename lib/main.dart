@@ -19,7 +19,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  
   WidgetsFlutterBinding.ensureInitialized();
   PrinterProvider.shared.open('printer.db');
   if (Platform.isAndroid) {
@@ -30,13 +29,11 @@ void main() {
 
 class MyApp extends StatelessWidget {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-
   void firebaseCloudMessaging_Listeners() {
     if (Platform.isIOS) 
         iOS_Permission();
     if (Platform.isAndroid)
        Android_Permission();
-       
   }
 
 void iOS_Permission() async {
@@ -46,22 +43,18 @@ void iOS_Permission() async {
         .listen((IosNotificationSettings settings) {
       print("Settings registered : $settings");
     });
-
   }
 
-  void Android_Permission() async {
-  }
+  void Android_Permission() async {}
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
 
   @override
   Widget build(BuildContext context) {
       final textTheme = Theme.of(context).textTheme;
-
       Future.delayed(Duration(milliseconds: 1000), () async {
         firebaseCloudMessaging_Listeners();
       });
-
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
             systemNavigationBarColor: Colors.white,
@@ -69,7 +62,6 @@ void iOS_Permission() async {
             systemNavigationBarIconBrightness: Brightness.dark
         ),
         child: GetMaterialApp(
-          // navigatorKey: navigatorKey,
             title: 'Restaurant',
             debugShowCheckedModeBanner: false,
             theme:
