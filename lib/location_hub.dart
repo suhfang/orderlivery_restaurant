@@ -330,8 +330,8 @@ FlutterLocalNotificationsPlugin fltrNotification;
       socket.onConnect( (data) async {
         setState(() {
           connected = true;
-          timer?.cancel();
-          timer = null;
+          socketTimer?.cancel();
+          socketTimer = null;
         });
         socket.emit('/restaurant_location_connected', json.encode({
         'id': id,
