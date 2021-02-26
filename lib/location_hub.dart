@@ -282,7 +282,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
           await getLocationId();
          allowing = await getAcceptanceStatus(location_id: location_id);
         if (allowing == true && connected == false) {
-          socket.connect();
+          setAcceptingStatus(value: true, location_id: location_id);
         } 
       }
     });
@@ -329,7 +329,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
       });
       socket.onConnect( (data) async {
         setState(() {
-          connected = false;
+          connected = true;
           timer?.cancel();
           timer = null;
         });
