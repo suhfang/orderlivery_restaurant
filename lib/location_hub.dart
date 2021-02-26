@@ -330,7 +330,6 @@ FlutterLocalNotificationsPlugin fltrNotification;
       socket.onConnect( (data) async {
         setState(() {
           connected = false;
-          print('connected');
           timer?.cancel();
           timer = null;
         });
