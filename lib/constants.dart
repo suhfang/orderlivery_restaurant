@@ -1,12 +1,8 @@
 library constants;
-
-// production
 // const String apiBaseUrl = "http://3.18.34.184:8080";
-
-// test
 const String apiBaseUrl = "http://3.23.171.169:8080";
- String messagingToken = '';
- String firebaseMessagingToken = '';
+String messagingToken = '';
+String firebaseMessagingToken = '';
 const String kGoogleApiKey = 'AIzaSyBQdRj5BVHvM7t2lEvDln9elJ73C-rJOp4';
 bool isOnOrdersPage = false;
 String location_id;

@@ -27,31 +27,21 @@ import 'package:focus_detector/focus_detector.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:screen/screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Restaurant/constants.dart' as Constants;
 import 'package:http/http.dart' as http;
 import 'package:wakelock/wakelock.dart';
 import 'package:esc_pos_printer/esc_pos_printer.dart';
-import 'package:image/image.dart' as img;
 import 'dart:typed_data';
-import 'package:flutter/services.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'dart:convert' show utf8, base64;
-import 'package:get/instance_manager.dart';
-import 'package:get/route_manager.dart';
-import 'package:socket_io/socket_io.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-String encryptString(String id) {
-  return  base64.encode(utf8.encode(id));
-}
+String encryptString(String id) => base64.encode(utf8.encode(id));
 
-String decryptString(String encoded) {
-  return utf8.decode(base64.decode(encoded));
-}
+String decryptString(String encoded) => utf8.decode(base64.decode(encoded));
+
 class LocationHubPage extends StatefulWidget {
-
   Map<String, dynamic> notificationData;
    LocationHubPage({this.notificationData});
   _LocationHubPageState createState() => _LocationHubPageState();
@@ -61,8 +51,8 @@ class CartItem {
   String name;
   String price;
   double quantity;
-  String pricing_type;
-  CartItem({this.name, this.price, this.quantity, this.pricing_type});
+  String pricingType;
+  CartItem({this.name, this.price, this.quantity, this.pricingType});
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
       name: json['name'] as String,
@@ -72,28 +62,39 @@ class CartItem {
   }
 }
 class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBindingObserver {
+
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  List<CartItem> items_to_buy = [];
-  List<Order> new_orders = [];
-  List<Order> past_orders = [];
-  List<Order> current_orders = [];
+  List<CartItem> itemsToBuy = [];
+  List<Order> newOrders = [];
+  List<Order> pastOrders = [];
+  List<Order> currentOrders = [];
   List<Order> orders = [];
-  String order_id;
-  double order_total;
+  String orderId;
+  double orderTotal;
   Timer timer;
   AppUpdateInfo _updateInfo;
-
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   bool connected = false;
-  bool _flexibleUpdateAvailable = false;
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  bool flexibleUpdateAvailable = false;
+  AppLifecycleState notification;
+  double port = 9100;
+  NetworkPrinter printer;
+  bool hasPrintedAlready = false;
+  Timer socketTimer;
+  IO.Socket socket;
+  bool _allowing = false;
+  String locationId;
+  String grossEarnings = 0.toDouble().toStringAsFixed(2);
+  UniqueKey focusDetectorKey = UniqueKey();
+  bool bottomContainerShows = false;
+  Printer localPrinter;
 
 
   Future<void> checkForUpdate() async {
     InAppUpdate.checkForUpdate().then((info) {
       setState(() {
         _updateInfo = info;
-        print('found an update here it is: ${_updateInfo}');
+        print('found an update here it is: $_updateInfo');
       });
     }).catchError((e) => _showError(e));
   }
@@ -103,62 +104,47 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
       Fluttertoast.showToast(msg: exception.toString(), backgroundColor: Colors.red, textColor: Colors.white);
   }
 
-
   @override
   void dispose() {
     handleWakeLock();
     WidgetsBinding.instance.removeObserver(this);
-
     timer?.cancel();
     timer = null;
-
     updateTimer?.cancel();
     updateTimer = null;
-
     super.dispose();
   }
-  AppLifecycleState _notification;
 
 void resume() async {
     reconnect();
-     await checkForUpdate();
-    if(_updateInfo?.updateAvailable == true) {
-      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
-    }
-}
+    await checkForUpdate();
+    if (Platform.isAndroid)
+      if(_updateInfo?.updateAvailable == true) 
+        await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+  }
+  
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
-      _notification = state;
+      notification = state;
     });
-    if (_notification == AppLifecycleState.resumed) {
-     resume();
-    } else {
-      socket.disconnect();
-    }
+    notification == AppLifecycleState.resumed ? resume() : socket.disconnect();
   }
 
   void reconnect() async {   
     SharedPreferences prefs  = await SharedPreferences.getInstance();
-    print(prefs.getString('token'));
-    print('soup');
-    final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
-       String id = json.decode(response.body)['location_id'] as String;
-       await getAcceptanceStatus(location_id: id);
-       if (_allowing == true) {
-         socket.connect();
-       } else {
-         Future.delayed(Duration(milliseconds: 500), () {
-          LocalNotification.shared.showNotification(title: 'Offline notice', body: 'Toggle the switch to start accepting orders »');
-         });
-       }
-       print('is accepting orders: ${_allowing}');
-      getOrders(location_id: location_id);
+    final response = await http.get(
+      '${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+      String id = json.decode(response.body)['location_id'] as String;
+      await getAcceptanceStatus(location_id: id);
+      _allowing == true ? 
+      socket.connect() : 
+      Future.delayed(Duration(milliseconds: 500), 
+      () => LocalNotification.shared.showNotification(
+        title: 'Offline notice', body: 'Toggle the switch to start accepting orders »'));  
+      getOrders(locationId: locationId);
   }
 
-double port = 9100;
-NetworkPrinter printer;
-bool hasPrintedAlready = false;
 Future<bool> initializePrinter(String ip) async {
   const PaperSize  paper = PaperSize.mm80;
   final profile = await CapabilityProfile.load();
@@ -170,59 +156,61 @@ Future<bool> initializePrinter(String ip) async {
 Future<bool> connectPrinter(String ip) async {
   final PosPrintResult res = await printer.connect(ip, port: 9100);
   bool val = res == PosPrintResult.success;
-  print ('printer connected: $val');
-   if (!val) {
+   if (!val) 
     Fluttertoast.showToast(
-      backgroundColor: Colors.red,
+      backgroundColor: Colors.red, 
       msg: 'Could not connect to the printer at $ip');
-  }
   return res == PosPrintResult.success;
 }
 
 void printItem(OrderItem item, int count) async {
-  printer.text('${item.quantity} x ${item.name}', linesAfter: 1, styles: PosStyles(codeTable: 'CP1252', align: PosAlign.center), containsChinese: true,);
+
+  printer.text(
+    '${item.quantity} x ${item.name}', 
+    linesAfter: 1, 
+    styles: PosStyles(codeTable: 'CP1252', 
+    align: PosAlign.center), 
+    containsChinese: true);
+
   if (item.special_instructions != null && item.special_instructions.isNotEmpty) {
     printer.feed(1);
     printer.text('Special instructions: ', linesAfter: 1, styles: PosStyles(bold: true));
     printer.text('${item.special_instructions}', linesAfter: 1);
     printer.feed(1);
   }
+
   item.lists.forEach((element) {
-    printer.text('${element.name}:', linesAfter: 1, styles: PosStyles(align: PosAlign.center));
+    printer.text(
+      '${element.name}:', 
+    linesAfter: 1, 
+    styles: PosStyles(align: PosAlign.center));
+
     element.items.forEach((elem) {
-      if (elem.quantity != 0) {
-        printer.text('${elem.quantity} x ${elem.name}', linesAfter: 1, styles: PosStyles(align: PosAlign.center)); 
-      } else {
+      if (elem.quantity != 0) 
+        printer.text('${elem.quantity} x ${elem.name}', 
+        linesAfter: 1, 
+        styles: PosStyles(align: PosAlign.center)); 
+      else
         printer.text('${elem.name}', linesAfter: 1, styles: PosStyles(align: PosAlign.center)); 
-      }
     });
     printer.feed(1);
   });
+
   printer.text('------------------------------------------', linesAfter: 1, styles: PosStyles(align: PosAlign.center));
 }
 
 void blinkLights() async {
-  if (new_orders.isNotEmpty) {
+  if (newOrders.isNotEmpty)
     await FlutterRingtonePlayer.playNotification();
-    // double brightness = await Screen.brightness;
-    // if (brightness == 0) {
-    //   Future.delayed(Duration(milliseconds: 100), () {
-    //     Screen.setBrightness(1.0);
-    //     Screen.keepOn(true);
-    //   });
-    // } else {
-    //   Future.delayed(Duration(milliseconds: 100), () {
-    //     Screen.setBrightness(0.0);
-    //     Screen.keepOn(false);
-    //   });
-    // }
-
-  }
 }
 
 FlutterLocalNotificationsPlugin fltrNotification;
-  Future _showNotification({String title, String body}) async {
-    var androidDetails = new AndroidNotificationDetails("orderlivery_restaurant_channel_id", "orderlivery_restaurant_channel_name", "Orderlivery restaurant channel description", importance: Importance.max);
+  Future showNotification({String title, String body}) async {
+    var androidDetails = new AndroidNotificationDetails(
+      "orderlivery_restaurant_channel_id", 
+      "orderlivery_restaurant_channel_name", 
+      "Orderlivery restaurant channel description", 
+      importance: Importance.max);
     var iOSDetails = new IOSNotificationDetails();
     var generalNotificationDetails = new NotificationDetails(android: androidDetails, iOS: iOSDetails);
     await fltrNotification.show((new Random()).nextInt(100), title, body, generalNotificationDetails);
@@ -230,26 +218,26 @@ FlutterLocalNotificationsPlugin fltrNotification;
 
   getLocationId() async  {
     SharedPreferences prefs  = await SharedPreferences.getInstance();
-    print(prefs.getString('token'));
-    print('soup');
-    final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+    final response = await http.get(
+      '${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
    _firebaseMessaging.getToken().then((value) async {
      setState(() {
-       location_id = json.decode(response.body)['location_id'] as String;
+       locationId = json.decode(response.body)['location_id'] as String;
      });
-     getAcceptanceStatus(location_id: location_id);
-     getOrders(location_id: location_id);
-      if (location_id != null) {
+     getAcceptanceStatus(location_id: locationId);
+     getOrders(locationId: locationId);
+      if (locationId != null) {
         String deviceId = await _getId();
-        final _response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token', headers: {
-          'Content-Type': 'application/json'
-        },
-            body: json.encode({
-              'token': value,
-              'location_id': location_id,
-              'device_id': deviceId
-            }));
-        print(_response.body);
+        await http.post(
+          '${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token', 
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: json.encode({
+            'token': value,
+            'location_id': locationId,
+            'device_id': deviceId
+          }));
       }
      });
       WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
@@ -259,21 +247,17 @@ FlutterLocalNotificationsPlugin fltrNotification;
   @override
   void initState() {
     getLocationId();
-    FlutterStatusbarcolor.setStatusBarColor(Colors.orange);
     super.initState();
-    // initializePrinter(printIpAddress);
     WidgetsBinding.instance.addObserver(this);
-     timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
-     updateTimer = Timer.periodic(Duration(seconds: 3600), (Timer t) => fetchUpdates());
+    timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
+    updateTimer = Timer.periodic(Duration(seconds: 3600), (Timer t) => fetchUpdates());
     handleNotifications();
     Wakelock.enable();
     var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
     var iOSInitialize = new IOSInitializationSettings();
     var initializationSetings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
     fltrNotification = new FlutterLocalNotificationsPlugin();
-     fltrNotification.initialize(initializationSetings, onSelectNotification:  (String f) async {
-        print(f);
-      });
+    fltrNotification.initialize(initializationSetings, onSelectNotification: (String s) async => print(s));
     connect();
   }
 
@@ -288,35 +272,19 @@ FlutterLocalNotificationsPlugin fltrNotification;
     socketTimer = Timer.periodic(Duration(seconds: 1), (Timer t) async {
       if (connected == false) {
         bool allowing;
-        if (location_id == null)
+        if (locationId == null)
           await getLocationId();
-         allowing = await getAcceptanceStatus(location_id: location_id);
+         allowing = await getAcceptanceStatus(location_id: locationId);
         if (allowing == true && connected == false) {
-          setAcceptingStatus(value: true, location_id: location_id);
+          setAcceptingStatus(value: true, locationId: locationId);
         } 
       }
     });
-  }
+  } 
 
-
-
-
-
-  Timer socketTimer;
-  // JS client
-  // var socket = io('http://localhost:3000');
-  // socket.on('connect', function(){console.log('connect')});
-  // socket.on('event', function(data){console.log(data)});
-  // socket.on('disconnect', function(){console.log('disconnect')});
-  // socket.on('fromServer', function(e){console.log(e)});
-  
-  IO.Socket socket;
   void initSocket() async {
-     String id = await getLocationAndSendData();
-     print('location id: ${id}');
-     print('is accepting initial orders: ${_allowing}');
-   try {
-      //Connect the client to the socket
+    String id = await getLocationAndSendData();
+    try {
        socket = IO.io('${Constants.apiBaseUrl}',
          <String, dynamic>{'transports': ['websocket']}
       );
@@ -330,44 +298,42 @@ FlutterLocalNotificationsPlugin fltrNotification;
         });
         runReconnectLoop();
         Fluttertoast.showToast(msg: 'Please toggle the switch to start accepting orders or Contact Support');
-        if (location_id != null) {
-          setAcceptingStatus(value: false, location_id: location_id);
-        } else {
+        if (locationId != null)
+          setAcceptingStatus(value: false, locationId: locationId);
+        else {
           await getLocationId();
-          setAcceptingStatus(value: false, location_id: location_id);
+          setAcceptingStatus(value: false, locationId: locationId);
         }
       });
-      socket.onConnect( (data) async {
+      socket.onConnect((data) async {
         setState(() {
           connected = true;
           socketTimer?.cancel();
           socketTimer = null;
         });
         socket.emit('/restaurant_location_connected', json.encode({
-        'id': id,
-        'user_type': 'restaurant_location'
-      }));
+          'id': id,
+          'user_type': 'restaurant_location'
+        }));
       });
-      if (_allowing == true) {
-        socket.connect();
-      }
+      if (_allowing == true) socket.connect();
    } catch (e) {
        print('error socket');
    }
-   
 }
 
-Future<String> getLocationAndSendData() async  {
-   SharedPreferences prefs  = await SharedPreferences.getInstance();
-    print(prefs.getString('token'));
-    print('soup');
-    final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
-    String id = json.decode(response.body)['location_id'] as String;
-    if (id != null) {
-      await getAcceptanceStatus(location_id: id);
-      return id;
-    }
-}
+  Future<String> getLocationAndSendData() async  {
+    SharedPreferences prefs  = await SharedPreferences.getInstance();
+      final response = await http.get(
+        '${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+      String id = json.decode(response.body)['location_id'] as String;
+      if (id != null) {
+        await getAcceptanceStatus(location_id: id);
+        return id;
+      }
+      return null;
+  }
+
   connect()  {
    initSocket();
   }
@@ -377,80 +343,46 @@ Future<String> getLocationAndSendData() async  {
        onMessage: (Map<String, dynamic> message) async {
          String title = '${message['notification']['title']}';
          String body = '${message['notification']['body']}';
-         if (body.contains('was picked up')) {
-           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage()));
-         } else {
-             LocalNotification.shared.showNotification(title: title, body: body);
-         }
-         print(message);
-        print(body);
-
-         print(message);
-         print('app onMessage');
-        //  showNotification(title: message['title'], body: message['body']);
-        getOrders(location_id: location_id); 
+         body.contains('was picked up') ? Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LocationHubPage())) : LocalNotification.shared.showNotification(title: title, body: body);
+         getOrders(locationId: locationId); 
        },
-       onResume: (Map<String, dynamic> message) async {
-        //  await FlutterRingtonePlayer.playNotification();
-        //  showNotification(title: message['title'], body: message['body']);
-        //  print(message);
-        //  getOrders(location_id: location_id);
-        //  print('app onResume');
-       
-       },
-       onLaunch: (Map<String, dynamic> message) async {
-        //  await FlutterRingtonePlayer.playNotification();
-        //  showNotification(title: message['title'], body: message['body']);
-        //  print(message);
-        //  getOrders(location_id: location_id);
-        //  print('app onLaunch');
-        
-       },
+       onResume: (Map<String, dynamic> message) async { },
+       onLaunch: (Map<String, dynamic> message) async { },
      );
   }
 
-  bool _allowing = false;
-  String location_id;
-  String gross_earnings = 0.toDouble().toStringAsFixed(2);
 
   setEarnings() {
     setState(() {
-      if (orders.isNotEmpty) {
-        gross_earnings = orders.where((a) => a.approved_at != null).map((e) => e.food_total).toList().reduce((a, b) => (a + b)).toStringAsFixed(2);
-      }
-      
+      if (orders.isNotEmpty) 
+        grossEarnings = orders
+        .where((a) => a.approved_at != null)
+        .map((e) => e.food_total)
+        .toList()
+        .reduce((a, b) => (a + b))
+        .toStringAsFixed(2);
     });
   }
   handleWakeLock() async {
-    if (await Wakelock.enabled) {
+    if (await Wakelock.enabled)
       Wakelock.disable();
-    }
   }
 
  initPlatformState() async {
    FlutterStatusbarcolor.setNavigationBarColor(Colors.orange);
    FlutterStatusbarcolor.setNavigationBarWhiteForeground(true);
    await PrinterProvider.shared.open('printer.db');
-    getDefaultPrinter();
-  }
-
-  UniqueKey focusDetectorKey = UniqueKey();
-  bool bottomContainerShows = false;
-  Printer localPrinter;
-
+   getDefaultPrinter();
+ }
 
   void getDefaultPrinter() async {
     var k = await PrinterProvider.shared.getDefaultPrinter();
-    if (k != null) {
+    if (k != null) 
       setState(() {
         localPrinter = k;
         print(localPrinter);
       });
-    }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -472,10 +404,10 @@ Future<String> getLocationAndSendData() async  {
         key: scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('TODAY\'S INCOMING ORDERS', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+        title: Text('Today\'s Incoming Orders', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
         centerTitle: true,
         shadowColor: Colors.transparent,
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.white,
       ),
       drawer: Drawer(
         child: SafeArea(
@@ -486,14 +418,14 @@ Future<String> getLocationAndSendData() async  {
                 ListView(
                   children: [
                     ListTile(
-                      title: Text('ORDERS', style: TextStyle(color: Colors.white),),
+                      title: Text('Orders', style: TextStyle(color: Colors.white),),
                       leading: Icon(LineIcons.newspaper_o, color: Colors.white,),
                       onTap: () {
                         Navigator.pop(context);
                       },
                     ),
                      ListTile(
-                      title: Text('CONNECT PRINTERS', style: TextStyle(color: Colors.white),),
+                      title: Text('Connect Printers', style: TextStyle(color: Colors.white),),
                       leading: Icon(LineIcons.print, color: Colors.white,),
                       onTap: () {
                         Navigator.pop(context);
@@ -504,56 +436,44 @@ Future<String> getLocationAndSendData() async  {
                     ),
                     ListTile(
                         tileColor: Colors.orange,
-                        title: Text('LOG OUT',style: TextStyle(color: Colors.white),),
+                        title: Text('Log Out',style: TextStyle(color: Colors.white),),
                         leading: Icon(LineIcons.sign_out, color: Colors.white,),
                         onTap: () async {
                           Navigator.pop(context);
-                           showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) {
-                            return Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SpinKitRing(
-                                      color: Colors.white,
-                                      size: 50.0,
-                                      lineWidth: 2,
-                                  )
-                                  ],
-                                ));
-                          });
-
-
-                          
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      SpinKitRing(
+                                        color: Colors.white,
+                                        size: 50.0,
+                                        lineWidth: 2)
+                                    ],
+                                  ));
+                            });
                           SharedPreferences prefs  = await SharedPreferences.getInstance();
                           final response = await http.get('${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
-                          String location_id = json.decode(response.body)['location_id'] as String;
-                          print(location_id);
-                          
-                              var url = Constants.apiBaseUrl + '/restaurant_locations/unregister-messaging-token';
-                            
-                            String device_id = await _getId();
-                            final r = await http.post(url,
+                          String locationId = json.decode(response.body)['location_id'] as String;
+                          var url = Constants.apiBaseUrl + '/restaurant_locations/unregister-messaging-token';
+                          String deviceId = await _getId();
+                          await http.post(url,
                             headers: {
                               "Content-Type": "application/json",
                             },
                             body: json.encode({
-                              'device_id': device_id,
-                              'location_id': location_id
+                              'device_id': deviceId,
+                              'location_id': locationId
                             }));
-                            print(r.body);
-                            Navigator.pop(context);
-                         if (location_id == null) {
-                           await getLocationId();
-                           await setAcceptingStatus(value: false, location_id: location_id);
-                         } else {
-                            await setAcceptingStatus(value: false, location_id: location_id);
-                         }
-                         
+                          Navigator.pop(context);
+                          if (locationId == null) 
+                            await getLocationId();
+                          await setAcceptingStatus(value: false, locationId: locationId);
                           await prefs.remove('token');
                           await prefs.remove('is_location');
                           await prefs.remove('is_restaurant');
@@ -578,14 +498,13 @@ Future<String> getLocationAndSendData() async  {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('ACCEPTING ORDERS', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                 
+                  Text('Accepting Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                   CupertinoSwitch(
                     activeColor: Colors.orange,
                     value: _allowing,
                     onChanged: (bool newValue) async {
-                      if (location_id != null) {
-                        bool result = await setAcceptingStatus(value: newValue, location_id: location_id);
+                      if (locationId != null) {
+                        bool result = await setAcceptingStatus(value: newValue, locationId: locationId);
                         setState(()  {
                           _allowing = result;
                         });
@@ -596,7 +515,6 @@ Future<String> getLocationAndSendData() async  {
                             textColor: Colors.white,
                             toastLength: Toast.LENGTH_LONG);
                           await HapticFeedback.heavyImpact();
-                            
                         } else {
                            Fluttertoast.showToast(
                             msg: 'You are now accepting orders!',
@@ -613,39 +531,31 @@ Future<String> getLocationAndSendData() async  {
             ),
             SizedBox(height: 20,),
             Text('Total Gross earnings for the day'),
-            Text(
-                  orders.isNotEmpty ?
-                  '\$$gross_earnings' : 
-                  '\$0.00',
-
-                  style: TextStyle(
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold
-                  ),),
-
+            Text(orders.isNotEmpty ? '\$$grossEarnings' : '\$0.00',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold
+                )),
             SizedBox(height: 40,),
             TabBar(
               unselectedLabelColor: Colors.black,
               indicatorSize: TabBarIndicatorSize.tab,
-
-              // indicator: BoxDecoration(),
               labelColor: Colors.black,
               tabs: [
                 Tab(
-
-                  child:  new_orders.isNotEmpty ?
+                  child:  newOrders.isNotEmpty ?
                   Badge(
                     badgeColor: Colors.brown,
                     badgeContent: Container(
                       height: 50, width: 50, 
                       child: Center(
-                        child: Text(new_orders.length > 99 ? '99+' : '${new_orders.length}', style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)),),
+                        child: Text(newOrders.length > 99 ? '99+' : '${newOrders.length}', style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)),),
                       ),
                     child: Row(
                       children: [
                           Expanded(
                             child: BlinkingButton(
-                              child: Text('NEW ORDERS', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                              child: Text('NEW', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 12),),
                             )
                         )
                       ],
@@ -653,31 +563,31 @@ Future<String> getLocationAndSendData() async  {
                   )
                   :  Container(
                     width: 150,
-                    child: Text('NEW ORDERS', textAlign: TextAlign.center,),
+                    child: Text('NEW', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   )
                 ),
                 Tab(
-                  child:  current_orders.isNotEmpty ?
+                  child: currentOrders.isNotEmpty ?
                   Badge(
                       child: Container(
                         width: 150,
-                        child: Text('IN-PROGRESS ORDERS', textAlign: TextAlign.center,),
+                        child: Text('IN-PROGRESS', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       )
                   ) : Container(
                     width: 150,
-                    child: Text('IN-PROGRESS ORDERS', textAlign: TextAlign.center,),
+                    child: Text('IN-PROGRESS', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   )
                 ),
                 Tab(
-                  child:  past_orders.isNotEmpty ?
+                  child:  pastOrders.isNotEmpty ?
                   Badge(
                       child: Container(
                         width: 150,
-                        child: Text('PAST ORDERS', textAlign: TextAlign.center,),
+                        child: Text('PAST', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       )
                   ) : Container(
                     width: 150,
-                    child: Text('PAST ORDERS', textAlign: TextAlign.center,),
+                    child: Text('PAST', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   )
                 ),
               ],
@@ -689,22 +599,20 @@ Future<String> getLocationAndSendData() async  {
               child: TabBarView(
                 children: [
                  Container(
-                  //  color: Colors.orange,
-                    child: new_orders.isEmpty ?
+                    child: newOrders.isEmpty ?
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LineIcons.frown_o, size: 50),
-                          SizedBox(height: 15),
-                          Text('No new orders were found', style: TextStyle(fontSize: 18)),
+                          Icon(LineIcons.frown_o, size: 25),
+                          SizedBox(height: 5),
+                          Text('No new orders were found', style: TextStyle(fontSize: 12)),
                         ],
                       )
                     ) : ListView.separated(
                       itemBuilder: (context, index) {
-                        final order = new_orders[index];
+                        final order = newOrders[index];
                         return Container(
-                          // color: Colors.orange,
                           child: Padding(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -745,7 +653,6 @@ Future<String> getLocationAndSendData() async  {
                                             Text('\$${item.flat_price.toStringAsFixed(2)}') :
                                             Text('')
                                           ),
-                                          
                                           ...(
                                             item.lists.map((list) {
                                               return Padding(
@@ -769,7 +676,6 @@ Future<String> getLocationAndSendData() async  {
                                               );
                                             }).toList()
                                           ),
-                                          
                                         ],
                                       );
                                     }).toList()
@@ -827,13 +733,10 @@ Future<String> getLocationAndSendData() async  {
                                                                  Expanded(
                                                                      child: GestureDetector(
                                                                        onTap: () async {
-                                                                          declineOrder(order_id: order.id);
-                                                                         
+                                                                         declineOrder(orderId: order.id);
                                                                          await getLocationId();
                                                                          Navigator.pop(context);
-
                                                                          Fluttertoast.showToast(msg: 'You declined this order!');
-                                                                         
                                                                        },
                                                                        child: Container(
                                                                          height: 50,
@@ -894,37 +797,33 @@ Future<String> getLocationAndSendData() async  {
                             )
                         );
                       },
-                      itemCount: new_orders.length,
+                      itemCount: newOrders.length,
                       separatorBuilder: (context, index) {
                         return Divider(thickness: 50, color: Color(0xF1F1F1F1), height: 50,);
                       }
                     )
-                    
                   ),
-
                   Container(
-                  //  color: Colors.orange,
-                    child: current_orders.isEmpty ?
+                    child: currentOrders.isEmpty ?
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LineIcons.frown_o, size: 50),
-                          SizedBox(height: 15),
-                          Text('No current orders were found', style: TextStyle(fontSize: 18)),
+                          Icon(LineIcons.frown_o, size: 25),
+                          SizedBox(height: 5),
+                          Text('No current orders were found', style: TextStyle(fontSize: 12)),
                         ],
                       )
                     ) :
                     ListView.separated(
                       itemBuilder: (context, index) {
-                        final order = current_orders[index];
+                        final order = currentOrders[index];
                         return Container(
-                          // color: Colors.orange,
                           child: Padding(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                    Text('Order #${order.id}'),
+                                  Text('Order #${order.id}'),
                                   SizedBox(height: 10,),
                                   Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
                                   SizedBox(height: 10,),
@@ -983,7 +882,6 @@ Future<String> getLocationAndSendData() async  {
                                               );
                                             }).toList()
                                           ),
-                                          
                                         ],
                                       );
                                     }).toList()
@@ -1002,7 +900,7 @@ Future<String> getLocationAndSendData() async  {
                                             child: order.approved_at != null && order.cooked_at == null ?
                                             GestureDetector(
                                               onTap: () async {
-                                                await finishOrder(order_id: order.id);
+                                                await finishOrder(orderId: order.id);
                                               },
                                               child: Container(
                                                 height: 45,
@@ -1069,13 +967,6 @@ Future<String> getLocationAndSendData() async  {
                                                                       //  borderRadius: BorderRadius.circular(30),
                                                                      ),
                                                                    ),
-                                                                  //  Align(
-                                                                  //    alignment: Alignment.center,
-                                                                  //    child: ClipRRect(
-                                                                  //      child: Image.asset('assets/images/qr-logo.png', height: 50, width: 50,),
-                                                                  //      borderRadius: BorderRadius.circular(10),
-                                                                  //    )
-                                                                  //  )
                                                                  ],
                                                                )
                                                              )
@@ -1088,18 +979,16 @@ Future<String> getLocationAndSendData() async  {
                                                     )
                                                   );
                                                 });
-                                                if (location_id == null) {
+                                                if (locationId == null) {
                                                   await getLocationId();
-                                                  getOrders(location_id: location_id);
-                                                } else {
-                                                  getOrders(location_id: location_id);
-                                                }
+                                                  getOrders(locationId: locationId);
+                                                } else 
+                                                  getOrders(locationId: locationId);
                                                } else {
                                                 await confirmPickup(order_id: order.id);
                                                }
                                              },
                                              child:  Container(
-
                                                height: 45,
                                                child: Center(
                                                  child: Text(order.order_type == 'delivery' ? 'HAND TO ENVOY' : 'HAND TO CUSTOMER', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
@@ -1111,13 +1000,7 @@ Future<String> getLocationAndSendData() async  {
                                              ),
                                            )
                                         ),
-
-                                        
-
-                                     
-
                                       ],
-                                     
                                     ) ,
                                     SizedBox(height: 10,),
                                       GestureDetector(
@@ -1136,9 +1019,7 @@ Future<String> getLocationAndSendData() async  {
                                           ),
                                         )
                                       ),
-
                                       SizedBox(height: 10,),
-
                                       order.cooked_at == null ?
                                         GestureDetector(
                                         onTap: () {
@@ -1206,40 +1087,34 @@ Future<String> getLocationAndSendData() async  {
                                           ),
                                         )
                                       ) : SizedBox()
-                                    
                                      ],
-
                               ),
                               padding: EdgeInsets.all(20),
                             )
                         );
                       },
-                      itemCount: current_orders.length,
+                      itemCount: currentOrders.length,
                       separatorBuilder: (context, index) {
                         return Divider(thickness: 50, color: Color(0xF1F1F1F1), height: 50,);
                       }
                     )
-                    
                   ),
-            
                  Container(
-                  //  color: Colors.orange,
-                    child: past_orders.isEmpty ?
+                    child: pastOrders.isEmpty ?
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LineIcons.frown_o, size: 50),
-                          SizedBox(height: 15),
-                          Text('No past orders were found', style: TextStyle(fontSize: 18)),
+                          Icon(LineIcons.frown_o, size: 25),
+                          SizedBox(height: 5),
+                          Text('No past orders were found', style: TextStyle(fontSize: 12)),
                         ],
                       )
                     ) : 
                     ListView.separated(
                       itemBuilder: (context, index) {
-                        final order = past_orders[index];
+                        final order = pastOrders[index];
                         return Container(
-                          // color: Colors.orange,
                           child: Padding(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1303,7 +1178,7 @@ Future<String> getLocationAndSendData() async  {
                                               );
                                             }).toList()
                                           ),
-                                            SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                       GestureDetector(
                                         onTap: () {
                                           printOrder(order: order);
@@ -1338,7 +1213,7 @@ Future<String> getLocationAndSendData() async  {
                             )
                         );
                       },
-                      itemCount: past_orders.length,
+                      itemCount: pastOrders.length,
                       separatorBuilder: (context, index) {
                         return Divider(thickness: 50, color: Color(0xF1F1F1F1), height: 50,);
                       }
@@ -1362,43 +1237,17 @@ Future<String> getLocationAndSendData() async  {
 
 
 outOfStock({Order order}) async {
-  final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/out-of-stock', 
+  final response = await http.post(
+    '${Constants.apiBaseUrl}/restaurant_locations/out-of-stock', 
   headers: {
     'Content-Type': 'application/json'
   },
   body: json.encode({
     'order_id': order.id
   }));
-  print('response body: ${response.body}');
   Navigator.pop(context);
-  getOrders(location_id: location_id);
+  getOrders(locationId: locationId);
 }
-
-  void showNotification({
-    String title,
-    String body,
-  }) {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'your channel id',
-        'your channel name',
-        'your channel description',
-        importance: Importance.max,
-        priority: Priority.max,
-        ticker: 'ticker',
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound('arrive')
-    );
-
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails(presentSound: true);
-
-    var platformChannelSpecifics = NotificationDetails(
-     android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics
-    );
-    flutterLocalNotificationsPlugin.show(0, title, body, platformChannelSpecifics, payload: 'sounds/sound.mp3',);
-
-
-  }
 
   Future<String> _getId() async {
     var deviceInfo = DeviceInfoPlugin();
@@ -1411,66 +1260,45 @@ outOfStock({Order order}) async {
     }
   }
 
-  getOrders({String location_id}) async {
-
+  getOrders({String locationId}) async {
     var date = DateTime.now();
-    int today = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      0,
-      0,
-      0
-    ).toUtc().millisecondsSinceEpoch;
-    
-
-    print(location_id);
+    int today = DateTime(date.year, date.month, date.day, 0, 0, 0).toUtc().millisecondsSinceEpoch;
     final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/get-orders', headers: {
       'Content-Type': 'application/json',
-
     },
     body: json.encode({
-      'location_id': location_id,
+      'location_id': locationId,
       'start_date': today
     }));
     Iterable _orders = json.decode(response.body);
-    setState(() {
-    print(_orders.length);
-
-      var all = _orders.map((e) => Order.fromJson(e)).toList();
-    all.sort((a,b) {
+    var all = _orders.map((e) => Order.fromJson(e)).toList();
+     all.sort((a,b) {
       return a.createdAt.compareTo(b.createdAt);
     });
-    orders = all;
-    new_orders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
-    current_orders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
-    past_orders = all.where((e) => e.picked_up_at != null || e.delivered_at != null || e.declined_at != null).toList();
-      
-      
-
+    setState(() {
+      orders = all;
+      newOrders = all.where((e) => e.approved_at == null && e.declined_at == null).toList();
+      currentOrders = all.where((e) => e.approved_at != null && e.picked_up_at == null).toList();
+      pastOrders = all.where((e) => e.picked_up_at != null || e.delivered_at != null || e.declined_at != null).toList();
     });
     setEarnings();
-    
   }
+
+
   acceptOrder({Order order}) async {
-
-    final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
+    await http.post(
+      '${Constants.apiBaseUrl}/restaurant_locations/accept-order',
         headers: {
-          'Content-Type': 'application/json',
-
+          'Content-Type': 'application/json'
         },
-    body: json.encode({
-      'order_id': order.id,
-      'location_id': location_id,
-
-    }));
-   Fluttertoast.showToast(msg: 'You accepted this order');
-  if (location_id != null) {
-      getOrders(location_id: location_id);
-    }
-    // Screen.setBrightness(1);
-    
-    printOrder(order: order);
+      body: json.encode({
+        'order_id': order.id,
+        'location_id': locationId,
+      }));
+    Fluttertoast.showToast(msg: 'You accepted this order');
+      if (locationId != null) 
+        getOrders(locationId: locationId);
+      printOrder(order: order);
   }
 
   printOrder({Order order}) async {
@@ -1478,41 +1306,28 @@ outOfStock({Order order}) async {
    var defaultPrinter = await PrinterProvider.shared.getDefaultPrinter();
    print(defaultPrinter.ip);
    print('default printer: $defaultPrinter');
-  if (defaultPrinter != null) {
+   if (defaultPrinter != null) {
     var initialized = await initializePrinter(defaultPrinter.ip);
-  if (initialized) {
-    final ByteData data = await rootBundle.load('assets/images/thermal-logo.png');
-    final Uint8List imgBytes = data.buffer.asUint8List();
-    // final img.Image image = img.decodeImage(imgBytes);
-    // var bytes = await toQrImageData(encryptString(order.id));
-    // final img.Image bytesImage = img.decodeImage(bytes);
-
-  //   printer.image(image, align: PosAlign.center);
-  //   printer.disconnect();
-  //  await initializePrinter(defaultPrinter.ip);
-    printer.text('ORDERLIVERY ORDER',      styles: PosStyles(align: PosAlign.center, bold: true,), linesAfter: 1);
-    printer.text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}', linesAfter: 1, styles: PosStyles(bold: true));
-    printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
-    printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
-    printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
-    var count = 1;
-    order.items.forEach((element) {
-      printItem(element, count);
-      count += 1;
-    });
-    printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}', linesAfter: 2);
-
-    // printer.disconnect();
-    // await initializePrinter(defaultPrinter.ip);
-    // printer.image(bytesImage, align: PosAlign.center,);
-    printer.feed(2);
-    printer.cut();
-    printer.disconnect();
+    if (initialized) {
+        final ByteData data = await rootBundle.load('assets/images/thermal-logo.png');
+        final Uint8List _ = data.buffer.asUint8List();
+        printer.text('ORDERLIVERY ORDER', styles: PosStyles(align: PosAlign.center, bold: true,), linesAfter: 1);
+        printer.text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}', linesAfter: 1, styles: PosStyles(bold: true));
+        printer.text('Customer\'s name: ${order.customer_name}', linesAfter: 1, styles: PosStyles(bold: true));
+        printer.text('${DateFormat().format(order.createdAt.toLocal())}', linesAfter: 2);
+        printer.text('Items:', styles: PosStyles(underline: true, align: PosAlign.left), linesAfter: 1);
+        var count = 1;
+        order.items.forEach((element) {
+          printItem(element, count);
+          count += 1;
+        });
+        printer.text('ORDER TOTAL: \$${order.food_total.toStringAsFixed(2)}', linesAfter: 2);
+        printer.feed(2);
+        printer.cut();
+        printer.disconnect();
+      }
+    }
   }
- 
-  }
-  }
-
 
 Future<Uint8List> toQrImageData(String text) async {
 try {
@@ -1523,73 +1338,63 @@ try {
       color: Colors.black,
       emptyColor: Colors.white,
     ).toImage(300);
-    final a = await image.toByteData(format: ImageByteFormat.png);
-    return a.buffer.asUint8List();
+    final png = await image.toByteData(format: ImageByteFormat.png);
+    return png.buffer.asUint8List();
   } catch (e) {
     throw e;
   }
 }
 
  confirmPickup({String order_id}) async {
-    final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/confirm-customer-pickup',
+    await http.post('${Constants.apiBaseUrl}/restaurant_locations/confirm-customer-pickup',
         headers: {
           'Content-Type': 'application/json',
-
         },
         body: json.encode({
           'order_id': order_id,
-          'location_id': location_id
+          'location_id': locationId
         }));
     Fluttertoast.showToast(msg: 'You marked this order as picked up by the customer');
-    if (location_id != null) {
-      await getOrders(location_id: location_id);
-    }
+    if (locationId != null) 
+      await getOrders(locationId: locationId);
   }
 
-  finishOrder({String order_id}) async {
-    final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',
+  finishOrder({String orderId}) async {
+    await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',
         headers: {
           'Content-Type': 'application/json',
-
         },
         body: json.encode({
-          'order_id': order_id,
-          'location_id': location_id
+          'order_id': orderId,
+          'location_id': locationId
         }));
     Fluttertoast.showToast(msg: 'You marked this order as ready for pickup');
-    if (location_id != null) {
-      await getOrders(location_id: location_id);
-    }
+    if (locationId != null)
+      await getOrders(locationId: locationId);
   }
-  declineOrder({String order_id}) async {
-    final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/decline-order',
+
+  declineOrder({String orderId}) async {
+    await http.post('${Constants.apiBaseUrl}/restaurant_locations/decline-order',
         headers: {
           'Content-Type': 'application/json',
-
         },
         body: json.encode({
-          'order_id': order_id,
-          'location_id': location_id
+          'order_id': orderId,
+          'location_id': locationId
         }));
-        
-
   }
-  setAcceptingStatus({bool value, String location_id}) async {
 
-    final response = await http.post('${Constants.apiBaseUrl}/restaurant_locations/set-status', headers: {
+  setAcceptingStatus({bool value, String locationId}) async {
+    final response = await http.post(
+      '${Constants.apiBaseUrl}/restaurant_locations/set-status', headers: {
       'Content-Type': 'application/json'
     },
     body: json.encode({
-      'location_id': location_id,
+      'location_id': locationId,
       'allowing_orders': value
     }));
-    print(response.body);
     bool result = json.decode(response.body)['result'] as bool;
-    if (result == true) {
-      socket.connect();
-    } else {
-      socket.disconnect();
-    }
+    result == true ? socket.connect() : socket.disconnect();
     return result;
   }
 
@@ -1986,16 +1791,16 @@ FlutterLocalNotificationsPlugin();
   }
 
   class _BlinkingButtonState extends State<BlinkingButton> with SingleTickerProviderStateMixin {
+
     AnimationController _animationController;
+
     @override
     void initState() {
-      
       _animationController =
           new AnimationController(vsync: this, duration: Duration(milliseconds: 100));
       _animationController.repeat(reverse: true);
     }
   
-
     @override
     Widget build(BuildContext context) {
       return Container(

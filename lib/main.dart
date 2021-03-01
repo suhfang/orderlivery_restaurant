@@ -22,7 +22,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   PrinterProvider.shared.open('printer.db');
   if (Platform.isAndroid) {
-    FlutterStatusbarcolor.setStatusBarColor(Colors.white);
+    FlutterStatusbarcolor.setNavigationBarColor(Colors.white);
   }
   runApp(MyApp());
 }
