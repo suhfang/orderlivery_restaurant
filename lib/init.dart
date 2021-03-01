@@ -1,5 +1,7 @@
 
 
+import 'dart:io';
+
 import 'package:Restaurant/auth.dart';
 import 'package:Restaurant/home.dart';
 import 'package:Restaurant/location_hub.dart';
@@ -41,24 +43,21 @@ class _InitPageState extends State<InitPage> {
     }).catchError((e) => _showError(e));
   }
 
-  void _showError(dynamic exception) {
+  void _showError(dynamic exception) =>  
     Fluttertoast.showToast(msg: exception.toString(), backgroundColor: Colors.red, textColor: Colors.white);
-  }
+
 
 
   doInit() async {
-
-    await checkForUpdate();
-
-    if(_updateInfo?.updateAvailable == true) {
-      await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+    if (Platform.isAndroid) {
+      await checkForUpdate();
+      if(_updateInfo?.updateAvailable == true) {
+        await InAppUpdate.performImmediateUpdate().catchError((e) => _showError(e));
+      }
     }
 
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     if ((prefs.getString('token') ?? '').isNotEmpty) {
-
       bool is_restaurant = prefs.getBool('is_restaurant');
       bool is_location = prefs.getBool('is_location');
       print(is_restaurant);

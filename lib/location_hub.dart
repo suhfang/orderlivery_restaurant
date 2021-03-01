@@ -91,12 +91,14 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
 
 
   Future<void> checkForUpdate() async {
-    InAppUpdate.checkForUpdate().then((info) {
+    if (Platform.isAndroid) {
+      InAppUpdate.checkForUpdate().then((info) {
       setState(() {
         _updateInfo = info;
         print('found an update here it is: $_updateInfo');
       });
     }).catchError((e) => _showError(e));
+    }
   }
 
   void _showError(dynamic exception) {
@@ -401,6 +403,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
             }
           },
           child: Scaffold(
+        
         key: scaffoldKey,
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -410,23 +413,22 @@ FlutterLocalNotificationsPlugin fltrNotification;
         backgroundColor: Colors.white,
       ),
       drawer: Drawer(
-        child: SafeArea(
-          child: Container(
-            color: Colors.orange,
+        child: Container(
+            color: Colors.white,
             child: Stack(
               children: [
                 ListView(
                   children: [
                     ListTile(
-                      title: Text('Orders', style: TextStyle(color: Colors.white),),
-                      leading: Icon(LineIcons.newspaper_o, color: Colors.white,),
+                      title: Text('Orders', style: TextStyle(color: Colors.black),),
+                      leading: Icon(LineIcons.newspaper_o, color: Colors.orange,),
                       onTap: () {
                         Navigator.pop(context);
                       },
                     ),
                      ListTile(
-                      title: Text('Connect Printers', style: TextStyle(color: Colors.white),),
-                      leading: Icon(LineIcons.print, color: Colors.white,),
+                      title: Text('Connect Printers', style: TextStyle(color: Colors.black),),
+                      leading: Icon(LineIcons.print, color: Colors.orange,),
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(context, MaterialPageRoute(
@@ -435,9 +437,8 @@ FlutterLocalNotificationsPlugin fltrNotification;
                       },
                     ),
                     ListTile(
-                        tileColor: Colors.orange,
-                        title: Text('Log Out',style: TextStyle(color: Colors.white),),
-                        leading: Icon(LineIcons.sign_out, color: Colors.white,),
+                        title: Text('Log Out',style: TextStyle(color: Colors.black),),
+                        leading: Icon(LineIcons.sign_out, color: Colors.orange,),
                         onTap: () async {
                           Navigator.pop(context);
                           showDialog(
@@ -485,8 +486,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
               ],
             ),
           ),
-        )
-      ),
+        ),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Container(
@@ -530,7 +530,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
               ),
             ),
             SizedBox(height: 20,),
-            Text('Total Gross earnings for the day'),
+            Text('Total Gross earnings for the day (USD)'),
             Text(orders.isNotEmpty ? '\$$grossEarnings' : '\$0.00',
                 style: TextStyle(
                   fontSize: 50,
@@ -547,9 +547,9 @@ FlutterLocalNotificationsPlugin fltrNotification;
                   Badge(
                     badgeColor: Colors.brown,
                     badgeContent: Container(
-                      height: 50, width: 50, 
+                      height: 25, width: 25, 
                       child: Center(
-                        child: Text(newOrders.length > 99 ? '99+' : '${newOrders.length}', style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold)),),
+                        child: Text(newOrders.length > 99 ? '99+' : '${newOrders.length}', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),),
                       ),
                     child: Row(
                       children: [
@@ -617,65 +617,105 @@ FlutterLocalNotificationsPlugin fltrNotification;
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Order #${order.id}'),
+                                  Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
-                                  Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
+                                   Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
-                                  Text('Customer\'s name: ${order.customer_name}'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Ordered at:'),
+                                      Text('${DateFormat().format(order.createdAt.toLocal())}')
+                                    ],
+                                  ),
                                   SizedBox(height: 10,),
-                                  Text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}',),
-                                  SizedBox(height: 20,),
-                                  Text('Ordered items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Customer\'s name:'),
+                                      Text('${order.customer_name}')
+                                    ],
+                                  ),
+                                  SizedBox(height: 10,),
+                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Order Type:'),
+                                      Text('${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}')
+                                    ],
+                                  ),
+                                  Divider(height: 50,),
+                                  Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                   SizedBox(height: 20),
                                   ...(
                                     order.items.map((item) {
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Divider(color: Colors.black,),
-                                          item.special_instructions != null && item.special_instructions.isNotEmpty ?
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                                SizedBox(height: 10,),
-                                                Text('${item.special_instructions}'),
+                                          Container(height: 10),
+                                          // Divider(color: Colors.black,),
+                                          Container(
+                                             padding: EdgeInsets.only(left: 10, right: 10),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                              color: Color(0xF1F1F1F1),
+                                               boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.1),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 3), // changes position of shadow
+                                                ),
                                               ],
-                                            ) 
-                                          ): SizedBox(),
-                                          SizedBox(height: 10),
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text('${item.quantity} x ${item.name}'),
-                                            trailing: item.flat_price != null ?
-                                            Text('\$${item.flat_price.toStringAsFixed(2)}') :
-                                            Text('')
-                                          ),
-                                          ...(
-                                            item.lists.map((list) {
-                                              return Padding(
-                                                padding: EdgeInsets.only(top: 20,),
-                                                child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                                  SizedBox(height: 20,),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                 item.special_instructions != null && item.special_instructions.isNotEmpty ?
+                                                  Padding(
+                                                    padding: EdgeInsets.only(top: 20),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                        SizedBox(height: 10,),
+                                                        Text('${item.special_instructions}'),
+                                                      ],
+                                                    ) 
+                                                  ): SizedBox(),
+                                                  SizedBox(height: 10),
+                                                  ListTile(
+                                                    contentPadding: EdgeInsets.zero,
+                                                    title: Text('${item.quantity} x ${item.name}'),
+                                                    trailing: item.flat_price != null ?
+                                                    Text('\$${item.flat_price.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold)) :
+                                                    Text('', style: TextStyle(fontWeight: FontWeight.bold)), 
+                                                  ),
                                                   ...(
-                                                    list.items.map((listItem) {
-                                                      if (listItem.quantity != 0) {
-                                                        return Text('${listItem.quantity} x ${listItem.name}');
-                                                      } else {
-                                                        return Text('${listItem.name}');
-                                                      }
+                                                    item.lists.map((list) {
+                                                      return Padding(
+                                                        padding: EdgeInsets.only(top: 20,),
+                                                        child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                                          SizedBox(height: 20,),
+                                                          ...(
+                                                            list.items.map((listItem) {
+                                                              if (listItem.quantity != 0) {
+                                                                return Text('${listItem.quantity} x ${listItem.name}');
+                                                              } else {
+                                                                return Text('${listItem.name}');
+                                                              }
+                                                            }).toList()
+                                                          )
+                                                        ],
+                                                      )
+                                                      );
                                                     }).toList()
-                                                  )
-                                                ],
-                                              )
-                                              );
-                                            }).toList()
-                                          ),
+                                                  ),
+                                              ],
+                                            )
+                                          )
                                         ],
                                       );
                                     }).toList()
@@ -695,16 +735,28 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                           onTap: () async {
                                             acceptOrder(order: order);
                                           },
-                                          child: Container(
-                                          height: 50,
-                                          child: Center(
-                                            child: Text('ACCEPT ORDER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange,
-                                            borderRadius: BorderRadius.circular(30)
-                                          ),
-                                        ),
+                                          child: BlinkingButton(
+                                            speed: 1000,
+                                            child: Container(
+                                            
+                                              height: 40,
+                                              child: Center(
+                                                child: Text('Accept Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange,
+                                                borderRadius: BorderRadius.circular(30),
+                                                boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.grey.withOpacity(0.1),
+                                                      spreadRadius: 1,
+                                                      blurRadius: 3,
+                                                      offset: Offset(0, 3), // changes position of shadow
+                                                    ),
+                                                ]
+                                              ),
+                                            ),
+                                          )
                                         )
                                       ),
                                       SizedBox(width: 20,),
@@ -741,7 +793,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                                                        child: Container(
                                                                          height: 50,
                                                                          child: Center(
-                                                                           child: Text('YES', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                           child: Text('Yes', style: TextStyle(fontWeight: FontWeight.bold),),
                                                                          ),
                                                                          decoration: BoxDecoration(
                                                                              color: Colors.orange,
@@ -759,7 +811,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                                                        child: Container(
                                                                          height: 50,
                                                                          child: Center(
-                                                                           child: Text('NO', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                           child: Text('No', style: TextStyle(fontWeight: FontWeight.bold),),
                                                                          ),
                                                                          decoration: BoxDecoration(
                                                                              color: Color(0xF1F1F1F1),
@@ -778,13 +830,21 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                                });
                                           },
                                           child: Container(
-                                            height: 50,
+                                            height: 40,
                                             child: Center(
-                                              child: Text('DECLINE ORDER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+                                              child: Text('Decline Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
                                             ),
                                             decoration: BoxDecoration(
                                               color: Colors.red,
-                                              borderRadius: BorderRadius.circular(30)
+                                              borderRadius: BorderRadius.circular(30),
+                                               boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.1),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 3), // changes position of shadow
+                                                ),
+                                               ]
                                             ),
                                           ),
                                         )
@@ -823,65 +883,103 @@ FlutterLocalNotificationsPlugin fltrNotification;
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Order #${order.id}'),
+                               Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
-                                  Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Ordered at:'),
+                                      Text('${DateFormat().format(order.createdAt.toLocal())}')
+                                    ],
+                                  ),
                                   SizedBox(height: 10,),
-                                  Text('Customer\'s name: ${order.customer_name}'),
+                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Customer\'s name:'),
+                                      Text('${order.customer_name}')
+                                    ],
+                                  ),
                                   SizedBox(height: 10,),
-                                  Text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}',),
-                                  SizedBox(height: 20,),
-                                  Text('Ordered items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Order Type:'),
+                                      Text('${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}')
+                                    ],
+                                  ),
+                                  Divider(height: 50,),
+                                  Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                   SizedBox(height: 20),
                                   ...(
                                     order.items.map((item) {
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Divider(color: Colors.black,),
-                                          item.special_instructions != null && item.special_instructions.isNotEmpty ?
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                                SizedBox(height: 10,),
-                                                Text('${item.special_instructions}'),
+                                          Container(height: 10),
+                                          // Divider(color: Colors.black,),
+                                          Container(
+                                             padding: EdgeInsets.only(left: 10, right: 10),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                              color: Color(0xF1F1F1F1),
+                                               boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.1),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 3), // changes position of shadow
+                                                ),
                                               ],
-                                            ) 
-                                          ): SizedBox(),
-                                          SizedBox(height: 10),
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text('${item.quantity} x ${item.name}'),
-                                            trailing: item.flat_price != null ?
-                                            Text('\$${item.flat_price.toStringAsFixed(2)}') :
-                                            Text('')
-                                          ),
-                                          ...(
-                                            item.lists.map((list) {
-                                              return Padding(
-                                                padding: EdgeInsets.only(top: 20,),
-                                                child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                                  SizedBox(height: 20,),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                 item.special_instructions != null && item.special_instructions.isNotEmpty ?
+                                                  Padding(
+                                                    padding: EdgeInsets.only(top: 20),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                        SizedBox(height: 10,),
+                                                        Text('${item.special_instructions}'),
+                                                      ],
+                                                    ) 
+                                                  ): SizedBox(),
+                                                  SizedBox(height: 10),
+                                                  ListTile(
+                                                    contentPadding: EdgeInsets.zero,
+                                                    title: Text('${item.quantity} x ${item.name}'),
+                                                    trailing: item.flat_price != null ?
+                                                    Text('\$${item.flat_price.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold)) :
+                                                    Text('', style: TextStyle(fontWeight: FontWeight.bold))
+                                                  ),
                                                   ...(
-                                                    list.items.map((listItem) {
-                                                      if (listItem.quantity != 0) {
-                                                        return Text('${listItem.quantity} x ${listItem.name}');
-                                                      } else {
-                                                        return Text('${listItem.name}');
-                                                      }
+                                                    item.lists.map((list) {
+                                                      return Padding(
+                                                        padding: EdgeInsets.only(top: 20,),
+                                                        child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                                          SizedBox(height: 20,),
+                                                          ...(
+                                                            list.items.map((listItem) {
+                                                              if (listItem.quantity != 0) {
+                                                                return Text('${listItem.quantity} x ${listItem.name}');
+                                                              } else {
+                                                                return Text('${listItem.name}');
+                                                              }
+                                                            }).toList()
+                                                          )
+                                                        ],
+                                                      )
+                                                      );
                                                     }).toList()
-                                                  )
-                                                ],
-                                              )
-                                              );
-                                            }).toList()
-                                          ),
+                                                  ),
+                                              ],
+                                            )
+                                          )
                                         ],
                                       );
                                     }).toList()
@@ -902,16 +1000,28 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                               onTap: () async {
                                                 await finishOrder(orderId: order.id);
                                               },
-                                              child: Container(
+                                              child: BlinkingButton(
+                                                speed: 1000,
+                                                child: Container(
+                                                
                                                 height: 45,
                                                 child: Center(
-                                                  child: Text('MARK AS READY FOR PICKUP', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                                                  child: Text('Ready for Pickup', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                                                 ),
                                                 decoration: BoxDecoration(
                                                     color: Colors.brown,
-                                                    borderRadius: BorderRadius.circular(30)
+                                                    borderRadius: BorderRadius.circular(30),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey.withOpacity(0.1),
+                                                        spreadRadius: 1,
+                                                        blurRadius: 3,
+                                                        offset: Offset(0, 3), // changes position of shadow
+                                                      ),
+                                                    ]
                                                 ),
                                               ),
+                                              )
                                             ) :
                                            GestureDetector(
                                              onTap: () async {
@@ -991,7 +1101,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                              child:  Container(
                                                height: 45,
                                                child: Center(
-                                                 child: Text(order.order_type == 'delivery' ? 'HAND TO ENVOY' : 'HAND TO CUSTOMER', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
+                                                 child: Text(order.order_type == 'delivery' ? 'Hand to Envoy' : 'Hand to Customer', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
                                                ),
                                                decoration: BoxDecoration(
                                                    color: Colors.orange,
@@ -1011,11 +1121,19 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                           height: 40,
                                           width: MediaQuery.of(context).size.width-80,
                                           decoration: BoxDecoration(
-                                            color: Colors.orange,
+                                            color: Color(0xF1F1F1F1),
                                             borderRadius: BorderRadius.circular(30),
+                                             boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.1),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 3), // changes position of shadow
+                                                ),
+                                              ],
                                           ),
                                           child: Center(
-                                            child: Text('PRINT THIS ORDER', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)
+                                            child: Text('Print this Order', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)
                                           ),
                                         )
                                       ),
@@ -1025,11 +1143,11 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                         onTap: () {
                                           showModalBottomSheet(context: context, builder: (context) {
                                             return Container(
-                                              padding: EdgeInsets.only(top: 20, bottom: 20),
+                                              padding: EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
                                               height: 150,
                                               child: Column(
                                                 children: [
-                                                  Text('Are you sure want to cancel this order because you were out of stock of an item?'),
+                                                  Text('Are you sure want to cancel this order because you were out of stock of an item?', textAlign: TextAlign.center,),
                                                   SizedBox(height: 20,),
                                                   Row(
                                                     children: [
@@ -1045,7 +1163,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                                           borderRadius: BorderRadius.circular(30)
                                                         ),
                                                         child: Center(
-                                                          child: Text('Yes')
+                                                          child: Text('Yes', style: TextStyle(fontWeight: FontWeight.bold,))
                                                         )
                                                       ),
                                                        )
@@ -1063,7 +1181,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                                           borderRadius: BorderRadius.circular(30)
                                                         ),
                                                         child: Center(
-                                                          child: Text('No')
+                                                          child: Text('No', style: TextStyle(fontWeight: FontWeight.bold,))
                                                         )
                                                       ),
                                                        )
@@ -1081,9 +1199,17 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                           decoration: BoxDecoration(
                                             color: Colors.red,
                                             borderRadius: BorderRadius.circular(30),
+                                             boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.1),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 3), // changes position of shadow
+                                                ),
+                                              ],
                                           ),
                                           child: Center(
-                                            child: Text('CANCEL ORDER DUE TO OUT OF STOCK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
+                                            child: Text('Cancel Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
                                           ),
                                         )
                                       ) : SizedBox()
@@ -1119,82 +1245,105 @@ FlutterLocalNotificationsPlugin fltrNotification;
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Order #${order.id}'),
+                                   Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
-                                  Text('Ordered at: ${DateFormat().format(order.createdAt.toLocal())}'),
+                                  Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
-                                  Text('Customer\'s name: ${order.customer_name}'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Ordered at:'),
+                                      Text('${DateFormat().format(order.createdAt.toLocal())}')
+                                    ],
+                                  ),
                                   SizedBox(height: 10,),
-                                  Text('Order Type: ${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}',),
-                                  SizedBox(height: 20,),
-                                  Text('Ordered items:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Customer\'s name:'),
+                                      Text('${order.customer_name}')
+                                    ],
+                                  ),
+                                  SizedBox(height: 10,),
+                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Order Type:'),
+                                      Text('${order.order_type == 'delivery' ? 'Delivery' : 'Pickup'}')
+                                    ],
+                                  ),
+                                  Divider(height: 50,),
+                                  Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                   SizedBox(height: 20),
                                   ...(
                                     order.items.map((item) {
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Divider(color: Colors.black,),
-                                          item.special_instructions != null && item.special_instructions.isNotEmpty ?
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                                SizedBox(height: 10,),
-                                                Text('${item.special_instructions}'),
+                                          Container(height: 10),
+                                          // Divider(color: Colors.black,),
+                                          Container(
+                                            padding: EdgeInsets.only(left: 10, right: 10),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                              color: Color(0xF1F1F1F1),
+                                               boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.1),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 3), // changes position of shadow
+                                                ),
                                               ],
-                                            ) 
-                                          ): SizedBox(),
-                                          SizedBox(height: 10),
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Text('${item.quantity} x ${item.name}'),
-                                            trailing: item.flat_price != null ?
-                                            Text('\$${item.flat_price.toStringAsFixed(2)}') :
-                                            Text('')
-                                          ),
-                                          ...(
-                                            item.lists.map((list) {
-                                              return Padding(
-                                                padding: EdgeInsets.only(top: 20,),
-                                                child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                                  SizedBox(height: 20,),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                 item.special_instructions != null && item.special_instructions.isNotEmpty ?
+                                                  Padding(
+                                                    padding: EdgeInsets.only(top: 20),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text('Special instructions: ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                                        SizedBox(height: 10,),
+                                                        Text('${item.special_instructions}'),
+                                                      ],
+                                                    ) 
+                                                  ): SizedBox(),
+                                                  SizedBox(height: 10),
+                                                  ListTile(
+                                                    contentPadding: EdgeInsets.zero,
+                                                    title: Text('${item.quantity} x ${item.name}'),
+                                                    trailing: item.flat_price != null ?
+                                                    Text('\$${item.flat_price.toStringAsFixed(2)}') :
+                                                    Text('')
+                                                  ),
                                                   ...(
-                                                    list.items.map((listItem) {
-                                                      if (listItem.quantity != 0) {
-                                                        return Text('${listItem.quantity} x ${listItem.name}');
-                                                      } else {
-                                                        return Text('${listItem.name}');
-                                                      }
+                                                    item.lists.map((list) {
+                                                      return Padding(
+                                                        padding: EdgeInsets.only(top: 20,),
+                                                        child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text('${list.name}: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                                          SizedBox(height: 20,),
+                                                          ...(
+                                                            list.items.map((listItem) {
+                                                              if (listItem.quantity != 0) {
+                                                                return Text('${listItem.quantity} x ${listItem.name}');
+                                                              } else {
+                                                                return Text('${listItem.name}');
+                                                              }
+                                                            }).toList()
+                                                          )
+                                                        ],
+                                                      )
+                                                      );
                                                     }).toList()
-                                                  )
-                                                ],
-                                              )
-                                              );
-                                            }).toList()
-                                          ),
-                                      SizedBox(height: 10,),
-                                      GestureDetector(
-                                        onTap: () {
-                                          printOrder(order: order);
-                                        },
-                                        child: Container(
-                                          height: 40,
-                                          width: MediaQuery.of(context).size.width-80,
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange,
-                                            borderRadius: BorderRadius.circular(30),
-                                          ),
-                                          child: Center(
-                                            child: Text('PRINT THIS ORDER', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)
-                                          ),
-                                        )
-                                      )
+                                                  ),
+                                              ],
+                                            )
+                                          )
                                         ],
                                       );
                                     }).toList()
@@ -1206,7 +1355,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
                                       title: Text('Food total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                       trailing: Text('\$${order.food_total.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                     )
-                                  ), 
+                                  ),
                                 ],
                               ),
                               padding: EdgeInsets.all(20),
@@ -1304,7 +1453,6 @@ outOfStock({Order order}) async {
   printOrder({Order order}) async {
      
    var defaultPrinter = await PrinterProvider.shared.getDefaultPrinter();
-   print(defaultPrinter.ip);
    print('default printer: $defaultPrinter');
    if (defaultPrinter != null) {
     var initialized = await initializePrinter(defaultPrinter.ip);
@@ -1326,6 +1474,11 @@ outOfStock({Order order}) async {
         printer.cut();
         printer.disconnect();
       }
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Could not print this order. Please check printer connection!',
+        backgroundColor: Colors.red,
+        textColor: Colors.white);
     }
   }
 
@@ -1784,7 +1937,8 @@ FlutterLocalNotificationsPlugin();
 
    final Widget child;
    final double width;
-   BlinkingButton({this.child, this.width});
+   final int speed;
+   BlinkingButton({this.child, this.width, this.speed = 100});
 
     @override
     _BlinkingButtonState createState() => _BlinkingButtonState();
@@ -1797,7 +1951,7 @@ FlutterLocalNotificationsPlugin();
     @override
     void initState() {
       _animationController =
-          new AnimationController(vsync: this, duration: Duration(milliseconds: 100));
+          new AnimationController(vsync: this, duration: Duration(milliseconds: widget.speed));
       _animationController.repeat(reverse: true);
     }
   

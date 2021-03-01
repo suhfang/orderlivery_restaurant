@@ -1041,7 +1041,7 @@ class TextFormFieldState extends State<TTextFormField> {
             inputFormatters: widget.inputFormatters,
             onChanged: widget.onChanged,
             autofillHints: widget.autofillHints,
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             controller: widget.controller,
             validator: widget.validator,
             decoration: InputDecoration(

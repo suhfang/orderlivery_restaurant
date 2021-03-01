@@ -46,8 +46,8 @@ class ConnectPrinterState extends State<ConnectPrinterPage> {
       child: Scaffold(
 
       appBar: AppBar(
-        title: Text('CONNECT PRINTERS'),
-        backgroundColor: Colors.orange,
+        title: Text('Connect Printers', style: TextStyle(fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.white,
         centerTitle: true,
         shadowColor: Colors.transparent,
         actions: [
@@ -59,9 +59,9 @@ class ConnectPrinterState extends State<ConnectPrinterPage> {
             },
             child: Container(
             height: 50,
-            width: 150,
+            width: 50,
             child: Center(
-              child: Text('ADD PRINTER', style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),),
+              child: Text('Add', style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),),
             ),
           ),
           )
@@ -76,7 +76,7 @@ class ConnectPrinterState extends State<ConnectPrinterPage> {
           child: printers.isEmpty ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                 Text('No Printers added', style: TextStyle(fontSize: 20),),
+                 Text('No Printers added', style: TextStyle(fontSize: 12),),
                  SizedBox(height: 40,),
                  GestureDetector(
                    onTap: () {
@@ -85,11 +85,11 @@ class ConnectPrinterState extends State<ConnectPrinterPage> {
                      ));
                    },
                    child: Container(
-                   height: 50,
+                   height: 40,
                    width: 200,
                    
                    child: Center(
-                     child: Text('ADD PRINTER', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                     child: Text('Add Printer', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                    ),
                    decoration: BoxDecoration(
                      color: Colors.orange,

@@ -28,13 +28,14 @@ class AddPrinterPageState extends State<AddPrinterPage> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text('ADD PRINTER'),
-        backgroundColor: Colors.orange,
+        title: Text('Add Printer', style: TextStyle(fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.white,
         shadowColor: Colors.transparent,
         centerTitle: true,
       ),
       body: SafeArea(
         child: Container(
+          color: Colors.white,
           padding: EdgeInsets.all(20),
          child: Column(
            children: [
@@ -72,10 +73,10 @@ class AddPrinterPageState extends State<AddPrinterPage> {
                   }
                 },
                 child: Container(
-                height: 50,
+                height: 40,
                 
                 child: Center(
-                  child: Text('ADD PRINTER', style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: Text('Add Printer', style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
                 decoration: BoxDecoration(
                   color: Colors.orange,
