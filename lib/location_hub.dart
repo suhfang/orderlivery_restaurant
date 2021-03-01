@@ -99,7 +99,8 @@ class _LocationHubPageState extends State<LocationHubPage>   with WidgetsBinding
   }
 
   void _showError(dynamic exception) {
-    Fluttertoast.showToast(msg: exception.toString(), backgroundColor: Colors.red, textColor: Colors.white);
+    if (Platform.isAndroid)
+      Fluttertoast.showToast(msg: exception.toString(), backgroundColor: Colors.red, textColor: Colors.white);
   }
 
 
@@ -263,7 +264,7 @@ FlutterLocalNotificationsPlugin fltrNotification;
     // initializePrinter(printIpAddress);
     WidgetsBinding.instance.addObserver(this);
      timer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => blinkLights());
-     updateTimer = Timer.periodic(Duration(milliseconds: 2000), (Timer t) => fetchUpdates());
+     updateTimer = Timer.periodic(Duration(seconds: 3600), (Timer t) => fetchUpdates());
     handleNotifications();
     Wakelock.enable();
     var androidInitialize = new AndroidInitializationSettings('@mipmap/ic_launcher');
