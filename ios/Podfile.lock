@@ -169,7 +169,7 @@ PODS:
     - Flutter
   - path_provider (0.0.1):
     - Flutter
-  - "permission_handler (5.0.1+1)":
+  - "permission_handler (5.1.0+2)":
     - Flutter
   - PromisesObjC (1.2.12)
   - Protobuf (3.14.0)
@@ -186,12 +186,6 @@ PODS:
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
-  - Stripe (21.3.1):
-    - Stripe/Stripe3DS2 (= 21.3.1)
-  - Stripe/Stripe3DS2 (21.3.1)
-  - stripe_native (1.2.2):
-    - Flutter
-    - Stripe (> 19.0.0)
   - Toast (4.0.0)
   - url_launcher (0.0.1):
     - Flutter
@@ -235,7 +229,6 @@ DEPENDENCIES:
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sms_autofill (from `.symlinks/plugins/sms_autofill/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - stripe_native (from `.symlinks/plugins/stripe_native/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
@@ -263,7 +256,6 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - Protobuf
-    - Stripe
     - Toast
 
 EXTERNAL SOURCES:
@@ -331,8 +323,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sms_autofill/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
-  stripe_native:
-    :path: ".symlinks/plugins/stripe_native/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
   vibration:
@@ -361,7 +351,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 466c7b4d1f58fe16707693091da253726a731ed2
   FirebaseInstanceID: bd3ffc24367f901a43c063b36c640b345a4a5dd1
   FirebaseMessaging: 5eca4ef173de76253352511aafef774caa1cba2a
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_device_locale: 94fbcacb38980dc1a9e31eb4ee8ae6d1c3a73042
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_ringtone_player: 15eba85187230b87b2512f0e1b92225618bc03e7
@@ -386,7 +376,7 @@ SPEC CHECKSUMS:
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
-  permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
+  permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   Protobuf: 0cde852566359049847168e51bd1c690e0f70056
   screen: abd91ca7bf3426e1cc3646d27e9b2358d6bf07b0
@@ -395,8 +385,6 @@ SPEC CHECKSUMS:
   sign_in_with_apple: 34f3f5456a45fd7ac5fb42905e2ad31dae061b4a
   sms_autofill: c461043483362c3f1709ee76eaae6eb570b31686
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
-  Stripe: 326a2160ac541eeffafb8b1aa0c9712e3ce8cec7
-  stripe_native: 20a5ba59c9d9287602a87382526fa2ae30d31139
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   vibration: b5a33e764c3f609a975b9dca73dce20fdde627dc
@@ -405,4 +393,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 9689f4bf49cc8772405db66e54b1536e1c907616
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1

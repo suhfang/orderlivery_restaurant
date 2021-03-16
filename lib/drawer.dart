@@ -48,7 +48,7 @@ class DrawerScaffold extends StatelessWidget {
           automaticallyImplyLeading: this.showsNavBar ?? true,
           shadowColor: Colors.transparent,
         centerTitle: true,
-        title:   Text(this.title.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold),),
+        title:   Text(this.title, style: TextStyle(fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
         ),
       backgroundColor: backgroundColor,
@@ -63,21 +63,21 @@ class DrawerScaffold extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     children: <Widget>[
                       ListTile(
-                        title: Text('MY HUB'),
+                        title: Text('My Hub'),
                         leading: Icon(FontAwesomeIcons.home, color: Colors.black,),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
                         }
                       ),
                       ListTile(
-                        title: Text('RESTAURANT PROFILE'),
+                        title: Text('Profile'),
                         leading: Icon(CupertinoIcons.profile_circled, color: Colors.black,),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RestaurantDetailPage()));
                         }
                       ),
                       ListTile(
-                        title: Text('FOOD MENU'),
+                        title: Text('Menu'),
                         leading: Icon(Icons.menu_book, color: Colors.black,),
                         onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => FoodMenuPage()));
@@ -85,28 +85,28 @@ class DrawerScaffold extends StatelessWidget {
 
                       ),
                       ListTile(
-                        title: Text('RATINGS'),
+                        title: Text('Ratings'),
                         leading: Icon(LineIcons.star, color: Colors.black,),
                         onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RatingsPage()));
                         }
                       ),
                       ListTile(
-                        title: Text('ORDERS'),
+                        title: Text('Orders'),
                         leading: Icon(LineIcons.newspaper_o, color: Colors.black,),
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => OrdersPage()));
                         }
                       ),
                       ListTile(
-                          title: Text('PAYMENTS'),
+                          title: Text('Payments'),
                           leading: Icon(LineIcons.credit_card, color: Colors.black,),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PaymentsPage()));
                           }
                       ),
                       ListTile(
-                          title: Text('ACCOUNT SETTINGS'),
+                          title: Text('Settings'),
                           leading: Icon(FontAwesomeIcons.cog, color: Colors.black,),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SettingsPage()));
@@ -114,7 +114,7 @@ class DrawerScaffold extends StatelessWidget {
                       ),
                       ListTile(
                         // tileColor: Colors.orange,
-                          title: Text('LOG OUT',style: TextStyle(color: Colors.black),),
+                          title: Text('Log Out',style: TextStyle(color: Colors.black),),
                           leading: Icon(LineIcons.sign_out, color: Colors.black,),
                           onTap: () async {
                             SharedPreferences prefs = await SharedPreferences.getInstance();

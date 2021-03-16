@@ -70,6 +70,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
                        });
                      },
                      hint: Text('Select a location to view its payments'),
+                     
                      value: selectedLocation != null ? selectedLocation :  null,
                    ) ,
                    )

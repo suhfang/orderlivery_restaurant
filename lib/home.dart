@@ -127,8 +127,8 @@ class _HomePageState extends State<HomePage> {
                             child:  Column(
                               children: [
                                 ListTile(
-                                  title: Text(_restaurantName + ' at'),
-                                  subtitle: Text(item.address.name),
+                                  title: Text(_restaurantName + ' at', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  subtitle: Text(item.address.name, style: TextStyle(fontSize: 13)),
                                 ),
                               ],
                             ),
@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                                   height: 50,
                                   width: MediaQuery.of(context).size.width - 50,
                                   child: Center(
-                                    child: Text('Add Location', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                                    child: Text('Add Location', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
                                   ),
                                 ),
                               ],

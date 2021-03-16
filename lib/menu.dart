@@ -21,26 +21,26 @@ class _FoodMenuPageState extends State<FoodMenuPage> {
     // TODO: implement build
     return DrawerScaffold(
       backgroundColor: Colors.white,
-      title: 'Food Menu',
+      title: 'Menu',
       body: SafeArea(
         child: ListView(
           children: [
             ListTile(
-              title: Text('UPLOAD', style: TextStyle(fontWeight: FontWeight.bold),),
+              title: Text('Upload', style: TextStyle(fontWeight: FontWeight.bold),),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UploadPage()));
               },
             ),
             Divider(),
             ListTile(
-              title: Text('CATEGORIES', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text('Categories', style: TextStyle(fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CategoriesPage()));
               },
             ),
             Divider(),
             ListTile(
-              title: Text('MENU ITEMS', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text('Menu Items', style: TextStyle(fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MenuItemsPage()));
               },

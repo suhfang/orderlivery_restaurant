@@ -303,9 +303,11 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
 
   ListItem _currentItem = ListItem();
   _showNameAndPriceDialog() async {
-    await showDialog<String>(
+    await showDialog(
       context: context,
-      child: new AlertDialog(
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        new AlertDialog(
         contentPadding: const EdgeInsets.all(16.0),
         content: Container(
           height: 125,
@@ -363,13 +365,16 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
                 Navigator.pop(context);
               })
         ],
-      ),
+      );
+      }
     );
   }
   _showNameDialog() async {
-    await showDialog<String>(
+    await showDialog(
       context: context,
-      child: new AlertDialog(
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return new AlertDialog(
         contentPadding: const EdgeInsets.all(16.0),
         content: new Row(
           children: <Widget>[
@@ -407,7 +412,8 @@ class _AddListWithoutPricesPageState extends State<AddListWithoutPricesPage> {
                 Navigator.pop(context);
               })
         ],
-      ),
+      );
+      }
     );
   }
 }

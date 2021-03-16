@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:Restaurant/drawer.dart';
 import 'package:Restaurant/users.dart';
 import 'package:badges/badges.dart';
+import 'package:commons/commons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -231,7 +232,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                                 ),
                                 height: 45,
                                 child: Center(
-                                  child: Text('Generate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                                  child: Text('Generate', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
 
                                 )
                             ),
@@ -262,13 +263,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('SUNDAY'),
+                          Text('Sunday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  sundayFromController.text = '${time.hour}:${time.minute}';
+                                  sundayFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -290,7 +291,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  sundayToController.text = '${time.hour}:${time.minute}';
+                                  sundayToController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -317,13 +318,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('MONDAY'),
+                          Text('Monday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  monFromController.text = '${time.hour}:${time.minute}';
+                                  monFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -345,7 +346,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  monToController.text = '${time.hour}:${time.minute}';
+                                  monToController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -371,13 +372,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('TUESDAY'),
+                          Text('Tuesday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  tuesFromController.text = '${time.hour}:${time.minute}';
+                                  tuesFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -399,7 +400,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  tuesToController.text = '${time.hour}:${time.minute}';
+                                  tuesToController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -425,13 +426,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('WEDNESDAY'),
+                          Text('Wednesday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  wedFromController.text = '${time.hour}:${time.minute}';
+                                  wedFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -453,7 +454,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  wedToController.text = '${time.hour}:${time.minute}';
+                                  wedToController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -479,13 +480,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('THURSDAY'),
+                          Text('Thursday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  thuFromController.text = '${time.hour}:${time.minute}';
+                                  thuFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -507,7 +508,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  thuToController.text = '${time.hour}:${time.minute}';
+                                  thuToController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -533,13 +534,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('FRIDAY'),
+                          Text('Friday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  friFromController.text = '${time.hour}:${time.minute}';
+                                  friFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -587,13 +588,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child:  Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('SATURDAY'),
+                          Text('Saturday'),
                           Row(
                             children: [
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  satFromController.text = '${time.hour}:${time.minute}';
+                                  satFromController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -615,7 +616,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                               InkWell(
                                 onTap: () async  {
                                   TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  satToController.text = '${time.hour}:${time.minute}';
+                                  satToController.text = formatTimeOfDay(time);
                                 },
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
@@ -649,7 +650,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                         ),
                         height: 45,
                         child: Center(
-                          child: Text('Save Details', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                          child: Text('Save Details', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
                         ),
                       ),
                       onTap: saveprofile,
@@ -730,6 +731,13 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
 
     Navigator.pop(context);
   }
+
+String formatTimeOfDay(TimeOfDay tod) {
+    final now = new DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
+    final format = DateFormat.jm();  //"6:00 AM"
+    return format.format(dt);
+}
 
 
   void saveprofile() async {

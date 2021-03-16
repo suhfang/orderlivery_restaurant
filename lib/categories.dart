@@ -19,10 +19,14 @@ class Category {
   String name;
 
   String id;
-  Category({this.name, this.id});
+  DateTime createdAt;
+  Category({this.name, this.id, this.createdAt});
 
   factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(name: json['name'] as String, id: json['_id'] as String);
+    return Category(
+      name: json['name'] as String, 
+      id: json['_id'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String).toLocal());
   }
 
 }
@@ -180,6 +184,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
     setState(() {
       _categories = categories.map((e) => Category.fromJson(e)).toList();
+      _categories.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     });
 
@@ -211,7 +216,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               child: Stack(
                 children: [
                   Text('Please note: This will be the order the categories will appear in the app. We recommend starting with Appetizers at the top of the list, and desserts last. But it\'s up to you!',
-                  style: TextStyle(fontWeight: FontWeight.bold),),
+                  style: TextStyle(), textAlign: TextAlign.center,),
                   
                   Padding(
                     padding: EdgeInsets.only(left: 0, right: 0, top:90, bottom: 70,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ),
@@ -298,7 +303,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                 child:  Container(
                                 padding: EdgeInsets.all(10),
                                 // color: Colors.orange,
-                                child: Icon(LineIcons.ellipsis_v),
+                                child: Icon(LineIcons.ellipsis_h),
                               )
                               )
                             );
@@ -351,7 +356,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                               borderRadius: BorderRadius.circular(30)
                           ),
                           child: Center(
-                            child: Text('Create New Category', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                            child: Text('Create New Category', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
                           ),
                         ),
                         )

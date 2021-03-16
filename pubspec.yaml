@@ -52,7 +52,7 @@ dependencies:
   fluttertoast: ^7.0.2
   focus_detector: ^1.0.3
   share: ^0.6.5
-  stripe_native: ^1.2.3
+  # stripe_native: ^1.2.3
   animations: ^1.1.2
   flutter_ringtone_player: ^2.0.0
   sms_autofill: ^1.2.5
@@ -92,6 +92,7 @@ dependencies:
   socket_io_client: ^0.9.12
   socket_io: ^0.9.4
   in_app_update: ^1.1.15
+  # facebook_app_events: ^0.11.0
 
 
   # The following adds the Cupertino Icons font to your application.

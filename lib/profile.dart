@@ -177,7 +177,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       showsNavBar: widget.showsNavBar ?? true,
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-      title: 'RESTAURANT PROFILE',
+      title: 'Profile',
       body: Builder(
         builder: (BuildContext context) {
           return Padding(

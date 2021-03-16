@@ -40,7 +40,7 @@ class _LocationMenuPageState extends State<LocationMenuPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.addressName.split(', ')[0], overflow: TextOverflow.clip, style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text('${widget.addressName.split(', ')[0]}, ${widget.addressName.split(', ')[1]}, ${widget.addressName.split(', ')[2]}', overflow: TextOverflow.clip, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),),
 
         centerTitle: true,
         backgroundColor: Colors.white,

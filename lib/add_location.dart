@@ -220,7 +220,7 @@ class _CustomSearchScaffoldState extends PlacesAutocompleteState {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Text('ADD LOCATION'),
+      title: Text('Add Location'),
       backgroundColor: Colors.white,
       shadowColor: Colors.transparent,
       centerTitle: true,
