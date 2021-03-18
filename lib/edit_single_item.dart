@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -81,25 +80,23 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
   File imageFile;
 
   Future<void> updateFlatPriceMenu() async {
-
     String name = nameController.text.trim();
     String description = descriptionController.text.trim();
     String price = flatPriceController.text.trim();
     String cookingTime = minutesController.text.trim();
     String category_id = dropdownValue.id;
-    List _lists = lists.map((itemList) => {
-      'name': itemList.name,
-      'description': itemList.description,
-      'is_required': itemList.is_required,
-      'minimum_length': itemList.minimum_length,
-      'maximum_length': itemList.maximum_length,
-      'items': itemList.items.map((item) {
-        return {
-          'name': item.name,
-          'price': item.price
-        };
-      }).toList()
-    }).toList();
+    List _lists = lists
+        .map((itemList) => {
+              'name': itemList.name,
+              'description': itemList.description,
+              'is_required': itemList.is_required,
+              'minimum_length': itemList.minimum_length,
+              'maximum_length': itemList.maximum_length,
+              'items': itemList.items.map((item) {
+                return {'name': item.name, 'price': item.price};
+              }).toList()
+            })
+        .toList();
     print(_lists);
     print('hello');
     List<String> labels = [];
@@ -166,7 +163,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     }
     print(_json);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
+    final response = await http.post(
+        '${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -195,7 +193,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
         };
       }).toList();
       return true;
-    } catch(e) {
+    } catch (e) {
       print(e);
       return false;
     }
@@ -227,18 +225,18 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     }).toList();
     String cookingTime = minutesController.text.trim();
     String category_id = dropdownValue.id;
-    List _lists = lists.map((itemList) => {
-      'name': itemList.name,
-      'description': itemList.description,
-      'is_required': itemList.is_required,
-      'minimum_length': itemList.minimum_length,
-      'maximum_length': itemList.maximum_length,
-      'items': itemList.items.map((item) =>
-      {
-        'name': item.name,
-        'price': item.price
-      }).toList()
-    }).toList();
+    List _lists = lists
+        .map((itemList) => {
+              'name': itemList.name,
+              'description': itemList.description,
+              'is_required': itemList.is_required,
+              'minimum_length': itemList.minimum_length,
+              'maximum_length': itemList.maximum_length,
+              'items': itemList.items
+                  .map((item) => {'name': item.name, 'price': item.price})
+                  .toList()
+            })
+        .toList();
     List<String> labels = [];
     if (isVegan) {
       labels.add('Vegan');
@@ -301,7 +299,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
+    final response = await http.post(
+        '${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -316,18 +315,18 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     String price = startingFromController.text.trim();
     String cookingTime = minutesController.text.trim();
     String category_id = dropdownValue.id;
-    List _lists = lists.map((itemList) => {
-      'name': itemList.name,
-      'description': itemList.description,
-      'is_required': itemList.is_required,
-      'minimum_length': itemList.minimum_length,
-      'maximum_length': itemList.maximum_length,
-      'items': itemList.items.map((item) =>
-      {
-        'name': item.name,
-        'price': item.price
-      }).toList()
-    }).toList();
+    List _lists = lists
+        .map((itemList) => {
+              'name': itemList.name,
+              'description': itemList.description,
+              'is_required': itemList.is_required,
+              'minimum_length': itemList.minimum_length,
+              'maximum_length': itemList.maximum_length,
+              'items': itemList.items
+                  .map((item) => {'name': item.name, 'price': item.price})
+                  .toList()
+            })
+        .toList();
     List<String> labels = [];
     if (isVegan) {
       labels.add('Vegan');
@@ -390,7 +389,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       _json['cooking_time'] = cookingTime;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/update-menu',
+    final response = await http.post(
+        '${Constants.apiBaseUrl}/restaurants/update-menu',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
@@ -518,7 +518,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       color: Colors.white,
                       size: 50.0,
                       lineWidth: 2,
-                  )
+                    )
                   ],
                 ));
           });
@@ -529,7 +529,9 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       });
       return;
     }
-    currentStep + 1 !=  6 ? goTo(currentStep + 1) : setState(() => complete = true);
+    currentStep + 1 != 6
+        ? goTo(currentStep + 1)
+        : setState(() => complete = true);
   }
 
   cancel() {
@@ -546,108 +548,134 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
   initState() {
     super.initState();
     getCategories();
-
   }
-
 
   @override
   Widget build(BuildContext context) {
-
     List<Step> steps = [
       Step(
           state: stepOneState,
           isActive: stepOneActive,
           title: Text('Item name, description and pricing'),
-          content:  Container(
+          content: Container(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('What\'s the name of the item?'),
-                    SizedBox(height: 5,),
-                    Container(
-                      alignment:
-                      Alignment.topCenter,
-                      child: _TextFormField(
-                        focusNode: nameFocusNode,
-                        inputFormatters: [],
-                        hintText: 'Item name',
-                        onChanged: (String value) {
+                Text('What\'s the name of the item?'),
+                SizedBox(
+                  height: 5,
+                ),
+                Container(
+                  alignment: Alignment.topCenter,
+                  child: _TextFormField(
+                    focusNode: nameFocusNode,
+                    inputFormatters: [],
+                    hintText: 'Item name',
+                    onChanged: (String value) {
 //                          _formKey.currentState.validate();
-                        },
-                        controller: nameController,
-                        validator:
-                            (String value) {
-                          if (value.length < 1) {
-                            return 'Enter the name of your menu';
-                          }
-                          return null;
-                        },
-                        onSaved: (String value) {
-                        },
+                    },
+                    controller: nameController,
+                    validator: (String value) {
+                      if (value.length < 1) {
+                        return 'Enter the name of your menu';
+                      }
+                      return null;
+                    },
+                    onSaved: (String value) {},
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Text('How would you describe this item to customers?'),
+                SizedBox(
+                  height: 0,
+                ),
+                TextFormField(
+                  onChanged: (String value) {},
+                  focusNode: descriptionNode,
+                  controller: descriptionController,
+                  textInputAction: TextInputAction.done,
+                  style: TextStyle(fontSize: 20),
+                  decoration: InputDecoration(
+                      hintText:
+                          'How would you describe this item to your customers? (Optional)',
+                      hintMaxLines: 200,
+                      border: InputBorder.none,
+                      disabledBorder: UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(width: 0.3, color: Colors.orange)),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(width: 0.3, color: Colors.grey))),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text('Select a pricing type'),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      height: 40,
+                      child: ListTile(
+                        title: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _character = PricingType.flat_price;
+                            });
+                          },
+                          child: const Text('Flat Price'),
+                        ),
+                        leading: Radio(
+                          value: PricingType.flat_price,
+                          groupValue: _character,
+                          onChanged: (PricingType value) {
+                            setState(() {
+                              _character = value;
+                            });
+                          },
+                        ),
                       ),
                     ),
-                    SizedBox(height: 5,),
-                    Text('How would you describe this item to customers?'),
-                    SizedBox(height: 0,),
-                    TextFormField(
-                      onChanged: (String value) {
-                      },
-                      focusNode: descriptionNode,
-                      controller: descriptionController,
-                      textInputAction: TextInputAction.done,
-                      style: TextStyle(fontSize: 20),
-                      decoration: InputDecoration(
-                          hintText: 'How would you describe this item to your customers? (Optional)',
-                          hintMaxLines: 200, border: InputBorder.none,
-                          disabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(width: 0.3, color: Colors.orange)
-                          ),
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                          )),
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                    ),
-                    SizedBox(height: 10,),
-                    Text('Select a pricing type'),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          height: 40,
-                          child:  ListTile(
-                            title: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _character = PricingType.flat_price;
-                                });
-                              },
-                              child: const Text('Flat Price'),
-                            ),
-                            leading: Radio(
-                              value: PricingType.flat_price,
-                              groupValue: _character,
-                              onChanged: (PricingType value) {
-                                setState(() {
-                                  _character = value;
-                                });
-                              },
-                            ),
-                          ),
+                    Container(
+                      height: 40,
+                      child: ListTile(
+                        title: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _character = PricingType.price_and_quantity;
+                            });
+                          },
+                          child: const Text('Price and Quantity'),
                         ),
-                        Container(
-                          height: 40,
+                        leading: Radio(
+                          value: PricingType.price_and_quantity,
+                          groupValue: _character,
+                          onChanged: (PricingType value) {
+                            setState(() {
+                              _character = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    Container(
+                        height: 40,
+                        child: Center(
                           child: ListTile(
                             title: GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _character = PricingType.price_and_quantity;
+                                  _character = PricingType.starting_from;
                                 });
                               },
-                              child: const Text('Price and Quantity'),
+                              child: const Text('Starting from'),
                             ),
                             leading: Radio(
-                              value: PricingType.price_and_quantity,
+                              value: PricingType.starting_from,
                               groupValue: _character,
                               onChanged: (PricingType value) {
                                 setState(() {
@@ -656,38 +684,11 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                               },
                             ),
                           ),
-                        ),
-                        Container(
-                            height: 40,
-                            child: Center(
-                              child: ListTile(
-                                title: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _character = PricingType.starting_from;
-                                    });
-                                  },
-                                  child: const Text('Starting from'),
-                                ),
-                                leading: Radio(
-                                  value: PricingType.starting_from,
-                                  groupValue: _character,
-                                  onChanged: (PricingType value) {
-                                    setState(() {
-                                      _character = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            )
-                        ),
-                        toggledPriceWidget(_character)
-                      ],
-                    ),
-                  ]
-              )
-          )
-      ),
+                        )),
+                    toggledPriceWidget(_character)
+                  ],
+                ),
+              ]))),
       Step(
         state: stepTwoState,
         isActive: stepTwoActive,
@@ -715,24 +716,29 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       dropdownValue = newValue;
                     });
                   },
-                  items: items
-                      .map<DropdownMenuItem<Category>>((Category value) {
+                  items:
+                      items.map<DropdownMenuItem<Category>>((Category value) {
                     return DropdownMenuItem<Category>(
                       value: value,
-                      child: Text(value.name, style: TextStyle(fontSize: 19),),
+                      child: Text(
+                        value.name,
+                        style: TextStyle(fontSize: 19),
+                      ),
                     );
                   }).toList(),
                 ),
               ),
               width: MediaQuery.of(context).size.width,
             ),
-            SizedBox(height: 20,),
+            SizedBox(
+              height: 20,
+            ),
             Text('What\'s the average cooking time of this item?'),
             Row(
               children: [
                 Text('Minutes: '),
                 Expanded(
-                  child:  _TextFormField(
+                  child: _TextFormField(
                     focusNode: minutesFocusNode,
                     controller: minutesController,
                     keyboardType: TextInputType.number,
@@ -751,18 +757,28 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
         content: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Text('You can create of options. Ex: Flavors of Wings, Sauce, Dressings, etc.'),
-            SizedBox(height: 15,),
+            Text(
+                'You can create of options. Ex: Flavors of Wings, Sauce, Dressings, etc.'),
+            SizedBox(
+              height: 15,
+            ),
             GestureDetector(
               onTap: () {
                 final act = CupertinoActionSheet(
                     title: Text('What type of list do you want to create?'),
                     actions: <Widget>[
                       CupertinoActionSheetAction(
-                        child: Text('List with Prices', style: TextStyle(color: Colors.blue),),
+                        child: Text(
+                          'List with Prices',
+                          style: TextStyle(color: Colors.blue),
+                        ),
                         onPressed: () async {
                           Navigator.pop(context);
-                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithPricePage()));
+                          ItemList list = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      AddListWithPricePage()));
                           setState(() {
                             if (list != null) {
                               lists.add(list);
@@ -771,10 +787,17 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: Text('List without Prices', style: TextStyle(color: Colors.blue),),
+                        child: Text(
+                          'List without Prices',
+                          style: TextStyle(color: Colors.blue),
+                        ),
                         onPressed: () async {
                           Navigator.pop(context);
-                          ItemList list = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => AddListWithoutPricesPage()));
+                          ItemList list = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      AddListWithoutPricesPage()));
                           setState(() {
                             if (list != null) {
                               lists.add(list);
@@ -790,22 +813,24 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       },
                     ));
                 showCupertinoModalPopup(
-                    context: context,
-                    builder: (BuildContext context) => act);
-
+                    context: context, builder: (BuildContext context) => act);
               },
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(
                     color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10)
-                ),
+                    borderRadius: BorderRadius.circular(10)),
                 child: Center(
-                  child: Text('ADD LIST', style: TextStyle(color: Colors.white),),
+                  child: Text(
+                    'ADD LIST',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             Text('Added ${lists.length} lists'),
             Container(
               height: 100,
@@ -816,18 +841,26 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                   return ListTile(
                     title: GestureDetector(
                       onTap: () async {
-                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditListPage(list_id: item.id, first_required: item.is_required, minimum_length:lists[index].minimum_length, maximum_length: lists[index].maximum_length ,)));
+                        final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EditListPage(
+                                      list_id: item.id,
+                                      first_required: item.is_required,
+                                      minimum_length:
+                                          lists[index].minimum_length,
+                                      maximum_length:
+                                          lists[index].maximum_length,
+                                    )));
 
-                      setState(() {
-                        int minimum_length = result['minimum_length'] as int;
-                        int maximum_length = result['maximum_length'] as int;
+                        setState(() {
+                          int minimum_length = result['minimum_length'] as int;
+                          int maximum_length = result['maximum_length'] as int;
 
-                        lists[index].is_required = result['is_required'];
-                        lists[index].minimum_length = minimum_length;
-                        lists[index].maximum_length = maximum_length;
-
-
-                      });
+                          lists[index].is_required = result['is_required'];
+                          lists[index].minimum_length = minimum_length;
+                          lists[index].maximum_length = maximum_length;
+                        });
                       },
                       child: Text(item.name),
                     ),
@@ -853,18 +886,27 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
         content: Column(
           children: <Widget>[
             imageUrl.startsWith('http')
-            ? Container(
-              height: 200,
-              child:  Image.network(imageUrl, fit: BoxFit.cover,),
-            ) :
-            Container(
-              height: 200,
-              child:  Image.asset(imageUrl, fit: BoxFit.cover,),
+                ? Container(
+                    height: 200,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Container(
+                    height: 200,
+                    child: Image.asset(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+            SizedBox(
+              height: 10,
             ),
-            SizedBox(height: 10,),
             GestureDetector(
               onTap: () async {
-                final image = await imagePicker.getImage(source: ImageSource.gallery);
+                final image =
+                    await imagePicker.getImage(source: ImageSource.gallery);
                 if (image != null) {
                   setState(() {
                     imageFile = File(image.path);
@@ -882,7 +924,10 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                 ),
                 height: 50,
                 child: Center(
-                  child: Text('UPDATE PHOTO', style: TextStyle(color: Colors.orange),),
+                  child: Text(
+                    'UPDATE PHOTO',
+                    style: TextStyle(color: Colors.orange),
+                  ),
                 ),
               ),
             ),
@@ -905,7 +950,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isVegan = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Vegetarian'),
@@ -915,7 +961,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isVegetarian = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Gluten Free'),
@@ -925,7 +972,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isGlutenFree = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Halal'),
@@ -935,7 +983,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isHalal = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Kosher'),
@@ -945,7 +994,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isKosher = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Sugar Free'),
@@ -955,12 +1005,12 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isSugarFree = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 )
               ],
             ),
-          )
-      ),
+          )),
       Step(
           state: stepSixState,
           isActive: stepSixActive,
@@ -977,7 +1027,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isEgg = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Fish'),
@@ -987,7 +1038,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isFish = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('ShellFish'),
@@ -997,7 +1049,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isShellFish = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Milk'),
@@ -1007,7 +1060,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isMilk = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Peanut'),
@@ -1017,7 +1071,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isPeanut = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Soy'),
@@ -1027,7 +1082,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isSoy = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Treenuts'),
@@ -1037,7 +1093,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isTreenuts = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 ),
                 CheckboxListTile(
                   title: Text('Wheat / Gluten'),
@@ -1047,22 +1104,23 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                       isWheatOrGluten = newValue;
                     });
                   },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                  controlAffinity:
+                      ListTileControlAffinity.leading, //  <-- leading Checkbox
                 )
               ],
             ),
-          )
-      ),
+          )),
     ];
-
-
 
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.white,
-          title: Text('Edit A La Carte Item', textAlign: TextAlign.center,),
+          title: Text(
+            'Edit A La Carte Item',
+            textAlign: TextAlign.center,
+          ),
           shadowColor: Colors.transparent,
           actions: [
             GestureDetector(
@@ -1070,9 +1128,12 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                 updateFlatPriceMenu();
               },
               child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Text('Save', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),)
-              ),
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                        color: Colors.orange, fontWeight: FontWeight.bold),
+                  )),
             )
           ],
         ),
@@ -1085,15 +1146,13 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
                   steps: steps,
                   onStepTapped: (step) => goTo(step),
                   onStepCancel: cancel,
-                )
-            )
-        )
-    );
-
+                ))));
   }
 
   switchStepType() {
-    setState(() => stepperType == StepperType.horizontal  ? stepperType = StepperType.vertical  : stepperType = StepperType.horizontal);
+    setState(() => stepperType == StepperType.horizontal
+        ? stepperType = StepperType.vertical
+        : stepperType = StepperType.horizontal);
   }
 
   Widget toggledPriceWidget(PricingType type) {
@@ -1101,9 +1160,13 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 30,),
+          SizedBox(
+            height: 30,
+          ),
           Text('Flat Price'),
-          SizedBox(height: 10,),
+          SizedBox(
+            height: 10,
+          ),
           Row(
             children: [
               Text('\$ '),
@@ -1128,9 +1191,13 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 30,),
+          SizedBox(
+            height: 30,
+          ),
           Text('Starting from Price'),
-          SizedBox(height: 10,),
+          SizedBox(
+            height: 10,
+          ),
           Row(
             children: [
               Text('\$ '),
@@ -1155,9 +1222,13 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 30,),
+          SizedBox(
+            height: 30,
+          ),
           Text('Enter quantities and prices separated by commas and spaces'),
-          SizedBox(height: 10,),
+          SizedBox(
+            height: 10,
+          ),
           Container(
             height: 60,
             width: 250,
@@ -1165,7 +1236,8 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
               children: [
                 Expanded(
                   child: _TextFormField(
-                    hintText: '3 Pieces/\$5.75, 7.5 Pieces/\$10.75, 10 Pieces/\$15',
+                    hintText:
+                        '3 Pieces/\$5.75, 7.5 Pieces/\$10.75, 10 Pieces/\$15',
                     controller: priceAndQuantityController,
                     focusNode: priceAndQuantityFocusNode,
                     textInputAction: TextInputAction.done,
@@ -1181,18 +1253,19 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     }
   }
 
-  void getItem() async  {
+  void getItem() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-item',
+    final response = await http.post(
+        '${Constants.apiBaseUrl}/restaurants/get-item',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
         },
-        body: json.encode({
-          'item_id': widget.id
-        }));
+        body: json.encode({'item_id': widget.id}));
     var menu = json.decode(response.body)['menus'][0];
-    dropdownValue = items.where((element) => element.id == menu['category_id'] as String).first;
+    dropdownValue = items
+        .where((element) => element.id == menu['category_id'] as String)
+        .first;
     nameController.text = menu['name'] as String;
     descriptionController.text = menu['description'] as String;
 
@@ -1207,10 +1280,12 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     }
     Iterable qps = menu['quantities_and_prices'];
 
-    List<QuantityAndPrice> qps_list = qps.map((e) => QuantityAndPrice.fromJson(e)).toList();
+    List<QuantityAndPrice> qps_list =
+        qps.map((e) => QuantityAndPrice.fromJson(e)).toList();
     if (qps.isNotEmpty) {
       _character = PricingType.price_and_quantity;
-       priceAndQuantityController.text = '${qps_list.map((e) => '${e.quantity} ${e.measurementLabel}/\$${e.price}').toList().join(', ')}';
+      priceAndQuantityController.text =
+          '${qps_list.map((e) => '${e.quantity} ${e.measurementLabel}/\$${e.price}').toList().join(', ')}';
     }
 
     if ((menu['cooking_time']) != null) {
@@ -1231,7 +1306,6 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
     Iterable health_labels = menu['health_labels'];
     var labels = health_labels.map((e) => e as String).toList();
     labels.forEach((element) {
-
       if (element == 'Vegan') {
         isVegan = true;
       }
@@ -1250,8 +1324,7 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
       if (element == 'Sugar Free') {
         isSugarFree = true;
       }
-     });
-
+    });
 
     Iterable allergens = menu['allergens'];
     var _allergens = allergens.map((e) => e as String).toList();
@@ -1281,28 +1354,28 @@ class _EditSingleItemPageState extends State<EditSingleItemPage> {
         isWheatOrGluten = true;
       }
     });
-    setState(() {
-    });
+    setState(() {});
   }
-  
-  void getCategories() async  {
+
+  void getCategories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-categories',
-        headers: {
-          'token': prefs.getString('token'),
-          'Content-Type': 'application/json'
-        });
+    final response = await http
+        .post('${Constants.apiBaseUrl}/restaurants/get-categories', headers: {
+      'token': prefs.getString('token'),
+      'Content-Type': 'application/json'
+    });
     Iterable categories = json.decode(response.body)['categories'];
     setState(() {
-      items = [chooseCategory] + categories.map((e) =>  Category.fromJson(e)).toList().toList();
+      items = [chooseCategory] +
+          categories.map((e) => Category.fromJson(e)).toList().toList();
       getItem();
     });
   }
 }
 
 List<String> titleList = ['Flat Price', 'Price and Quantity', 'Starting From'];
-class _TextFormField extends StatelessWidget {
 
+class _TextFormField extends StatelessWidget {
   final String hintText;
   final Function validator;
   final Function onSaved;
@@ -1318,26 +1391,23 @@ class _TextFormField extends StatelessWidget {
 
   final Iterable<TextInputFormatter> inputFormatters;
 
-  _TextFormField({
-    this.hintText,
-    this.validator,
-    this.onSaved,
-    this.isPassword = false,
-    this.isEmail = false,
-    this.controller,
-    this.autofillHints,
-    this.onChanged,
-    this.inputFormatters,
-    this.focusNode,
-    this.enabled,
-    this.keyboardType,
-    this.textInputAction
-  });
-
+  _TextFormField(
+      {this.hintText,
+      this.validator,
+      this.onSaved,
+      this.isPassword = false,
+      this.isEmail = false,
+      this.controller,
+      this.autofillHints,
+      this.onChanged,
+      this.inputFormatters,
+      this.focusNode,
+      this.enabled,
+      this.keyboardType,
+      this.textInputAction});
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
         padding: EdgeInsets.only(left: 0.0, right: 0.0),
         child: Container(
@@ -1359,19 +1429,18 @@ class _TextFormField extends StatelessWidget {
               decoration: InputDecoration(
                   helperText: ' ',
                   hintText: hintText,
-                  contentPadding: EdgeInsets.only(left: 10, right: 0, bottom: 5),
+                  contentPadding:
+                      EdgeInsets.only(left: 10, right: 0, bottom: 5),
                   filled: true,
                   fillColor: Colors.white,
                   enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                  )
-              ),
+                      borderSide: BorderSide(width: 0.3, color: Colors.grey))),
               obscureText: isPassword ? true : false,
-              keyboardType: keyboardType
-          ),
+              keyboardType: keyboardType),
         ));
   }
 }
+
 enum PricingType { flat_price, price_and_quantity, starting_from, none }
 
 class DecimalTextInputFormatter extends TextInputFormatter {
@@ -1380,9 +1449,9 @@ class DecimalTextInputFormatter extends TextInputFormatter {
   final int decimalRange;
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, // unused.
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue, // unused.
+    TextEditingValue newValue,
+  ) {
     TextSelection newSelection = newValue.selection;
     String truncated = newValue.text;
     if (decimalRange != null) {
@@ -1408,12 +1477,22 @@ class DecimalTextInputFormatter extends TextInputFormatter {
   }
 }
 
-
 enum Healh_and_Safety_Labels {
-  vegan, vegetarian, gluten_free, halal, kosher, sugar_free,
+  vegan,
+  vegetarian,
+  gluten_free,
+  halal,
+  kosher,
+  sugar_free,
 }
 
-
 enum Allergens {
-  egg, fish, shellfish, milk, peanut, soy, treenuts, wheat_or_gluten
+  egg,
+  fish,
+  shellfish,
+  milk,
+  peanut,
+  soy,
+  treenuts,
+  wheat_or_gluten
 }

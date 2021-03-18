@@ -1,5 +1,3 @@
-
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -29,9 +27,25 @@ class LocationProfilePage extends StatefulWidget {
   _LocationProfilePageState createState() => _LocationProfilePageState();
 }
 
+class ScheduleTime {
+  TimeOfDay timeOfDay;
+
+  ScheduleTime({@required this.timeOfDay});
+
+  int minutes() {
+    return (this.timeOfDay.hour * 60) + (this.timeOfDay.minute);
+  }
+
+  String readableLocalTime() {
+    final now = new DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, this.timeOfDay.hour,
+        this.timeOfDay.minute);
+    final format = DateFormat.jm(); //"6:00 AM"
+    return (format.format(dt)).toLowerCase();
+  }
+}
 
 class _LocationProfilePageState extends State<LocationProfilePage> {
-
   bool _doesPickup = true;
 //  TextEditingController nameController = TextEditingController();
 //  TextEditingController descriptionController = TextEditingController();
@@ -79,11 +93,30 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
   final logoImagePicker = ImagePicker();
   File coverImage;
   File logoImage;
+  List<Slot> sundaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
+  List<Slot> mondaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
+  List<Slot> tuesdaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
+  List<Slot> wednesdaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
+  List<Slot> thursdaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
+  List<Slot> fridaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
+  List<Slot> saturdaySlots = [
+    Slot(start: TimeOfDay.now(), end: TimeOfDay.now()),
+  ];
 
   String _selectedValuesJson = 'Nothing tags to show';
   List<Tag> _selectedLanguages;
-
-
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,10 +133,9 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
           return Padding(
               padding: EdgeInsets.only(left: 20, right: 20, top: 10),
               child: SingleChildScrollView(
-                child:  Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     CheckboxListTile(
                       title: Text('Are you available for pickup?'),
                       value: _doesPickup,
@@ -112,9 +144,12 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                           _doesPickup = newValue;
                         });
                       },
-                      controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                      controlAffinity: ListTileControlAffinity
+                          .leading, //  <-- leading Checkbox
                     ),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
 //                    Text('What\'s the full main US address of your restaurant?'),
 //                    Container(
 //                      alignment:
@@ -143,25 +178,23 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
 //                        },
 //                      ),
 //                    ),
-                    Text('What phone number can we use to reach this location?'),
-                    SizedBox(height: 5,),
+                    Text(
+                        'What phone number can we use to reach this location?'),
+                    SizedBox(
+                      height: 5,
+                    ),
                     Container(
-                      alignment:
-                      Alignment.topCenter,
+                      alignment: Alignment.topCenter,
                       width: MediaQuery.of(context).size.width,
                       child: _TextFormField(
                         focusNode: phoneFocusNode,
-                        inputFormatters: [
-                        ],
+                        inputFormatters: [],
                         hintText: 'Phone number',
                         onChanged: (String value) {
-                          _formKey
-                              .currentState
-                              .validate();
+                          _formKey.currentState.validate();
                         },
                         controller: phoneController,
-                        validator:
-                            (String value) {
+                        validator: (String value) {
                           if (value.length < 1) {
                             return 'Enter your phone';
                           }
@@ -177,7 +210,9 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                     ),
 
                     Text('Generate an access token for this location'),
-                    SizedBox(height: 5,),
+                    SizedBox(
+                      height: 5,
+                    ),
                     Row(
                       children: [
                         GestureDetector(
@@ -187,25 +222,19 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                           child: Row(
                             children: [
                               Container(
-                                alignment:
-                                Alignment.bottomCenter,
+                                alignment: Alignment.bottomCenter,
                                 width: 200,
                                 child: _TextFormField(
                                   isPassword: true,
                                   enabled: false,
                                   focusNode: accessTokenNode,
-                                  inputFormatters: [
-                                  ],
+                                  inputFormatters: [],
                                   hintText: 'Access token',
-                                  onChanged:
-                                      (String value) {
-                                    _formKey
-                                        .currentState
-                                        .validate();
+                                  onChanged: (String value) {
+                                    _formKey.currentState.validate();
                                   },
                                   controller: accessTokenController,
-                                  validator:
-                                      (String value) {
+                                  validator: (String value) {
                                     if (value.length < 2) {
                                       return 'Enter your restaurant\'s name';
                                     }
@@ -220,425 +249,146 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                             ],
                           ),
                         ),
-                        SizedBox(width: 10,),
+                        SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
-                          child: GestureDetector(
-                            onTap: generateAccessToken,
-                            child: Container(
-
-                                decoration: BoxDecoration(
-                                    color: Colors.orange,
-                                    borderRadius: BorderRadius.circular(30)
+                            child: GestureDetector(
+                          onTap: generateAccessToken,
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(30)),
+                              height: 45,
+                              child: Center(
+                                child: Text(
+                                  'Generate',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                height: 45,
-                                child: Center(
-                                  child: Text('Generate', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
-
-                                )
-                            ),
-                          )
-                        )
+                              )),
+                        ))
                       ],
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     ),
                     Divider(),
-                    SizedBox(height: 10,),
-                    Text('Let\'s know your restaurant schedule', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      'Let\'s know your restaurant schedule',
+                      style:
+                          TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Icon(LineIcons.info_circle),
-                        SizedBox(width: 5,),
+                        SizedBox(
+                          width: 5,
+                        ),
                         Container(
-                          width: MediaQuery.of(context).size.width-70,
-                          child: Text('Please note that days left without both opening and closing times are considered non-working days', style: TextStyle(fontSize: 17),),
+                          width: MediaQuery.of(context).size.width - 70,
+                          child: Text(
+                            'Please note that days left without both opening and closing times are considered non-working days',
+                            style: TextStyle(fontSize: 17),
+                          ),
                         )
                       ],
                     ),
                     Divider(),
-                    SizedBox(height: 10,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Sunday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  sundayFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: sundayFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  sundayToController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: sundayToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                            ],
+                          ScheduleSlotsWidget(
+                            slots: sundaySlots,
                           )
                         ],
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Monday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  monFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: monFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  monToController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: monToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          ScheduleSlotsWidget(
+                            slots: mondaySlots,
                           )
                         ],
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Tuesday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  tuesFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: tuesFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  tuesToController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: tuesToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          ScheduleSlotsWidget(
+                            slots: tuesdaySlots,
                           )
                         ],
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Wednesday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  wedFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: wedFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  wedToController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: wedToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          ScheduleSlotsWidget(
+                            slots: wednesdaySlots,
                           )
                         ],
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Thursday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  thuFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: thuFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  thuToController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: thuToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          ScheduleSlotsWidget(
+                            slots: thursdaySlots,
                           )
                         ],
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Friday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  friFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: friFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  friToController.text = '${time.hour}:${time.minute}';
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: friToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          ScheduleSlotsWidget(
+                            slots: fridaySlots,
                           )
                         ],
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(10),
-                      child:  Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Saturday'),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  satFromController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: satFromController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Opening time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              InkWell(
-                                onTap: () async  {
-                                  TimeOfDay time  = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                                  satToController.text = formatTimeOfDay(time);
-                                },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  width: 100,
-                                  height: 50,
-                                  child: TextFormField(
-                                    enabled: false,
-                                    controller: satToController,
-                                    decoration: InputDecoration(
-                                        labelText: 'Closing time'
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
+                          ScheduleSlotsWidget(slots: saturdaySlots)
                         ],
                       ),
                     ),
-
-                    SizedBox(height: 30,),
+                    SizedBox(
+                      height: 30,
+                    ),
                     InkWell(
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
@@ -650,17 +400,22 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                         ),
                         height: 45,
                         child: Center(
-                          child: Text('Save Details', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+                          child: Text(
+                            'Save Details',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
-                      onTap: saveprofile,
+                      onTap: saveProfile,
                     ),
-                    SizedBox(height: 30,),
-
+                    SizedBox(
+                      height: 30,
+                    ),
                   ],
                 ),
-              )
-          );
+              ));
         },
       ),
     );
@@ -672,7 +427,6 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
     super.initState();
     getProfile();
     fToast = FToast();
-
   }
 
   _showToast(String message) {
@@ -685,11 +439,17 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.check, color: Colors.white,),
+          Icon(
+            Icons.check,
+            color: Colors.white,
+          ),
           SizedBox(
             width: 12.0,
           ),
-          Text(message, style: TextStyle(color: Colors.white),),
+          Text(
+            message,
+            style: TextStyle(color: Colors.white),
+          ),
         ],
       ),
     );
@@ -699,11 +459,9 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
       gravity: ToastGravity.BOTTOM,
       toastDuration: Duration(seconds: 2),
     );
-
   }
 
   _showErrorToast(String message) {
-
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
@@ -713,15 +471,20 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(FontAwesomeIcons.surprise, color: Colors.white,),
+          Icon(
+            FontAwesomeIcons.surprise,
+            color: Colors.white,
+          ),
           SizedBox(
             width: 12.0,
           ),
-          Text(message, style: TextStyle(color: Colors.white),),
+          Text(
+            message,
+            style: TextStyle(color: Colors.white),
+          ),
         ],
       ),
     );
-
 
     fToast.showToast(
       child: toast,
@@ -732,15 +495,39 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
     Navigator.pop(context);
   }
 
-String formatTimeOfDay(TimeOfDay tod) {
+  String formatTimeOfDay(TimeOfDay tod) {
     final now = new DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
-    final format = DateFormat.jm();  //"6:00 AM"
+    final format = DateFormat.jm(); //"6:00 AM"
     return format.format(dt);
-}
+  }
 
+  void saveProfile() async {
+    var _sundaySlots = sundaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
+    var _mondaySlots = mondaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
+    var _tuesdaySlots = tuesdaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
+    var _wednesdaySlots = wednesdaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
+    var _thursdaySlots = thursdaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
+    var _fridaySlots = fridaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
+    var _saturdaySlots = saturdaySlots
+        .where((element) => element.start.hour < element.end.hour)
+        .toList();
 
-  void saveprofile() async {
+    print(_sundaySlots.length);
+    return;
+
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -752,9 +539,9 @@ String formatTimeOfDay(TimeOfDay tod) {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SpinKitRing(
-                      color: Colors.white,
-                      size: 50.0,
-                      lineWidth: 2,
+                    color: Colors.white,
+                    size: 50.0,
+                    lineWidth: 2,
                   )
                 ],
               ));
@@ -762,7 +549,6 @@ String formatTimeOfDay(TimeOfDay tod) {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-
 
 //    if (nameController.text.trim().isEmpty) {
 //      _showErrorToast('Please enter your restaurant\'s name');
@@ -780,7 +566,6 @@ String formatTimeOfDay(TimeOfDay tod) {
 //      return;
 //    }
 
-
 //    if ((await Geocoder.local.findAddressesFromQuery(addressController.text.trim())).first.countryName != 'United States') {
 //      _showErrorToast('Enter a valid US address');
 //      FocusScope.of(context).requestFocus(addressFocusNode);
@@ -791,8 +576,6 @@ String formatTimeOfDay(TimeOfDay tod) {
       FocusScope.of(context).requestFocus(phoneFocusNode);
       return;
     }
-
-
 
 //    var addresses = await Geocoder.local.findAddressesFromQuery(addressController.text.trim());
 //    var coordinates = addresses.first.coordinates;
@@ -830,14 +613,12 @@ String formatTimeOfDay(TimeOfDay tod) {
           "open": sundayFromController.text.trim(),
           "close": sundayToController.text.trim()
         },
-      }});
+      }
+    });
 
-
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/save-location-profile',
-        headers: {
-          'token': token,
-          'Content-Type': 'application/json'
-        },
+    final response = await http.post(
+        '${Constants.apiBaseUrl}/restaurants/save-location-profile',
+        headers: {'token': token, 'Content-Type': 'application/json'},
         body: body);
     print(response.body);
     Navigator.pop(context);
@@ -845,26 +626,20 @@ String formatTimeOfDay(TimeOfDay tod) {
 //    Navigator.pop(context);
   }
 
-  void getProfile() async  {
+  void getProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
     print(token);
     print(widget.locationId);
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-location-profile',
-
-        body: json.encode({
-          'location_id': widget.locationId
-        }),
-        headers: {
-          'token': token,
-          'Content-Type': 'application/json'
-        },);
-  print(response.body);
+    final response = await http.post(
+      '${Constants.apiBaseUrl}/restaurants/get-location-profile',
+      body: json.encode({'location_id': widget.locationId}),
+      headers: {'token': token, 'Content-Type': 'application/json'},
+    );
+    print(response.body);
     var profile = Profile.fromJson(json.decode(response.body));
 
-
     setState(() {
-
       phoneController.text = profile.phone_number;
       _doesPickup = profile.does_pickup;
       sundayFromController.text = profile.hours.sun.open;
@@ -889,7 +664,6 @@ String formatTimeOfDay(TimeOfDay tod) {
       satToController.text = profile.hours.sat.close;
 
       accessTokenController.text = profile.access_token;
-
     });
   }
 
@@ -907,95 +681,114 @@ String formatTimeOfDay(TimeOfDay tod) {
 
       final response = await http.post(
         '${Constants.apiBaseUrl}/restaurants/generate-access-token',
-
-        body: json.encode({
-          'location_id': widget.locationId
-        }),
-        headers: {
-          'token': token,
-          'Content-Type': 'application/json'
-        },);
+        body: json.encode({'location_id': widget.locationId}),
+        headers: {'token': token, 'Content-Type': 'application/json'},
+      );
       accessTokenController.text =
-      json.decode(response.body)['token'] as String;
+          json.decode(response.body)['token'] as String;
       _showToast('Token was generated');
     } else {
-      showModalBottomSheet(context: context, builder: (BuildContext context) {
-        return Container(
-          color: Color(0xFF737373),
-          height: 230,
-          child: Container(
-            decoration: BoxDecoration(
-                color: Theme.of(context).canvasColor,
-                borderRadius: BorderRadius.only(topRight: const Radius.circular(10), topLeft: const Radius.circular(10))
-            ),
-            child: Column(
-              children: [
-                SizedBox(height: 10,),
-                Container(
-                  height: 5,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                ),
-                SizedBox(height: 15,),
-                Text('WARNING!', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                SizedBox(height: 5,),
-                Divider(),
-                Padding(
-                  padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
-                  child: Text('Generating another access token may prevent this location from access. Are you sure you want to continue?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-
-                  Container(
-                    decoration: BoxDecoration(
+      showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              color: Color(0xFF737373),
+              height: 230,
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).canvasColor,
+                    borderRadius: BorderRadius.only(
+                        topRight: const Radius.circular(10),
+                        topLeft: const Radius.circular(10))),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 10,
                     ),
-                    width: MediaQuery.of(context).size.width - 40,
-                    height: 40,
+                    Container(
+                      height: 5,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey.withOpacity(0.5),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Text(
+                      'WARNING!',
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Divider(),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: 0, left: 15, right: 15, bottom: 15),
+                      child: Text(
+                        'Generating another access token may prevent this location from access. Are you sure you want to continue?',
+                        style: TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                        decoration: BoxDecoration(),
+                        width: MediaQuery.of(context).size.width - 40,
+                        height: 40,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                                child: GestureDetector(
+                              onTap: () async {
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                String token = prefs.getString('token');
 
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () async  {
-                              SharedPreferences prefs = await SharedPreferences.getInstance();
-                              String token = prefs.getString('token');
-
-                              final response = await http.post(
-                                '${Constants.apiBaseUrl}/restaurants/generate-access-token',
-
-                                body: json.encode({
-                                  'location_id': widget.locationId
-                                }),
-                                headers: {
-                                  'token': token,
-                                  'Content-Type': 'application/json'
-                                },);
-                              accessTokenController.text =
-                              json.decode(response.body)['token'] as String;
-                              Navigator.pop(context);
-                              _showToast('Token was generated');
-                            },
-                            child:  Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.white,
+                                final response = await http.post(
+                                  '${Constants.apiBaseUrl}/restaurants/generate-access-token',
+                                  body: json.encode(
+                                      {'location_id': widget.locationId}),
+                                  headers: {
+                                    'token': token,
+                                    'Content-Type': 'application/json'
+                                  },
+                                );
+                                accessTokenController.text = json
+                                    .decode(response.body)['token'] as String;
+                                Navigator.pop(context);
+                                _showToast('Token was generated');
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.white,
+                                ),
+                                height: 50,
+                                child: Center(
+                                  child: Text(
+                                    'YES',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.orange,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                               ),
-                              height: 50,
-                              child: Center(child: Text('YES', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.orange, fontWeight: FontWeight.bold),),),
-
+                            )),
+                            SizedBox(
+                              width: 10,
                             ),
-                          )
-                        ),
-                        SizedBox(width: 10,),
-                        Expanded(
-
-                            child: GestureDetector(
+                            Expanded(
+                                child: GestureDetector(
                               onTap: () {
                                 Navigator.pop(context);
                               },
@@ -1005,23 +798,26 @@ String formatTimeOfDay(TimeOfDay tod) {
                                   color: Colors.orange,
                                 ),
                                 height: 50,
-                                child: Center(child: Text('NO', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),),
-
+                                child: Center(
+                                  child: Text(
+                                    'NO',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                               ),
-                            )
-                        ),
-                      ],
-                    )
-                  ),
-              ],
-            ),
-          ),
-        );
-      });
+                            )),
+                          ],
+                        )),
+                  ],
+                ),
+              ),
+            );
+          });
     }
-
-
-
   }
 }
 
@@ -1055,13 +851,27 @@ class Profile {
   factory Profile.fromJson(Map<String, dynamic> json) {
     var hours = json['hours'];
 
-    var mon_period = Period(open: hours['mon']['open'] as String, close: hours['mon']['close'] as String);
-    var tue_period = Period(open: hours['tue']['open'] as String, close: hours['tue']['close'] as String);
-    var wed_period = Period(open: hours['wed']['open'] as String, close: hours['wed']['close'] as String);
-    var thu_period = Period(open: hours['thu']['open'] as String, close: hours['thu']['close'] as String);
-    var fri_period = Period(open: hours['fri']['open'] as String, close: hours['fri']['close'] as String);
-    var sat_period = Period(open: hours['sat']['open'] as String, close: hours['sat']['close'] as String);
-    var sun_period = Period(open: hours['sun']['open'] as String, close: hours['sun']['close'] as String);
+    var mon_period = Period(
+        open: hours['mon']['open'] as String,
+        close: hours['mon']['close'] as String);
+    var tue_period = Period(
+        open: hours['tue']['open'] as String,
+        close: hours['tue']['close'] as String);
+    var wed_period = Period(
+        open: hours['wed']['open'] as String,
+        close: hours['wed']['close'] as String);
+    var thu_period = Period(
+        open: hours['thu']['open'] as String,
+        close: hours['thu']['close'] as String);
+    var fri_period = Period(
+        open: hours['fri']['open'] as String,
+        close: hours['fri']['close'] as String);
+    var sat_period = Period(
+        open: hours['sat']['open'] as String,
+        close: hours['sat']['close'] as String);
+    var sun_period = Period(
+        open: hours['sun']['open'] as String,
+        close: hours['sun']['close'] as String);
 
     return Profile(
 //        name: json['name'] as String,
@@ -1080,15 +890,11 @@ class Profile {
             thu: thu_period,
             fri: fri_period,
             sat: sat_period,
-            sun: sun_period
-        )
-    );
+            sun: sun_period));
   }
-
 }
 
 class _TextFormField extends StatelessWidget {
-
   final String hintText;
   final Function validator;
   final Function onSaved;
@@ -1102,24 +908,21 @@ class _TextFormField extends StatelessWidget {
 
   final Iterable<TextInputFormatter> inputFormatters;
 
-  _TextFormField({
-    this.hintText,
-    this.validator,
-    this.onSaved,
-    this.isPassword = false,
-    this.isEmail = false,
-    this.controller,
-    this.autofillHints,
-    this.onChanged,
-    this.inputFormatters,
-    this.focusNode,
-    this.enabled
-  });
-
+  _TextFormField(
+      {this.hintText,
+      this.validator,
+      this.onSaved,
+      this.isPassword = false,
+      this.isEmail = false,
+      this.controller,
+      this.autofillHints,
+      this.onChanged,
+      this.inputFormatters,
+      this.focusNode,
+      this.enabled});
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
         padding: EdgeInsets.only(left: 0.0, right: 0.0),
         child: Container(
@@ -1144,17 +947,13 @@ class _TextFormField extends StatelessWidget {
                 filled: true,
                 fillColor: Colors.white,
                 enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(width: 0.3, color: Colors.grey)
-                )
-            ),
+                    borderSide: BorderSide(width: 0.3, color: Colors.grey))),
             obscureText: isPassword ? true : false,
             keyboardType:
-            isEmail ? TextInputType.emailAddress : TextInputType.text,
+                isEmail ? TextInputType.emailAddress : TextInputType.text,
           ),
         ));
   }
-
-
 }
 
 /// Language Class
@@ -1204,5 +1003,242 @@ class TagService {
     ]
         .where((lang) => lang.name.toLowerCase().contains(query.toLowerCase()))
         .toList();
+  }
+}
+
+class Slot {
+  TimeOfDay start;
+  TimeOfDay end;
+
+  Slot({this.start, this.end});
+}
+
+class ScheduleSlotWidget extends StatefulWidget {
+  final Function(TextEditingController) onTapOpening;
+  final Function(TextEditingController) onTapClosing;
+  final Function onTapRemove;
+  final List<Slot> slots;
+  final int index;
+
+  ScheduleSlotWidget(
+      {this.onTapOpening,
+      this.onTapClosing,
+      this.slots,
+      this.onTapRemove,
+      this.index});
+
+  _ScheduleSlotWidgetState createState() => _ScheduleSlotWidgetState();
+}
+
+class _ScheduleSlotWidgetState extends State<ScheduleSlotWidget> {
+  TextEditingController fromController = TextEditingController();
+  TextEditingController toController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: 50,
+        width: 200,
+        child: Row(
+          children: [
+            widget.index != 0 && widget.index > widget.slots.length - 2
+                ? GestureDetector(
+                    onTap: () {
+                      widget.onTapRemove();
+                    },
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.brown,
+                      ),
+                      child: Icon(
+                        LineIcons.minus,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ))
+                : SizedBox(),
+            SizedBox(width: 10),
+            GestureDetector(
+              onTap: () {
+                widget.onTapOpening(fromController);
+              },
+              child: Container(
+                width: 100,
+                height: 50,
+                child: TextFormField(
+                  enabled: false,
+                  controller: fromController,
+                  decoration: InputDecoration(
+                    labelText: 'Start time',
+                    labelStyle: TextStyle(fontSize: 12),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            GestureDetector(
+              onTap: () {
+                widget.onTapClosing(toController);
+              },
+              child: Container(
+                width: 100,
+                height: 50,
+                child: TextFormField(
+                  enabled: false,
+                  controller: toController,
+                  decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Stop time',
+                      labelStyle: TextStyle(fontSize: 12)),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
+}
+
+class ScheduleDay {
+  List<Slot> slots;
+  String name;
+  ScheduleDay({this.name, this.slots});
+}
+
+class ScheduleSlotsWidget extends StatefulWidget {
+  List<Slot> slots;
+
+  ScheduleSlotsWidget({this.slots});
+
+  _ScheduleSlotsWidgetState createState() => _ScheduleSlotsWidgetState();
+}
+
+class _ScheduleSlotsWidgetState extends State<ScheduleSlotsWidget> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Color(0xF1F1F1F1),
+        ),
+        height: widget.slots.length * 60.0,
+        width: 280,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // GestureDetector(
+            //         onTap: () {
+            //           if (widget.slots.length > 1) {
+            //             setState(() {
+            //               widget.slots.length -= 1;
+            //             });
+            //           }
+            //         },
+            //         child: Container(
+            //           height: 20,
+            //           width: 20,
+
+            //           decoration: BoxDecoration(
+            //             borderRadius: BorderRadius.circular(20),
+            //             color: Colors.brown,
+            //           ),
+
+            //           child: Icon(LineIcons.minus, color: Colors.white, size: 15,),
+
+            //       )
+            //     )
+            Container(
+              padding: EdgeInsets.only(left: 10, right: 10),
+              height: widget.slots.length * 50.0,
+              width: 260,
+              child: ListView.separated(
+                  separatorBuilder: (context, index) {
+                    return Container(
+                      height: 5,
+                      color: Colors.transparent,
+                    );
+                  },
+                  itemCount: widget.slots.length,
+                  itemBuilder: (context, index) {
+                    var slot = widget.slots[index];
+                    return ScheduleSlotWidget(
+                      index: index,
+                      slots: widget.slots,
+                      onTapRemove: () {
+                        setState(() {
+                          widget.slots.removeAt(index);
+                        });
+                      },
+                      onTapClosing: (controller) async {
+                        TimeOfDay time = await showTimePicker(
+                            context: context, initialTime: TimeOfDay.now());
+                        if (time != null) {
+                          var scheduledTime = ScheduleTime(timeOfDay: time);
+                          setState(() {
+                            slot.end = time;
+                          });
+                          controller.text = scheduledTime.readableLocalTime();
+                        }
+                      },
+                      onTapOpening: (controller) async {
+                        TimeOfDay time = await showTimePicker(
+                            context: context, initialTime: TimeOfDay.now());
+                        if (time != null) {
+                          var scheduledTime = ScheduleTime(timeOfDay: time);
+                          setState(() {
+                            slot.start = time;
+                          });
+                          controller.text = scheduledTime.readableLocalTime();
+                        }
+                      },
+                    );
+                  }),
+            ),
+
+            Column(children: [
+              GestureDetector(
+                  onTap: () {
+                    var array = widget.slots;
+                    array = array
+                        .where(
+                            (element) => element.start.hour >= element.end.hour)
+                        .toList();
+                    if (array.isEmpty) {
+                      setState(() {
+                        widget.slots.add(
+                            Slot(start: TimeOfDay.now(), end: TimeOfDay.now()));
+                      });
+                    } else {
+                      Fluttertoast.showToast(
+                          msg:
+                              'Insert a start and end time to create a new slot');
+                    }
+                  },
+                  child: Container(
+                    height: 20,
+                    width: 20,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.brown,
+                    ),
+                    child: Icon(
+                      LineIcons.plus,
+                      color: Colors.white,
+                      size: 15,
+                    ),
+                  ))
+            ])
+          ],
+        ));
   }
 }

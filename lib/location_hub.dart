@@ -617,8 +617,6 @@ FlutterLocalNotificationsPlugin fltrNotification;
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 10,),
                                    Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
                                   Row(
@@ -1245,8 +1243,6 @@ FlutterLocalNotificationsPlugin fltrNotification;
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                   Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 10,),
                                   Text('Order #${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
                                   SizedBox(height: 10,),
                                   Row(

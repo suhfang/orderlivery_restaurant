@@ -1,5 +1,3 @@
-
-
 import 'dart:convert';
 
 //import 'package:Restaurant/categories.dart';
@@ -17,8 +15,6 @@ import 'package:Restaurant/constants.dart' as Constants;
 import 'package:line_icons/line_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class QuantityAndPrice {
   dynamic quantity;
   dynamic price;
@@ -26,10 +22,9 @@ class QuantityAndPrice {
   QuantityAndPrice({this.quantity, this.price, this.measurementLabel});
   factory QuantityAndPrice.fromJson(Map<String, dynamic> json) {
     return QuantityAndPrice(
-      quantity: json['quantity'].toDouble(),
-      price: json['price'].toDouble(),
-      measurementLabel: json['measurement_label'] as String
-    );
+        quantity: json['quantity'].toDouble(),
+        price: json['price'].toDouble(),
+        measurementLabel: json['measurement_label'] as String);
   }
 }
 
@@ -42,10 +37,9 @@ class Category {
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(name: json['name'] as String, id: json['_id'] as String);
   }
-
 }
-class Item {
 
+class Item {
   String id;
   String name;
   String description;
@@ -60,59 +54,44 @@ class Item {
   List<String> individualItemIds;
   DateTime createdAt;
 
-  Item({
-    this.id,
-    this.createdAt,
-    this.name,
-    this.description,
-    this.flatPrice,
-    this.quantitiesAndPrices,
-    this.healthLabels,
-    this.allergens,
-    this.startingPrice,
-    this.imageUrl,
-    this.cookingTime,
-    this.lists,
-    this.individualItemIds
-  });
+  Item(
+      {this.id,
+      this.createdAt,
+      this.name,
+      this.description,
+      this.flatPrice,
+      this.quantitiesAndPrices,
+      this.healthLabels,
+      this.allergens,
+      this.startingPrice,
+      this.imageUrl,
+      this.cookingTime,
+      this.lists,
+      this.individualItemIds});
 
   factory Item.fromJson(Map<String, dynamic> json) {
     Iterable list = json['quantities_and_prices'];
-    List<QuantityAndPrice> qps = list.map((e) => QuantityAndPrice.fromJson(e)).toList();
-
-//    if (qp_map_list.isNotEmpty) {
-//        qp_map_list.forEach((element) {
-//
-//          qps.add(
-//              QuantityAndPrice(
-//                  quantity: element['quantity'] as int,
-//                  price: element['price'] as double
-//              )
-//          );
-//        });
-//    }
-
-
-
+    List<QuantityAndPrice> qps =
+        list.map((e) => QuantityAndPrice.fromJson(e)).toList();
     return Item(
         id: json['_id'] as String,
         name: json['name'] as String,
         description: json['description'] as String,
         individualItemIds: json['individual_items'].cast<String>(),
-        flatPrice: json['flat_price'] != null ? json['flat_price'].toDouble() ?? json['flat_price'] as int : null,
+        flatPrice: json['flat_price'] != null
+            ? json['flat_price'].toDouble() ?? json['flat_price'] as int
+            : null,
         quantitiesAndPrices: qps,
-        createdAt: DateTime.parse(json['createdAt'] as String).toLocal()
-
-    );
+        createdAt: DateTime.parse(json['createdAt'] as String).toLocal());
   }
 }
-
 
 class MenuItemsPage extends StatefulWidget {
   _MenuItemsPageState createState() => _MenuItemsPageState();
 }
 
-class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateMixin{
+class _MenuItemsPageState extends State<MenuItemsPage>
+    with TickerProviderStateMixin {
   TabController _controller;
   AnimationController _animationControllerOn;
   AnimationController _animationControllerOff;
@@ -133,33 +112,29 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   List _keys = [];
   bool _buttonTap = false;
 
-
-
-
-  Future<List<Item>> getMenusForCategory(String category_id) async{
+  Future<List<Item>> getMenusForCategory(String category_id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-items-by-category',
+    final response = await http.post(
+        '${Constants.apiBaseUrl}/restaurants/get-items-by-category',
         headers: {
           'token': prefs.getString('token'),
           'Content-Type': 'application/json'
         },
-        body: json.encode({
-          'category_id': category_id
-        }));
-    Iterable items = json .decode(response.body)['menus'];
+        body: json.encode({'category_id': category_id}));
+    Iterable items = json.decode(response.body)['menus'];
 
-    var res =  items.map((e) => Item.fromJson(e)).toList();
+    var res = items.map((e) => Item.fromJson(e)).toList();
     res.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return res;
   }
 
   Future<void> getCategories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post('${Constants.apiBaseUrl}/restaurants/get-categories',
-        headers: {
-          'token': prefs.getString('token'),
-          'Content-Type': 'application/json'
-        });
+    final response = await http
+        .post('${Constants.apiBaseUrl}/restaurants/get-categories', headers: {
+      'token': prefs.getString('token'),
+      'Content-Type': 'application/json'
+    });
     Iterable categories = json.decode(response.body)['categories'];
     setState(() {
       _categories = categories.map((e) => Category.fromJson(e)).toList();
@@ -178,8 +153,8 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
       _controller.animation.addListener(_handleTabAnimation);
       _controller.addListener(_handleTabChange);
 
-      _animationControllerOff =
-          AnimationController(vsync: this, duration: Duration(milliseconds: 75));
+      _animationControllerOff = AnimationController(
+          vsync: this, duration: Duration(milliseconds: 75));
       _animationControllerOff.value = 1.0;
       _colorTweenBackgroundOff =
           ColorTween(begin: _backgroundOn, end: _backgroundOff)
@@ -188,8 +163,8 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
           ColorTween(begin: _foregroundOn, end: _foregroundOff)
               .animate(_animationControllerOff);
 
-      _animationControllerOn =
-          AnimationController(vsync: this, duration: Duration(milliseconds: 150));
+      _animationControllerOn = AnimationController(
+          vsync: this, duration: Duration(milliseconds: 150));
       _animationControllerOn.value = 1.0;
       _colorTweenBackgroundOn =
           ColorTween(begin: _backgroundOff, end: _backgroundOn)
@@ -208,8 +183,6 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
 
     super.initState();
     getCategories();
-
-
   }
 
   @override
@@ -219,74 +192,100 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   }
 
   void deleteItem(String id) async {
-    showModalBottomSheet(context: context, builder: (BuildContext context) {
-      return Container(
-        color: Color(0xFF737373),
-        height: 200,
-        child: Container(
-          decoration: BoxDecoration(
-              color: Theme.of(context).canvasColor,
-              borderRadius: BorderRadius.only(topRight: const Radius.circular(10), topLeft: const Radius.circular(10))
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 10,),
-              Container(
-                height: 5,
-                width: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.grey.withOpacity(0.5),
-                ),
-              ),
-              SizedBox(height: 15,),
-              Text('CONFIRM!', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-              SizedBox(height: 5,),
-              Divider(),
-              Padding(
-                padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
-                child: Text('Are you sure you want to delete this item?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                  decoration: BoxDecoration(
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            color: Color(0xFF737373),
+            height: 200,
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).canvasColor,
+                  borderRadius: BorderRadius.only(
+                      topRight: const Radius.circular(10),
+                      topLeft: const Radius.circular(10))),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 10,
                   ),
-                  width: MediaQuery.of(context).size.width - 40,
-                  height: 40,
-
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                          child: GestureDetector(
-                            onTap: () async  {
-                              SharedPreferences prefs = await SharedPreferences.getInstance();
-                              final response = http.post('${Constants.apiBaseUrl}/restaurants/delete-menu',
+                  Container(
+                    height: 5,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text(
+                    'CONFIRM!',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: 0, left: 15, right: 15, bottom: 15),
+                    child: Text(
+                      'Are you sure you want to delete this item?',
+                      style:
+                          TextStyle(fontSize: 19, fontWeight: FontWeight.w500),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                      decoration: BoxDecoration(),
+                      width: MediaQuery.of(context).size.width - 40,
+                      height: 40,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                              child: GestureDetector(
+                            onTap: () async {
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              final response = http.post(
+                                  '${Constants.apiBaseUrl}/restaurants/delete-menu',
                                   headers: {
                                     'token': prefs.getString('token'),
                                     'Content-Type': 'application/json'
                                   },
-                                  body: json.encode({
-                                    'menu_id': id
-                                  }));
+                                  body: json.encode({'menu_id': id}));
                               getCategories();
                               Navigator.pop(context);
                             },
-                            child:  Container(
+                            child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 color: Colors.white,
                               ),
                               height: 50,
-                              child: Center(child: Text('YES', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.orange, fontWeight: FontWeight.bold),),),
+                              child: Center(
+                                child: Text(
+                                  'YES',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                          )
-                      ),
-                      SizedBox(width: 10,),
-                      Expanded(
-                          child: GestureDetector(
+                          )),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                              child: GestureDetector(
                             onTap: () {
                               Navigator.of(context).pop(true);
                               setState(() {});
@@ -298,164 +297,189 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                                 color: Colors.orange,
                               ),
                               height: 50,
-                              child: Center(child: Text('NO', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),),
+                              child: Center(
+                                child: Text(
+                                  'NO',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                          )
-                      ),
-                    ],
-                  )
+                          )),
+                        ],
+                      )),
+                ],
               ),
-
-            ],
-          ),
-        ),
-      );
-    });
-
-
+            ),
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(
-          title: Text('MENU ITEMS', style: TextStyle(fontWeight: FontWeight.bold),),
+          title: Text(
+            'MENU ITEMS',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.white,
           shadowColor: Colors.transparent,
         ),
         backgroundColor: Colors.white,
-        body: Column(children: <Widget>[
-          Container(
-              height: 49.0,
-              // this generates our tabs buttons
-              child: ListView.builder(
-                // this gives the TabBar a bounce effect when scrolling farther than it's size
-                  physics: BouncingScrollPhysics(),
-                  controller: _scrollController,
-                  // make the list horizontal
-                  scrollDirection: Axis.horizontal,
-                  // number of tabs
-                  itemCount: _categories.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      // each button's key
-                        key: _keys[index],
-                        // padding for the buttons
-                        padding: EdgeInsets.all(6.0),
-                        child: ButtonTheme(
-                            child: AnimatedBuilder(
-                              animation: _colorTweenBackgroundOn,
-                              builder: (context, child) => FlatButton(
+        body: Column(
+          children: <Widget>[
+            Container(
+                height: 49.0,
+                // this generates our tabs buttons
+                child: ListView.builder(
+                    // this gives the TabBar a bounce effect when scrolling farther than it's size
+                    physics: BouncingScrollPhysics(),
+                    controller: _scrollController,
+                    // make the list horizontal
+                    scrollDirection: Axis.horizontal,
+                    // number of tabs
+                    itemCount: _categories.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                          // each button's key
+                          key: _keys[index],
+                          // padding for the buttons
+                          padding: EdgeInsets.all(6.0),
+                          child: ButtonTheme(
+                              child: AnimatedBuilder(
+                            animation: _colorTweenBackgroundOn,
+                            builder: (context, child) => FlatButton(
                                 // get the color of the button's background (dependent of its state)
-                                  color: _getBackgroundColor(index),
-                                  // make the button a rectangle with round corners
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: new BorderRadius.circular(7.0)),
-                                  onPressed: () {
-                                    setState(() {
-                                      _buttonTap = true;
-                                      // trigger the controller to change between Tab Views
-                                      _controller.animateTo(index);
-                                      // set the current index
-                                      _setCurrentIndex(index);
-                                      // scroll to the tapped button (needed if we tap the active button and it's not on its position)
-                                      _scrollTo(index);
-                                    });
-                                  },
-                                  child: Text(
-                                    // get the icon
-                                    _categories[index].name, style: TextStyle(fontWeight: FontWeight.bold),
-                                    // get the color of the icon (dependent of its state)
+                                color: _getBackgroundColor(index),
+                                // make the button a rectangle with round corners
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        new BorderRadius.circular(7.0)),
+                                onPressed: () {
+                                  setState(() {
+                                    _buttonTap = true;
+                                    // trigger the controller to change between Tab Views
+                                    _controller.animateTo(index);
+                                    // set the current index
+                                    _setCurrentIndex(index);
+                                    // scroll to the tapped button (needed if we tap the active button and it's not on its position)
+                                    _scrollTo(index);
+                                  });
+                                },
+                                child: Text(
+                                  // get the icon
+                                  _categories[index].name,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  // get the color of the icon (dependent of its state)
 //                                    color: _getForegroundColor(index),
-                                  )),
-                            )));
-                  })),
-          Flexible(
-              child: TabBarView(
-                controller: _controller,
-                children: <Widget>[
-                  ...(_categories
-                  .map((category) {
-                    if (category.items != null) {
-                      return ListView.separated(
-                        separatorBuilder: (context, index) {
-                          return Divider();
-                        },
-                        itemCount: category.items.length,
-                        itemBuilder: (context, index) {
-                          final item = category.items[index];
-                          return ListTile(
+                                )),
+                          )));
+                    })),
+            Flexible(
+                child: TabBarView(
+              controller: _controller,
+              children: <Widget>[
+                ...(_categories.map((category) {
+                  if (category.items != null) {
+                    return ListView.separated(
+                      separatorBuilder: (context, index) {
+                        return Divider();
+                      },
+                      itemCount: category.items.length,
+                      itemBuilder: (context, index) {
+                        final item = category.items[index];
+                        return ListTile(
+                          onTap: () {
+                            if (item.individualItemIds.isEmpty) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          EditSingleItemPage(id: item.id)));
+                            } else {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          EditComboItemPage(id: item.id)));
+                            }
+                          },
+                          trailing: GestureDetector(
                             onTap: () {
-                              if (item.individualItemIds.isEmpty) {
-                                    Navigator.push(context, MaterialPageRoute(
-                                        builder: (BuildContext context) => EditSingleItemPage(id: item.id)
-                                    ));
-                                  } else {
-                                    Navigator.push(context, MaterialPageRoute(
-                                        builder: (BuildContext context) => EditComboItemPage(id: item.id)
-                                    ));
-                                  }
-                              },
-                            trailing: GestureDetector(
-                              onTap: () {
-                                deleteItem(item.id);
-                              },
-                              child: Icon(CupertinoIcons.trash, color: Colors.black,),
+                              deleteItem(item.id);
+                            },
+                            child: Icon(
+                              CupertinoIcons.trash,
+                              color: Colors.black,
                             ),
-                            title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold),),
-                            subtitle: item.individualItemIds.isEmpty ? Text('Single item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black), ) :
-                            Text('Combo item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),),
-                          );
-                        },
-                      );
-                    } else {
-                      return SizedBox();
-                    }
-                  })).toList()
-                ],
-              )),
-        Padding(
-          padding: EdgeInsets.only(bottom: 40),
-          child:   Align(
-              alignment: Alignment.bottomCenter,
-              child: Stack(
-                children: [
-                  GestureDetector(
-                      onTap: askMenuType,
-                      child: Container(
-                        height: 70,
-                        child: Column(
-                          children: [
-
-                            SizedBox(height: 10,),
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.orange,
-                                  borderRadius: BorderRadius.circular(30)
-                              ),
-                              height: 45,
-
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width - 50,
-                              child: Center(
-                                child: Text('Create New Menu Item', style: TextStyle(
-
-                                       fontWeight: FontWeight.bold,
-                                    color: Colors.white),),
-                              ),
+                          ),
+                          title: Text(
+                            item.name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: item.individualItemIds.isEmpty
+                              ? Text(
+                                  'Single item',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
+                                )
+                              : Text(
+                                  'Combo item',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
+                                ),
+                        );
+                      },
+                    );
+                  } else {
+                    return SizedBox();
+                  }
+                })).toList()
+              ],
+            )),
+            Padding(
+              padding: EdgeInsets.only(bottom: 40),
+              child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Stack(
+                    children: [
+                      GestureDetector(
+                          onTap: askMenuType,
+                          child: Container(
+                            height: 70,
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(30)),
+                                  height: 45,
+                                  width: MediaQuery.of(context).size.width - 50,
+                                  child: Center(
+                                    child: Text(
+                                      'Create New Menu Item',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      )
-                  ),
-                ],
-              )
-          ),
-        )
-        ],
+                          )),
+                    ],
+                  )),
+            )
+          ],
         ));
   }
 
@@ -539,7 +563,8 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
       // if the button is to the right of the middle
 
       // get the last button
-      renderBox = _keys[_categories.length - 1].currentContext.findRenderObject();
+      renderBox =
+          _keys[_categories.length - 1].currentContext.findRenderObject();
       // get its position
       position = renderBox.localToGlobal(Offset.zero).dx;
       // and size
@@ -584,67 +609,57 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
   }
 
   void askMenuType() {
-    showModalBottomSheet(context: context, builder: (BuildContext context) {
-      return Container(
-        color: Color(0xFF737373),
-        height: 150,
-        child: Container(
-          decoration: BoxDecoration(
-              color: Theme.of(context).canvasColor,
-              borderRadius: BorderRadius.only(topRight: const Radius.circular(10), topLeft: const Radius.circular(10))
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 10,),
-
-
-              SizedBox(height: 5,),
-
-              Padding(
-                padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
-                child: Text('What type of menu do you want to create?', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center,),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-
-              Container(
-                  decoration: BoxDecoration(
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            color: Color(0xFF737373),
+            height: 150,
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).canvasColor,
+                  borderRadius: BorderRadius.only(
+                      topRight: const Radius.circular(10),
+                      topLeft: const Radius.circular(10))),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 10,
                   ),
-                  width: MediaQuery.of(context).size.width - 40,
-                  height: 40,
-
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                          child: GestureDetector(
-                            onTap: () async  {
-                            Navigator.pop(context);
-                            String result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ComboItemPage()));
-                              if (result == 'created') {
-                                setState(() {
-                                  getCategories();
-                                });
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                color: Colors.orange,
-                              ),
-                              height: 45,
-                              child: Center(child: Text('Combo', textAlign: TextAlign.center, style: TextStyle( color: Colors.white, fontWeight: FontWeight.bold),),),
-                            ),
-                          )
-                      ),
-                      SizedBox(width: 10,),
-                      Expanded(
-
-                          child: GestureDetector(
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: 0, left: 15, right: 15, bottom: 15),
+                    child: Text(
+                      'What type of menu do you want to create?',
+                      style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                      decoration: BoxDecoration(),
+                      width: MediaQuery.of(context).size.width - 40,
+                      height: 40,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                              child: GestureDetector(
                             onTap: () async {
                               Navigator.pop(context);
-                              String result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SingleItemPage()));
+                              String result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          ComboItemPage()));
                               if (result == 'created') {
                                 setState(() {
                                   getCategories();
@@ -658,17 +673,57 @@ class _MenuItemsPageState extends State<MenuItemsPage> with TickerProviderStateM
                               ),
                               height: 45,
                               child: Center(
-                                child: Text('A La Carte', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),),
+                                child: Text(
+                                  'Combo',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                          )
-                      ),
-                    ],
-                  )
+                          )),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                              child: GestureDetector(
+                            onTap: () async {
+                              Navigator.pop(context);
+                              String result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          SingleItemPage()));
+                              if (result == 'created') {
+                                setState(() {
+                                  getCategories();
+                                });
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: Colors.orange,
+                              ),
+                              height: 45,
+                              child: Center(
+                                child: Text(
+                                  'A La Carte',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          )),
+                        ],
+                      )),
+                ],
               ),
-            ],
-          ),
-        ),
-      );
-    });
+            ),
+          );
+        });
   }
 }
