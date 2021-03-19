@@ -309,7 +309,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Sunday'),
+                          Text('Sun'),
                           ScheduleSlotsWidget(
                             slots: sundaySlots,
                           )
@@ -321,7 +321,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Monday'),
+                          Text('Mon'),
                           ScheduleSlotsWidget(
                             slots: mondaySlots,
                           )
@@ -333,7 +333,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tuesday'),
+                          Text('Tue'),
                           ScheduleSlotsWidget(
                             slots: tuesdaySlots,
                           )
@@ -345,7 +345,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Wednesday'),
+                          Text('Wed'),
                           ScheduleSlotsWidget(
                             slots: wednesdaySlots,
                           )
@@ -357,7 +357,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Thursday'),
+                          Text('Thur'),
                           ScheduleSlotsWidget(
                             slots: thursdaySlots,
                           )
@@ -369,7 +369,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Friday'),
+                          Text('Fri'),
                           ScheduleSlotsWidget(
                             slots: fridaySlots,
                           )
@@ -381,7 +381,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Saturday'),
+                          Text('Sat'),
                           ScheduleSlotsWidget(slots: saturdaySlots)
                         ],
                       ),
@@ -525,8 +525,62 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
         .where((element) => element.start.hour < element.end.hour)
         .toList();
 
-    print(_sundaySlots.length);
-    return;
+    Map<String, dynamic> hours = {
+
+      'sun': _sundaySlots.map((e) {
+        return {
+          'open': e.start.hour*60 + e.start.minute,
+          'close': e.end.hour*60 + e.end.minute,
+        };
+      }).toList(),
+
+      'mon': _mondaySlots.map((e) {
+          return {
+          'open': e.start.hour*60 + e.start.minute,
+          'close': e.end.hour*60 + e.end.minute,
+        };
+      }).toList(),
+
+      'tue': _tuesdaySlots.map((e) {
+          return {
+          'open': e.start.hour*60 + e.start.minute,
+          'close': e.end.hour*60 + e.end.minute,
+        };
+      }).toList(),
+
+      'wed': _wednesdaySlots.map((e) {
+          return {
+          'open': e.start.hour*60  + e.start.minute,
+          'close': e.end.hour*60 + e.end.minute,
+        };
+      }).toList(),
+
+      'thu': _thursdaySlots.map((e) {
+          return {
+          'open': e.start.hour*60  + e.start.minute,
+          'close': e.end.hour*60 + e.end.minute,
+        };
+      }).toList(),
+
+      'fri': _fridaySlots.map((e) {
+          return {
+          'open': e.start.hour*60 + e.start.minute,
+          'close': e.end.hour*60 +  e.end.minute,
+        };
+      }).toList(),
+
+       'sat': _saturdaySlots.map((e) {
+          return {
+          'opem': e.start.hour*60 + e.start.minute,
+          'close': e.end.hour*60 + e.end.minute,
+        };
+      }).toList(),
+
+    };
+
+    print(hours);
+
+   //  return;
 
     showDialog(
         context: context,
@@ -549,28 +603,6 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-
-//    if (nameController.text.trim().isEmpty) {
-//      _showErrorToast('Please enter your restaurant\'s name');
-//      FocusScope.of(context).requestFocus(nameFocusNode);
-//      return;
-//    }
-//    if (descriptionController.text.trim().isEmpty) {
-//      _showErrorToast('Please enter your restaurant\'s name');
-//      FocusScope.of(context).requestFocus(descriptionFocusNode);
-//      return;
-//    }
-//    if (addressController.text.trim().isEmpty) {
-//      _showErrorToast('Please enter your restaurant\'s address');
-//      FocusScope.of(context).requestFocus(addressFocusNode);
-//      return;
-//    }
-
-//    if ((await Geocoder.local.findAddressesFromQuery(addressController.text.trim())).first.countryName != 'United States') {
-//      _showErrorToast('Enter a valid US address');
-//      FocusScope.of(context).requestFocus(addressFocusNode);
-//      return;
-//    }
     if (phoneController.text.length != 10) {
       _showErrorToast('Please enter your locations\'s phone number');
       FocusScope.of(context).requestFocus(phoneFocusNode);
@@ -584,36 +616,7 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
       'does_pickup': _doesPickup,
       'location_id': widget.locationId,
       'phone_number': phoneController.text.trim(),
-      'hours': {
-        "mon": {
-          "open": monFromController.text.trim(),
-          "close": monToController.text.trim()
-        },
-        "tue": {
-          "open": tuesFromController.text.trim(),
-          "close": tuesToController.text.trim()
-        },
-        "wed": {
-          "open": wedFromController.text.trim(),
-          "close": wedToController.text.trim()
-        },
-        "thu": {
-          "open": thuFromController.text.trim(),
-          "close": thuToController.text.trim()
-        },
-        "fri": {
-          "open": friFromController.text.trim(),
-          "close": friToController.text.trim()
-        },
-        "sat": {
-          "open": satFromController.text.trim(),
-          "close": satToController.text.trim()
-        },
-        "sun": {
-          "open": sundayFromController.text.trim(),
-          "close": sundayToController.text.trim()
-        },
-      }
+      'hours': hours
     });
 
     final response = await http.post(
@@ -622,7 +625,8 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
         body: body);
     print(response.body);
     Navigator.pop(context);
-    _showToast('Your profile was successfully updated');
+    Fluttertoast.showToast(msg: 'Your profile was successfully updated');
+    // Fluttertoast.show(msg: 'Your profile was successfully updated');
 //    Navigator.pop(context);
   }
 
@@ -642,26 +646,15 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
     setState(() {
       phoneController.text = profile.phone_number;
       _doesPickup = profile.does_pickup;
-      sundayFromController.text = profile.hours.sun.open;
-      sundayToController.text = profile.hours.sun.close;
 
-      monFromController.text = profile.hours.mon.open;
-      monToController.text = profile.hours.tue.close;
+      sundaySlots = profile.hours.sun.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.sun;
+      mondaySlots = profile.hours.mon.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.mon;
+      tuesdaySlots = profile.hours.tue.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.tue;
+      wednesdaySlots = profile.hours.wed.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.wed;
+      thursdaySlots = profile.hours.thu.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.thu;
+      fridaySlots = profile.hours.fri.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.fri;
+      saturdaySlots = profile.hours.sat.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.sat;
 
-      tuesFromController.text = profile.hours.tue.open;
-      tuesToController.text = profile.hours.tue.close;
-
-      wedFromController.text = profile.hours.wed.open;
-      wedToController.text = profile.hours.wed.close;
-
-      thuFromController.text = profile.hours.thu.open;
-      thuToController.text = profile.hours.thu.close;
-
-      friFromController.text = profile.hours.fri.open;
-      friToController.text = profile.hours.fri.close;
-
-      satFromController.text = profile.hours.sat.open;
-      satToController.text = profile.hours.sat.close;
 
       accessTokenController.text = profile.access_token;
     });
@@ -828,16 +821,32 @@ class Period {
 }
 
 class Hours {
-  Period mon;
-  Period tue;
-  Period wed;
-  Period thu;
-  Period fri;
-  Period sat;
-  Period sun;
+  List<Slot> mon;
+  List<Slot> tue;
+  List<Slot> wed;
+  List<Slot> thu;
+  List<Slot> fri;
+  List<Slot> sat;
+  List<Slot> sun;
   Hours({this.mon, this.tue, this.wed, this.thu, this.fri, this.sat, this.sun});
 }
 
+List<Slot> get({Map<String, dynamic> json, String day}) {
+   return (json[day] as Iterable).map((e) {
+
+      int openingHours = ((e['open'] as int) - ((e['open'] as int) % 60)) ~/ 60;
+      int openingMinutes = (e['open'] as int) % 60;
+
+      int closingHours = ((e['close'] as int) - ((e['close'] as int) % 60)) ~/ 60;
+      int closingMinutes = (e['close'] as int) % 60;
+
+      return Slot(
+        start: TimeOfDay(hour: openingHours, minute: openingMinutes),
+        end: TimeOfDay(hour: closingHours, minute: closingMinutes),
+      );
+      
+    }).toList();
+}
 class Profile {
 //  String name;
 //  String description;
@@ -848,30 +857,18 @@ class Profile {
   bool does_pickup;
   Profile({this.access_token, this.phone_number, this.hours, this.does_pickup});
 
+
+
   factory Profile.fromJson(Map<String, dynamic> json) {
     var hours = json['hours'];
 
-    var mon_period = Period(
-        open: hours['mon']['open'] as String,
-        close: hours['mon']['close'] as String);
-    var tue_period = Period(
-        open: hours['tue']['open'] as String,
-        close: hours['tue']['close'] as String);
-    var wed_period = Period(
-        open: hours['wed']['open'] as String,
-        close: hours['wed']['close'] as String);
-    var thu_period = Period(
-        open: hours['thu']['open'] as String,
-        close: hours['thu']['close'] as String);
-    var fri_period = Period(
-        open: hours['fri']['open'] as String,
-        close: hours['fri']['close'] as String);
-    var sat_period = Period(
-        open: hours['sat']['open'] as String,
-        close: hours['sat']['close'] as String);
-    var sun_period = Period(
-        open: hours['sun']['open'] as String,
-        close: hours['sun']['close'] as String);
+    var sun = get(json: hours, day: 'sun');
+    var mon = get(json: hours, day: 'mon');
+    var tue = get(json: hours, day: 'tue');
+    var wed = get(json: hours, day: 'wed');
+    var thu = get(json: hours, day: 'thu');
+    var fri = get(json: hours, day: 'fri');
+    var sat = get(json: hours, day: 'sat');
 
     return Profile(
 //        name: json['name'] as String,
@@ -884,13 +881,14 @@ class Profile {
 //        cover_image_url: json['cover_image_url'] as String,
 //        logo_image_url: json['logo_image_url'] as String,
         hours: Hours(
-            mon: mon_period,
-            tue: tue_period,
-            wed: wed_period,
-            thu: thu_period,
-            fri: fri_period,
-            sat: sat_period,
-            sun: sun_period));
+            sun: sun,
+            mon: mon,
+            tue: tue,
+            wed: wed,
+            thu: thu,
+            fri: fri,
+            sat: sat
+        ));
   }
 }
 
@@ -1031,11 +1029,23 @@ class ScheduleSlotWidget extends StatefulWidget {
 }
 
 class _ScheduleSlotWidgetState extends State<ScheduleSlotWidget> {
+
   TextEditingController fromController = TextEditingController();
   TextEditingController toController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    
+     fromController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ?  ScheduleTime(timeOfDay: widget.slots[widget.index].start).readableLocalTime() : '';
+    toController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ? ScheduleTime(timeOfDay: widget.slots[widget.index].end).readableLocalTime() : '';
+  }
+
+  @override
   Widget build(BuildContext context) {
+      fromController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ?  ScheduleTime(timeOfDay: widget.slots[widget.index].start).readableLocalTime() : '';
+    toController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ? ScheduleTime(timeOfDay: widget.slots[widget.index].end).readableLocalTime() : '';
+
     return Container(
         height: 50,
         width: 200,
@@ -1136,32 +1146,12 @@ class _ScheduleSlotsWidgetState extends State<ScheduleSlotsWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // GestureDetector(
-            //         onTap: () {
-            //           if (widget.slots.length > 1) {
-            //             setState(() {
-            //               widget.slots.length -= 1;
-            //             });
-            //           }
-            //         },
-            //         child: Container(
-            //           height: 20,
-            //           width: 20,
-
-            //           decoration: BoxDecoration(
-            //             borderRadius: BorderRadius.circular(20),
-            //             color: Colors.brown,
-            //           ),
-
-            //           child: Icon(LineIcons.minus, color: Colors.white, size: 15,),
-
-            //       )
-            //     )
             Container(
               padding: EdgeInsets.only(left: 10, right: 10),
               height: widget.slots.length * 50.0,
               width: 260,
               child: ListView.separated(
+                physics: NeverScrollableScrollPhysics(),
                   separatorBuilder: (context, index) {
                     return Container(
                       height: 5,
@@ -1185,7 +1175,7 @@ class _ScheduleSlotsWidgetState extends State<ScheduleSlotsWidget> {
                         if (time != null) {
                           var scheduledTime = ScheduleTime(timeOfDay: time);
                           setState(() {
-                            slot.end = time;
+                            widget.slots[index].end = time;
                           });
                           controller.text = scheduledTime.readableLocalTime();
                         }
@@ -1196,7 +1186,7 @@ class _ScheduleSlotsWidgetState extends State<ScheduleSlotsWidget> {
                         if (time != null) {
                           var scheduledTime = ScheduleTime(timeOfDay: time);
                           setState(() {
-                            slot.start = time;
+                            widget.slots[index].start = time;
                           });
                           controller.text = scheduledTime.readableLocalTime();
                         }
