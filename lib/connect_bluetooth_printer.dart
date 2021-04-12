@@ -5,11 +5,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:line_icons/line_icons.dart';
 
-class ConnectPrinterPage extends StatefulWidget {
+class ConnectBluetoothPrinterPage extends StatefulWidget {
 ConnectPrinterState createState() => ConnectPrinterState();
 }
 
-class ConnectPrinterState extends State<ConnectPrinterPage> {
+class ConnectPrinterState extends State<ConnectBluetoothPrinterPage> {
 
   List<Printer> printers = [];
   int id;
@@ -46,7 +46,7 @@ class ConnectPrinterState extends State<ConnectPrinterPage> {
       child: Scaffold(
 
       appBar: AppBar(
-        title: Text('Connect Wi-Fi Printers', style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text('Connect Bluetooth Printers', style: TextStyle(fontWeight: FontWeight.bold),),
         backgroundColor: Colors.white,
         centerTitle: true,
         shadowColor: Colors.transparent,

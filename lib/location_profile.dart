@@ -526,61 +526,53 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
         .toList();
 
     Map<String, dynamic> hours = {
-
       'sun': _sundaySlots.map((e) {
         return {
-          'open': e.start.hour*60 + e.start.minute,
-          'close': e.end.hour*60 + e.end.minute,
+          'open': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
       'mon': _mondaySlots.map((e) {
-          return {
-          'open': e.start.hour*60 + e.start.minute,
-          'close': e.end.hour*60 + e.end.minute,
+        return {
+          'open': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
       'tue': _tuesdaySlots.map((e) {
-          return {
-          'open': e.start.hour*60 + e.start.minute,
-          'close': e.end.hour*60 + e.end.minute,
+        return {
+          'open': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
       'wed': _wednesdaySlots.map((e) {
-          return {
-          'open': e.start.hour*60  + e.start.minute,
-          'close': e.end.hour*60 + e.end.minute,
+        return {
+          'open': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
       'thu': _thursdaySlots.map((e) {
-          return {
-          'open': e.start.hour*60  + e.start.minute,
-          'close': e.end.hour*60 + e.end.minute,
+        return {
+          'open': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
       'fri': _fridaySlots.map((e) {
-          return {
-          'open': e.start.hour*60 + e.start.minute,
-          'close': e.end.hour*60 +  e.end.minute,
+        return {
+          'open': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
-       'sat': _saturdaySlots.map((e) {
-          return {
-          'opem': e.start.hour*60 + e.start.minute,
-          'close': e.end.hour*60 + e.end.minute,
+      'sat': _saturdaySlots.map((e) {
+        return {
+          'opem': e.start.hour * 60 + e.start.minute,
+          'close': e.end.hour * 60 + e.end.minute,
         };
       }).toList(),
-
     };
 
     print(hours);
 
-   //  return;
+    //  return;
 
     showDialog(
         context: context,
@@ -647,14 +639,27 @@ class _LocationProfilePageState extends State<LocationProfilePage> {
       phoneController.text = profile.phone_number;
       _doesPickup = profile.does_pickup;
 
-      sundaySlots = profile.hours.sun.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.sun;
-      mondaySlots = profile.hours.mon.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.mon;
-      tuesdaySlots = profile.hours.tue.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.tue;
-      wednesdaySlots = profile.hours.wed.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.wed;
-      thursdaySlots = profile.hours.thu.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.thu;
-      fridaySlots = profile.hours.fri.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.fri;
-      saturdaySlots = profile.hours.sat.isEmpty ? [ Slot(start: TimeOfDay.now(), end: TimeOfDay.now()) ] : profile.hours.sat;
-
+      sundaySlots = profile.hours.sun.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.sun;
+      mondaySlots = profile.hours.mon.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.mon;
+      tuesdaySlots = profile.hours.tue.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.tue;
+      wednesdaySlots = profile.hours.wed.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.wed;
+      thursdaySlots = profile.hours.thu.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.thu;
+      fridaySlots = profile.hours.fri.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.fri;
+      saturdaySlots = profile.hours.sat.isEmpty
+          ? [Slot(start: TimeOfDay.now(), end: TimeOfDay.now())]
+          : profile.hours.sat;
 
       accessTokenController.text = profile.access_token;
     });
@@ -832,21 +837,20 @@ class Hours {
 }
 
 List<Slot> get({Map<String, dynamic> json, String day}) {
-   return (json[day] as Iterable).map((e) {
+  return (json[day] as Iterable).map((e) {
+    int openingHours = ((e['open'] as int) - ((e['open'] as int) % 60)) ~/ 60;
+    int openingMinutes = (e['open'] as int) % 60;
 
-      int openingHours = ((e['open'] as int) - ((e['open'] as int) % 60)) ~/ 60;
-      int openingMinutes = (e['open'] as int) % 60;
+    int closingHours = ((e['close'] as int) - ((e['close'] as int) % 60)) ~/ 60;
+    int closingMinutes = (e['close'] as int) % 60;
 
-      int closingHours = ((e['close'] as int) - ((e['close'] as int) % 60)) ~/ 60;
-      int closingMinutes = (e['close'] as int) % 60;
-
-      return Slot(
-        start: TimeOfDay(hour: openingHours, minute: openingMinutes),
-        end: TimeOfDay(hour: closingHours, minute: closingMinutes),
-      );
-      
-    }).toList();
+    return Slot(
+      start: TimeOfDay(hour: openingHours, minute: openingMinutes),
+      end: TimeOfDay(hour: closingHours, minute: closingMinutes),
+    );
+  }).toList();
 }
+
 class Profile {
 //  String name;
 //  String description;
@@ -856,8 +860,6 @@ class Profile {
   Hours hours;
   bool does_pickup;
   Profile({this.access_token, this.phone_number, this.hours, this.does_pickup});
-
-
 
   factory Profile.fromJson(Map<String, dynamic> json) {
     var hours = json['hours'];
@@ -887,8 +889,7 @@ class Profile {
             wed: wed,
             thu: thu,
             fri: fri,
-            sat: sat
-        ));
+            sat: sat));
   }
 }
 
@@ -1029,32 +1030,56 @@ class ScheduleSlotWidget extends StatefulWidget {
 }
 
 class _ScheduleSlotWidgetState extends State<ScheduleSlotWidget> {
-
   TextEditingController fromController = TextEditingController();
   TextEditingController toController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    
-     fromController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ?  ScheduleTime(timeOfDay: widget.slots[widget.index].start).readableLocalTime() : '';
-    toController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ? ScheduleTime(timeOfDay: widget.slots[widget.index].end).readableLocalTime() : '';
+
+    fromController.text = widget.slots[widget.index].start.hour <
+            widget.slots[widget.index].end.hour
+        ? ScheduleTime(timeOfDay: widget.slots[widget.index].start)
+            .readableLocalTime()
+        : '';
+    toController.text = widget.slots[widget.index].start.hour <
+            widget.slots[widget.index].end.hour
+        ? ScheduleTime(timeOfDay: widget.slots[widget.index].end)
+            .readableLocalTime()
+        : '';
   }
 
   @override
   Widget build(BuildContext context) {
-      fromController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ?  ScheduleTime(timeOfDay: widget.slots[widget.index].start).readableLocalTime() : '';
-    toController.text = widget.slots[widget.index].start.hour < widget.slots[widget.index].end.hour ? ScheduleTime(timeOfDay: widget.slots[widget.index].end).readableLocalTime() : '';
+    fromController.text = widget.slots[widget.index].end.hour != null &&
+            widget.slots[widget.index].start.hour <
+                widget.slots[widget.index].end.hour
+        ? ScheduleTime(timeOfDay: widget.slots[widget.index].start)
+            .readableLocalTime()
+        : '';
+
+    toController.text = widget.slots[widget.index].start.hour != null &&
+            widget.slots[widget.index].start.hour <
+                widget.slots[widget.index].end.hour
+        ? ScheduleTime(timeOfDay: widget.slots[widget.index].end)
+            .readableLocalTime()
+        : '';
 
     return Container(
         height: 50,
         width: 200,
         child: Row(
           children: [
-            widget.index != 0 && widget.index > widget.slots.length - 2
+            widget.index != -1 && widget.index > widget.slots.length - 2
                 ? GestureDetector(
                     onTap: () {
-                      widget.onTapRemove();
+                      //  setState(() {
+                      if (widget.index == 0) {
+                        fromController.clear();
+                        toController.clear();
+                      } else
+                        widget.onTapRemove();
+                      //  });
                     },
                     child: Container(
                       height: 20,
@@ -1151,7 +1176,7 @@ class _ScheduleSlotsWidgetState extends State<ScheduleSlotsWidget> {
               height: widget.slots.length * 50.0,
               width: 260,
               child: ListView.separated(
-                physics: NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   separatorBuilder: (context, index) {
                     return Container(
                       height: 5,
@@ -1194,7 +1219,6 @@ class _ScheduleSlotsWidgetState extends State<ScheduleSlotsWidget> {
                     );
                   }),
             ),
-
             Column(children: [
               GestureDetector(
                   onTap: () {
