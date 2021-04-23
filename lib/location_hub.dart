@@ -233,7 +233,7 @@ class _LocationHubPageState extends State<LocationHubPage>
       getOrders(locationId: locationId);
       if (locationId != null) {
         String deviceId = await _getId();
-        await http.post(
+        http.post(
             '${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token',
             headers: {'Content-Type': 'application/json'},
             body: json.encode({
@@ -243,7 +243,6 @@ class _LocationHubPageState extends State<LocationHubPage>
             }));
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
   }
 
   Timer updateTimer;
@@ -267,6 +266,7 @@ class _LocationHubPageState extends State<LocationHubPage>
     fltrNotification.initialize(initializationSetings,
         onSelectNotification: (String s) async => print(s));
     connect();
+    WidgetsBinding.instance.addPostFrameCallback((_) => initPlatformState());
   }
 
   fetchUpdates() async {
@@ -365,13 +365,17 @@ class _LocationHubPageState extends State<LocationHubPage>
 
   setEarnings() {
     setState(() {
-      if (orders.isNotEmpty)
-        grossEarnings = orders
-            .where((a) => a.approved_at != null)
-            .map((e) => e.food_total)
+      print(orders);
+
+      Iterable state_orders = orders.where((a) => a.approved_at != null);
+
+      if (state_orders.isNotEmpty) {
+        grossEarnings = state_orders
+            .map((e) => e.food_total ?? 0)
             .toList()
             .reduce((a, b) => (a + b))
             .toStringAsFixed(2);
+      }
     });
   }
 
@@ -393,6 +397,31 @@ class _LocationHubPageState extends State<LocationHubPage>
         localPrinter = k;
         print(localPrinter);
       });
+  }
+
+  Future<void> getLocationIdFirst() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await http.get(
+        '${Constants.apiBaseUrl}/restaurant_locations/get-location-id?token=${prefs.getString('token')}');
+    _firebaseMessaging.getToken().then((value) async {
+      setState(() {
+        locationId = json.decode(response.body)['location_id'] as String;
+      });
+      getAcceptanceStatus(location_id: locationId);
+      getOrders(locationId: locationId);
+      if (locationId != null) {
+        String deviceId = await _getId();
+        http.post(
+            '${Constants.apiBaseUrl}/restaurant_locations/set-firebase-messaging-token',
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'token': value,
+              'location_id': locationId,
+              'device_id': deviceId
+            }));
+      }
+    });
+    await getOrders(locationId: locationId);
   }
 
   @override
@@ -471,7 +500,7 @@ class _LocationHubPageState extends State<LocationHubPage>
                                                 ConnectPrinterPage()));
                                   },
                                 ),
-                                 ListTile(
+                                ListTile(
                                   title: Text(
                                     'Connect Bluetooth Printers',
                                     style: TextStyle(color: Colors.black),
@@ -1463,12 +1492,13 @@ class _LocationHubPageState extends State<LocationHubPage>
                                                                                                 ))));
                                                                                   });
                                                                               if (locationId == null) {
-                                                                                await getLocationId();
+                                                                                getLocationIdFirst();
+                                                                              } else {
                                                                                 getOrders(locationId: locationId);
-                                                                              } else
-                                                                                getOrders(locationId: locationId);
+                                                                              }
                                                                             } else {
-                                                                              await confirmPickup(order_id: order.id);
+                                                                              // print('hello');
+                                                                              confirmPickup(order_id: order.id);
                                                                             }
                                                                           },
                                                                           child:
@@ -1938,6 +1968,7 @@ class _LocationHubPageState extends State<LocationHubPage>
           'Content-Type': 'application/json',
         },
         body: json.encode({'location_id': locationId, 'start_date': today}));
+    print(response);
     Iterable _orders = json.decode(response.body);
     var all = _orders.map((e) => Order.fromJson(e)).toList();
     all.sort((a, b) {
@@ -1965,6 +1996,20 @@ class _LocationHubPageState extends State<LocationHubPage>
   }
 
   acceptOrder({Order order}) async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SpinKitRing(color: Colors.white, size: 50.0, lineWidth: 2)
+                ],
+              ));
+        });
     await http.post('${Constants.apiBaseUrl}/restaurant_locations/accept-order',
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
@@ -1972,6 +2017,7 @@ class _LocationHubPageState extends State<LocationHubPage>
           'location_id': locationId,
         }));
     Fluttertoast.showToast(msg: 'You accepted this order');
+    Navigator.pop(context);
     if (locationId != null) getOrders(locationId: locationId);
     printOrder(order: order);
   }
@@ -2038,23 +2084,62 @@ class _LocationHubPageState extends State<LocationHubPage>
   }
 
   confirmPickup({String order_id}) async {
-    await http.post(
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SpinKitRing(color: Colors.white, size: 50.0, lineWidth: 2)
+                ],
+              ));
+        });
+    http.post(
         '${Constants.apiBaseUrl}/restaurant_locations/confirm-customer-pickup',
         headers: {
           'Content-Type': 'application/json',
         },
         body: json.encode({'order_id': order_id, 'location_id': locationId}));
+    Navigator.pop(context);
     Fluttertoast.showToast(
         msg: 'You marked this order as picked up by the customer');
-    if (locationId != null) await getOrders(locationId: locationId);
+
+    Future.delayed(Duration(seconds: 1), () async {
+      if (locationId == null) {
+        getLocationIdFirst();
+      } else {
+        getOrders(locationId: locationId);
+      }
+      setState(() {});
+    });
   }
 
   finishOrder({String orderId}) async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SpinKitRing(color: Colors.white, size: 50.0, lineWidth: 2)
+                ],
+              ));
+        });
+
     await http.post('${Constants.apiBaseUrl}/restaurant_locations/finish-order',
         headers: {
           'Content-Type': 'application/json',
         },
         body: json.encode({'order_id': orderId, 'location_id': locationId}));
+    Navigator.pop(context);
     Fluttertoast.showToast(msg: 'You marked this order as ready for pickup');
     if (locationId != null) await getOrders(locationId: locationId);
   }
@@ -2178,17 +2263,23 @@ class OrderItem {
     double convertToDouble(dynamic value) {
       if (value is int) {
         return value.toDouble();
+      } else if (value is String) {
+        return double.parse(value);
       } else {
         return value;
       }
     }
 
     return OrderItem(
-        name: json['name'] as String,
-        quantity: json['quantity'] as int,
-        flat_price: convertToDouble(json['flat_price']),
-        special_instructions: json['special_instructions'] as String,
-        lists: lists.map((e) => OrderList.fromJson(e)).toList());
+      name: json['name'] as String,
+      quantity: json['quantity'].runtimeType == String
+          ? int.parse(json['quantity'])
+          : json['quantity'] as int,
+      flat_price: convertToDouble(json['flat_price']),
+      special_instructions: json['special_instructions'] as String,
+      lists:
+          lists != null ? lists.map((e) => OrderList.fromJson(e)).toList() : [],
+    );
   }
 }
 
@@ -2247,11 +2338,14 @@ class Order {
       this.customer_phone});
 
   factory Order.fromJson(Map<String, dynamic> json) {
+    print(json);
     double convertToDouble(dynamic value) {
       if (value is int) {
         return value.toDouble();
-      } else {
+      } else if (value is double) {
         return value;
+      } else {
+        return 0.0;
       }
     }
 

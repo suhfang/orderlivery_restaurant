@@ -90,7 +90,7 @@ class _SupportPageState extends State<SupportPage> {
                       borderRadius: BorderRadius.circular(30)),
                   child: Center(
                       child: Text(
-                    '24/7 Live Chat',
+                    '10:30 AM - 10:00 PM Live Chat',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.black),
                   )),
